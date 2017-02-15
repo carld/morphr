@@ -5,7 +5,7 @@
 #' certain parameter) using the JavaScript library DataTables.
 #' @export
 morphfield <- function(input, output, session, id,
-                       param_values, determinations = NULL) {
+                       param_values, specific_configurations = NULL) {
   if (class(param_values) == "list") {
     # Make sure that all list items have same length.
     # If not: fill with empty character strings
@@ -42,47 +42,40 @@ morphfield <- function(input, output, session, id,
     )
   )
 
-  if (!is.null(determinations)) {
+  if (!is.null(specific_configurations)) {
     proxy <- dataTableProxy(id)
-    # reactiveValue needed to ignore the selection change itself
-    rv <- reactiveValues()
-    rv$setting_cell_selection <- FALSE
 
     observeEvent(input[[paste0(id, "_cells_selected")]], {
       cells <- input[[paste0(id, "_cells_selected")]]
       last_selected_cell <- cells[nrow(cells),]
       row <- last_selected_cell[1]
       col <- last_selected_cell[2]
-      determined_cells <- determineCells(param_values, determinations,
+      determined_cells <- determineCells(param_values, specific_configurations,
                                          row, col)
-      if (!rv$setting_cell_selection) {
-        rv$setting_cell_selection <- TRUE
-        proxy %>% selectCells(determined_cells)
-      } else {
-        rv$setting_cell_selection <- FALSE
+      if (!is.null(determined_cells)) {
+          proxy %>% selectCells(determined_cells)
       }
     })
   }
 }
 
 
-determineCells <- function(param_values, determinations, row, col) {
+determineCells <- function(param_values, specific_configurations, row, col) {
   col_names <- names(param_values)
   col_name <- col_names[col + 1] # + 1 needed because JavaScript starts counting at 0
-  determined_cells <- matrix(c(row, col), ncol = 2)
-  if (col_name %in% names(determinations)) {
+  determined_cells <- NULL
+  if (col_name %in% names(specific_configurations)) {
     row_name <- param_values[row, col + 1] # + 1 see above
-    if (row_name %in% names(determinations[[col_name]])) {
-      determined_col_names <- names(determinations[[col_name]][[row_name]])
+    if (row_name %in% names(specific_configurations[[col_name]])) {
+      determined_col_names <- names(specific_configurations[[col_name]][[row_name]])
       determined_cols <- match(determined_col_names, col_names)
-      determined_row_names <- determinations[[col_name]][[row_name]]
+      determined_row_names <- specific_configurations[[col_name]][[row_name]]
       determined_rows <- sapply(determined_col_names, function(c) {
         match(determined_row_names[[c]], param_values[[c]])
       })
-      determined_cells <- rbind(
-        determined_cells,
-        matrix(c(determined_rows, determined_cols - 1), # - 1 needed because JavaScript starts counting at 0
-               ncol = 2)
+      determined_cells <- matrix(
+        c(row, determined_rows, col, determined_cols - 1), # - 1 needed because JavaScript starts counting at 0
+        ncol = 2
       )
     }
   }
