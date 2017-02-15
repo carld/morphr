@@ -1,12 +1,13 @@
-Package: DT
+Package: morphr
 Type: Package
-Title: A Wrapper of the JavaScript Library 'DataTables'
-Version: 0.2.11
-Date: 2016-08-08
+Title: A Tool for General Morphological Analysis (GMA) using the JavaScript Library 'DataTables'
+Version: 0.0.1
+Date: 2017-02-15
 Authors@R: c(
-    person("Yihui", "Xie", email = "xie@yihui.name", role = c("aut", "cre")),
-    person("Joe", "Cheng", role = "ctb"),
-    person("JJ", "Allaire", role = "ctb"),
+    person("Markus", "Voge", email = "markus.voge@ea-aw.de", role = c("aut", "cre")),
+    person("Yihui", "Xie", email = "xie@yihui.name", role = c("ctb", "cph"), comment = "Author and maintainer of the R package DT that this package is built upon"),
+    person("Joe", "Cheng", role = c("ctb", "cph"), comment = "Contributor to DT"),
+    person("JJ", "Allaire", role = c("ctb", "cph"), comment = "Contributor to DT"),
     person("jQuery contributors", role = c("ctb", "cph"), comment = "jQuery in htmlwidgets/lib"),
     person("SpryMedia Limited", role = c("ctb", "cph"), comment = "DataTables in htmlwidgets/lib"),
     person("Brian", "Reavis", role = c("ctb", "cph"), comment = "selectize.js in htmlwidgets/lib"),
@@ -14,13 +15,13 @@ Authors@R: c(
     person("Bartek", "Szopka", role = c("ctb", "cph"), comment = "jquery.highlight.js in htmlwidgets/lib"),
     person("RStudio Inc", role = "cph")
     )
-Maintainer: Yihui Xie <xie@yihui.name>
-Description: Data objects in R can be rendered as HTML tables using the
-    JavaScript library 'DataTables' (typically via R Markdown or Shiny). The
-    'DataTables' library has been included in this R package. The package name
-    'DT' is an abbreviation of 'DataTables'.
-URL: http://rstudio.github.io/DT
-BugReports: https://github.com/rstudio/DT/issues
+Maintainer: Markus Voge <markus.voge@ea-aw.de>
+Description: Data objects in R that describe a morphological field can be
+    rendered as HTML tables using the JavaScript library 'DataTables' (typically
+    via R Markdown or Shiny). The 'DataTables' library has been included in this
+    R package. The package is built upon RStudio's R package 'DT'.
+#URL: http://rstudio.github.io/DT
+#BugReports: https://github.com/rstudio/DT/issues
 License: GPL-3 | file LICENSE
 Imports:
     htmltools (>= 0.3.5),
