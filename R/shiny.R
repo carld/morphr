@@ -24,7 +24,7 @@
 dataTableOutput = function(outputId, width = '100%', height = 'auto') {
   htmltools::attachDependencies(
     htmlwidgets::shinyWidgetOutput(
-      outputId, 'datatables', width, height, package = 'DT'
+      outputId, 'datatables', width, height, package = 'morphr'
     ),
     crosstalk::crosstalkLibs(),
     append = TRUE

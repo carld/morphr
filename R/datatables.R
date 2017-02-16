@@ -253,7 +253,7 @@ datatable = function(
 
   htmlwidgets::createWidget(
     'datatables', if (hideDataTable) NULL else params,
-    package = 'DT', width = width, height = height, elementId = elementId,
+    package = 'morphr', width = width, height = height, elementId = elementId,
     sizingPolicy = htmlwidgets::sizingPolicy(
       knitr.figure = FALSE, knitr.defaultWidth = "100%", knitr.defaultHeight = "auto"
     ),
@@ -475,7 +475,7 @@ filterDependencies = function() {
 }
 
 depPath = function(...) {
-  system.file('htmlwidgets', 'lib', ..., package = 'DT')
+  system.file('htmlwidgets', 'lib', ..., package = 'morphr')
 }
 
 depName = function(style = 'default', ...) {

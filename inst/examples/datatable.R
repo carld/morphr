@@ -2,7 +2,7 @@
 library(DT)
 
 # see the package vignette for examples and the link to website
-vignette('DT', package = 'DT')
+vignette('DT', package = 'morphr')
 
 # some boring edge cases for testing purposes
 m = matrix(nrow = 0, ncol = 5, dimnames = list(NULL, letters[1:5]))
