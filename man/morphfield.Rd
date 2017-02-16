@@ -3,7 +3,7 @@
 \alias{morphfield}
 \title{Create an HTML morphological field widget using the DataTables library}
 \usage{
-morphfield(input, output, session, id, param_values, specific_configurations = NULL)
+morphfield(param_values, specific_configurations = NULL)
 }
 \description{
 This function creates an HTML widget to display a morphological field (a kind
