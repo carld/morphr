@@ -26,27 +26,35 @@ installMorphField <- function(input, output, session, id,
 
   # immediately deselect empty cells, they shall not be selectable
   observeEvent(input[[paste0(id, "_cells_selected")]], {
-    cells <- input[[paste0(id, "_cells_selected")]]
-    last_selected_cell <- cells[nrow(cells),]
+    sel_cells <- input[[paste0(id, "_cells_selected")]]
+    last_selected_cell <- sel_cells[nrow(sel_cells),]
     row <- last_selected_cell[1]
     col <- last_selected_cell[2]
     cell_content <- param_values[row, col + 1]
     if (is.null(cell_content) || cell_content == "") {
-      proxy %>% selectCells(cells[-nrow(cells),])
+      proxy %>% selectCells(sel_cells[-nrow(sel_cells),])
     }
   })
 
   if (!is.null(specific_configurations)) {
     # enforce the specific configurations for automatic cell selection
     observeEvent(input[[paste0(id, "_cells_selected")]], {
-      cells <- input[[paste0(id, "_cells_selected")]]
-      last_selected_cell <- cells[nrow(cells),]
+      sel_cells <- input[[paste0(id, "_cells_selected")]]
+      last_selected_cell <- sel_cells[nrow(sel_cells),]
       row <- last_selected_cell[1]
       col <- last_selected_cell[2]
-      determined_cells <- determineCells(param_values, specific_configurations,
-                                         row, col)
-      if (!is.null(determined_cells)) {
-        proxy %>% selectCells(determined_cells)
+      if (is.null(row) || is.null(col) ||
+          is.na(row) || is.na(col)) return()
+      clicked_cell <- input[[paste0(id, "_cell_clicked")]]
+      if (is.null(clicked_cell$row) || is.null(clicked_cell$col) ||
+          is.na(clicked_cell$row) || is.na(clicked_cell$col)) return()
+      # if last clicked cell is last selected cell (if a cell was selected)
+      if (clicked_cell$row == row && clicked_cell$col == col) {
+        determined_cells <- determineCells(param_values, specific_configurations,
+                                           row, col)
+        if (!is.null(determined_cells)) {
+          proxy %>% selectCells(determined_cells)
+        }
       }
     })
   }
