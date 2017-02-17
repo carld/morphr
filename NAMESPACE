@@ -1,6 +1,8 @@
 export("%>%")
 export(JS)
 export(addRow)
+export(buildHashValue)
+export(buildUnconstrainedCCM)
 export(clearSearch)
 export(dataTableAjax)
 export(dataTableOutput)
