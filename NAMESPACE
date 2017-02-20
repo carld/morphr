@@ -1,6 +1,7 @@
 export("%>%")
 export(JS)
 export(addRow)
+export(buildCCMFromSpecificConfigurations)
 export(buildHashValue)
 export(buildUnconstrainedCCM)
 export(clearSearch)

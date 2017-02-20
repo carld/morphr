@@ -30,28 +30,6 @@ same hash character string.
 \details{
 The purpose of this function is to provide hash keys that can be used to
 index a named list representing the CCM (cross-consistency matrix) of a
-morphological field. The CCM contains a logical for each pair-wise comparison
-of the parameter values of a morphological field, being TRUE if the
-combination of the two values is consistent or valid, otherwise FALSE. It is
-a symmetric matrix with empty diagonal. This means that the result of
-assessing the consistency of value1 in param1 (column1 of the morphological
-field) with value2 in param2 is the same as the consistency of value2 in
-param2 with value1 in param1 (hence the symmetry). Parameter values are not
-cross-checked with other values of the same parameter (hence the empty
-diagonal).
-
-The CCM is stored as a list whose names are hash strings of the two compared
-parameter/value pairs. One could also store the CCM as a simple matrix, but
-this has two drawbacks: (1) Even though it's declare to make a matrix as
-symmetric with \code{\link{Matrix::forceSymmetric}()}, this does not appear
-to make the matrix \emph{stay} symmetric when it is modified, i.e. updating
-the upper/lower triangle does not change the lower/upper triangle
-accordingly. One must therefore decide for one half of the matrix and
-remember to operate only on that. (2) It is slightly less straight forward to
-look up the consistency for a given pair of values. One must first find the
-indices corresponding to them. (However, this would be more trivial when the
-matrix columns/rows are named.) I find it a bit easier to use
-\code{\link{buildHashValue}()} on the value pair and use the hash for the
-lookup in a named list, where one does not need to remember which value is
-column, which is row.
+morphological field. See \code{\link{morphfield}()} for information on the
+CCM and in what format it is expected by \code{\link{morphfield}()}.
 }

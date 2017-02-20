@@ -5,15 +5,32 @@
 \alias{renderMorphField}
 \title{Helper functions for using morphr in Shiny}
 \usage{
-installMorphField(input, output, session, id, param_values, 
+installMorphField(input, output, session, id, param_values, ccm = NULL, 
     specific_configurations = NULL, styleFunc = NULL)
 
 morphFieldOutput(outputId, width = "100\%", height = "auto")
 
-renderMorphField(expr, server = TRUE, env = parent.frame(), 
-    quoted = FALSE, ...)
+renderMorphField(expr, server = TRUE, env = parent.frame(), quoted = FALSE, 
+    ...)
 }
 \arguments{
+\item{id}{The unique ID string that the morphological field will have in the
+HTML document. This ID can be used with functions like
+\code{\link{dataTableProxy}}() to programmatically alter the field/table.}
+
+\item{param_values}{A named list of vectors/lists. The names of the list are
+the names of the parameters (columns) in the morphological field. The
+vectors/lists contain the possible values that the parameter can have.}
+
+\item{ccm}{Optional. The cross-consistency matrix (CCM) for the morphological
+field can be given to constrain the possible configurations of the field.
+If provided, the \code{specific_configurations} are ignored. See details.}
+
+\item{specific_configurations}{Optional. The specific configurations are a
+list of only the valid parameter configrations as alternative to the CCM.
+If the \code{ccm} is also given, \code{specific_configurations} are
+ignored. See details.}
+
 \item{outputId}{output variable to read the value from}
 
 \item{width}{the width of the table container}

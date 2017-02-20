@@ -1,0 +1,35 @@
+% Please edit documentation in R/morphr.R
+\name{findConsistentCells}
+\alias{findConsistentCells}
+\title{Find cells that are consistent in at least one configuration}
+\usage{
+findConsistentCells(param_values, ccm, selected_cells = NULL)
+}
+\arguments{
+\item{param_values}{A named list of vectors/lists. The names of the list are
+the names of the parameters (columns) in the morphological field. The
+vectors/lists contain the possible values that the parameter can have.}
+
+\item{ccm}{Optional. The cross-consistency matrix (CCM) for the morphological
+field can be given to constrain the possible configurations of the field.
+If provided, the \code{specific_configurations} are ignored. See details.}
+
+\item{selected_cells}{A two-column matrix with the row and column indices of
+selected cells, starting at 1 for rows (0 is header) and at 0 for columns.
+It is obtained from \code{input$tableId_cells_selected}.}
+}
+\value{
+A two-column matrix with the row and column indices of consistent
+  cells, starting at 1 for rows (0 is header) and at 0 for columns. This can
+  be plugged into \code{\link{setCellsConsistent}()}.
+}
+\description{
+Of all configurations spanned by combinations of the parameter values in
+\code{param_values}, find the ones that are possible in at least one
+combination, as it is told by the CCM (cross-consistency matrix). If some
+cells are selected, then they are not marked as consistent (because that
+would cause them to get the consistent color so that they do not appear to be
+selected). However, selected cells restrict the consistent configurations to
+only those including one of the selected cells (in each column where selected
+cells are present).
+}

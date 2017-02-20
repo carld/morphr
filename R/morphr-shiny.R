@@ -18,7 +18,15 @@ installMorphField <- function(input, output, session, id,
                               param_values, ccm = NULL,
                               specific_configurations = NULL,
                               styleFunc = NULL) {
-  field <- morphfield(param_values, specific_configurations)
+  if (is.null(ccm)) {
+    if (!is.null(specific_configurations)) {
+      ccm <- buildCCMFromSpecificConfigurations(param_values, specific_configurations)
+    } else {
+      ccm <- buildUnconstrainedCCM(param_values)
+    }
+  }
+
+  field <- morphfield(param_values, ccm, specific_configurations)
   if (!is.null(styleFunc)) {
     field <- styleFunc(field)
   }
@@ -56,16 +64,20 @@ installMorphField <- function(input, output, session, id,
           is.na(clicked_cell$row) || is.na(clicked_cell$col)) return()
       # if last clicked cell is last selected cell (if a cell was selected)
       if (clicked_cell$row == row && clicked_cell$col == col) {
-        determined_cells <- determineCells(field_df, specific_configurations,
-                                           row, col)
-        print("determined_cells:")
-        print(determined_cells)
+        # determined_cells <- determineCells(field_df, specific_configurations,
+        #                                    row, col)
+        consistent_cells <- findConsistentCells(param_values, ccm, sel_cells)
+        print("selected cells:")
+        print(sel_cells)
         print("last_selected_cell:")
         print(last_selected_cell)
-        if (!is.null(determined_cells)) {
-          proxy %>% selectCells(last_selected_cell)
-          proxy %>% setCellsConsistent(determined_cells)
-        }
+        print("consistent_cells:")
+        print(consistent_cells)
+        proxy %>% setCellsConsistent(consistent_cells)
+        # if (!is.null(determined_cells)) {
+        #   proxy %>% selectCells(last_selected_cell)
+        #   proxy %>% setCellsConsistent(determined_cells)
+        # }
       }
     })
   }

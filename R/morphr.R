@@ -165,8 +165,14 @@ findConsistentCells <- function(param_values, ccm, selected_cells = NULL) {
           # in each column (index ocol), at least one value (only within the selection
           # if there is a selection) must be consistent with value1
           param2 <- names(param_values)[ocol]
+          if (ocol %in% sel_cols) {
+            # check only with selected values
+            check_values <- param_values[[ocol]][sel_rows[sel_cols == ocol]]
+          } else {
+            check_values <- param_values[[ocol]]
+          }
           consistent <- FALSE
-          for (value2 in param_values[[ocol]]) {
+          for (value2 in check_values) {
             if (ccm[[buildHashValue(param1, value1, param2, value2)]]) {
               consistent <- TRUE
               break()
