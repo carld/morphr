@@ -8,12 +8,16 @@
 #' \code{renderFoo()} typical for the \pkg{shiny} package. The former is used to
 #' create a container for the morphological field, and the latter is used in the
 #' server logic to render the field.
+#' @inheritParams shiny::shinyServer
+#' @param id The unique ID string that the morphological field will have in the
+#'   HTML document. This ID can be used with functions like
+#'   \code{\link{dataTableProxy}}() to programmatically alter the field/table.
+#' @inheritParams morphfield
 #' @export
 installMorphField <- function(input, output, session, id,
-                              param_values, specific_configurations = NULL,
+                              param_values, ccm = NULL,
+                              specific_configurations = NULL,
                               styleFunc = NULL) {
-  param_values <- paramValuesToDataFrame(param_values)
-
   field <- morphfield(param_values, specific_configurations)
   if (!is.null(styleFunc)) {
     field <- styleFunc(field)
@@ -23,6 +27,7 @@ installMorphField <- function(input, output, session, id,
   )
 
   proxy <- dataTableProxy(id)
+  field_df <- paramValuesToDataFrame(param_values)
 
   # immediately deselect empty cells, they shall not be selectable
   observeEvent(input[[paste0(id, "_cells_selected")]], {
@@ -30,7 +35,7 @@ installMorphField <- function(input, output, session, id,
     last_selected_cell <- sel_cells[nrow(sel_cells),]
     row <- last_selected_cell[1]
     col <- last_selected_cell[2]
-    cell_content <- param_values[row, col + 1]
+    cell_content <- field_df[row, col + 1]
     if (is.null(cell_content) || cell_content == "") {
       proxy %>% selectCells(sel_cells[-nrow(sel_cells),])
     }
@@ -41,6 +46,7 @@ installMorphField <- function(input, output, session, id,
     observeEvent(input[[paste0(id, "_cells_selected")]], {
       sel_cells <- input[[paste0(id, "_cells_selected")]]
       last_selected_cell <- sel_cells[nrow(sel_cells),]
+      last_selected_cell <- matrix(last_selected_cell, ncol = 2)
       row <- last_selected_cell[1]
       col <- last_selected_cell[2]
       if (is.null(row) || is.null(col) ||
@@ -50,10 +56,15 @@ installMorphField <- function(input, output, session, id,
           is.na(clicked_cell$row) || is.na(clicked_cell$col)) return()
       # if last clicked cell is last selected cell (if a cell was selected)
       if (clicked_cell$row == row && clicked_cell$col == col) {
-        determined_cells <- determineCells(param_values, specific_configurations,
+        determined_cells <- determineCells(field_df, specific_configurations,
                                            row, col)
+        print("determined_cells:")
+        print(determined_cells)
+        print("last_selected_cell:")
+        print(last_selected_cell)
         if (!is.null(determined_cells)) {
-          proxy %>% selectCells(determined_cells)
+          proxy %>% selectCells(last_selected_cell)
+          proxy %>% setCellsConsistent(determined_cells)
         }
       }
     })
@@ -98,4 +109,11 @@ renderMorphField <- function(expr, server = TRUE, env = parent.frame(),
   #   print("Hallo Welt!")
   # })
   renderDataTable(expr = expr, server = server, quoted = quoted, ...) # must not give the default env (parent.frame()) to renderDataTable, or the expr will not be found in scope
+}
+
+
+#' @rdname proxy
+#' @export
+setCellsConsistent = function(proxy, consistent) {
+  invokeRemote(proxy, 'setCellsConsistent', list(consistent))
 }

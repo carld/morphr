@@ -12,5 +12,22 @@ table.dataTable tr.selected td:before, table.dataTable td.selected:before {
   left: 0;
   right: 0;
   background: #b0bed9;
-  background: rgba(0, 29, 255, 0.4);
+  background: rgba(255, 0, 72, 0.4); /* red */
+}
+
+table.dataTable tr.consistent td, table.dataTable td.consistent {
+  position: relative;
+}
+
+table.dataTable tr.consistent td:before, table.dataTable td.consistent:before {
+  content: " ";
+  z-index: 10;
+  display: block;
+  position: absolute;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #b0bed9;
+  background: rgba(0, 29, 255, 0.4); /* blue */
 }
