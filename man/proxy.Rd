@@ -1,5 +1,5 @@
-% Please edit documentation in R/shiny.R
-\name{dataTableProxy}
+% Please edit documentation in R/morphr-shiny.R, R/shiny.R
+\name{setCellsConsistent}
 \alias{addRow}
 \alias{clearSearch}
 \alias{dataTableProxy}
@@ -8,10 +8,13 @@
 \alias{selectColumns}
 \alias{selectPage}
 \alias{selectRows}
+\alias{setCellsConsistent}
 \alias{updateCaption}
 \alias{updateSearch}
 \title{Manipulate an existing DataTables instance in a Shiny app}
 \usage{
+setCellsConsistent(proxy, consistent)
+
 dataTableProxy(outputId, session = shiny::getDefaultReactiveDomain(), 
     deferUntilFlush = TRUE)
 
@@ -35,6 +38,8 @@ reloadData(proxy, resetPaging = TRUE, clearSelection = c("all", "none",
     "row", "column", "cell"))
 }
 \arguments{
+\item{proxy}{a proxy object returned by \code{dataTableProxy()}}
+
 \item{outputId}{the id of the table to be manipulated (the same id as the one
 you used in \code{\link{dataTableOutput}()})}
 
@@ -43,8 +48,6 @@ Shiny app)}
 
 \item{deferUntilFlush}{whether an action should be carried out right away, or
 should be held until after the next time all of the outputs are updated}
-
-\item{proxy}{a proxy object returned by \code{dataTableProxy()}}
 
 \item{selected}{an integer vector of row/column indices, or a matrix of two
 columns (row and column indices, respectively) for cell indices; you may
