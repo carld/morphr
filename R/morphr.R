@@ -118,6 +118,7 @@ morphfield <- function(param_values, ccm = NULL, specific_configurations = NULL)
 #' a list of lists (each list representing one list of parameter configurations,
 #' i.e. one column) and fills the empty cells with empty character strings to
 #' create a fixed dimension data.frame.
+#' @export
 paramValuesToDataFrame <- function(param_values) {
   ret_val <- param_values
   if (class(ret_val) == "list") {
@@ -151,20 +152,28 @@ paramValuesToDataFrame <- function(param_values) {
 #' @return A two-column matrix with the row and column indices of consistent
 #'   cells, starting at 1 for rows (0 is header) and at 0 for columns. This can
 #'   be plugged into \code{\link{setCellsConsistent}()}.
+#' @export
 findConsistentCells <- function(param_values, ccm, selected_cells = NULL) {
-  sel_cols <- selected_cells[,2] + 1
-  sel_rows <- selected_cells[,1]
+  sel_cols <- c()
+  sel_rows <- c()
+  try({
+    sel_cols <- selected_cells[,2] + 1
+    sel_rows <- selected_cells[,1]
+  }, silent = TRUE)
   consistent_cells <- matrix(ncol = 2)[-1,] # empty two-column matrix
   lapply(seq_along(param_values), function(col) { # loop over all columns (index col)
     param1 <- names(param_values)[col]
+    # print(param1)
     if (!col %in% sel_cols) { # don't mark cells in columns with selections
       lapply(seq_along(param_values[[col]]), function(row) { # loop over all values in column (rows)
         value1 <- param_values[[col]][[row]]
+        # print(paste0("   ", value1))
         cell_consistent <- TRUE
         for (ocol in seq_along(param_values)[-col]) { # loop over all other columns (index ocol)
           # in each column (index ocol), at least one value (only within the selection
           # if there is a selection) must be consistent with value1
           param2 <- names(param_values)[ocol]
+          # print(paste0("      ", param2))
           if (ocol %in% sel_cols) {
             # check only with selected values
             check_values <- param_values[[ocol]][sel_rows[sel_cols == ocol]]
@@ -173,8 +182,10 @@ findConsistentCells <- function(param_values, ccm, selected_cells = NULL) {
           }
           consistent <- FALSE
           for (value2 in check_values) {
+            # print(paste0("         ", value2))
             if (ccm[[buildHashValue(param1, value1, param2, value2)]]) {
               consistent <- TRUE
+              # print(paste0("            CONSISTENT!"))
               break()
             }
           }
@@ -184,7 +195,10 @@ findConsistentCells <- function(param_values, ccm, selected_cells = NULL) {
           }
         }
         if (cell_consistent) {
-          consistent_cells <<- rbind(consistent_cells, c(row, col))
+          # print(paste0("   => CELL CONSISTENT!"))
+          consistent_cells <<- rbind(consistent_cells, c(row, col - 1))
+        } else {
+          # print(paste0("   => CELL NOT CONSISTENT!"))
         }
       })
     }
@@ -247,7 +261,7 @@ buildHashValue <- function(param1, value1, param2, value2) {
 
 
 #' @export
-buildUnconstrainedCCM <- function(param_values) {
+initializeCCM <- function(param_values, def_val = TRUE) {
   ccm <- list()
   lapply(1:(length(param_values) - 1), function(i) {
     param1 <- names(param_values)[i]
@@ -255,7 +269,7 @@ buildUnconstrainedCCM <- function(param_values) {
       lapply((i + 1):length(param_values), function(j) {
         param2 <- names(param_values)[j]
         lapply(param_values[[j]], function(value2) {
-          ccm[[buildHashValue(param1, value1, param2, value2)]] <<- TRUE
+          ccm[[buildHashValue(param1, value1, param2, value2)]] <<- def_val
         })
       })
     })
@@ -265,17 +279,36 @@ buildUnconstrainedCCM <- function(param_values) {
 
 
 #' @export
+buildUnconstrainedCCM <- function(param_values) {
+  initializeCCM(param_values, def_val = TRUE)
+}
+
+
+#' @export
 buildCCMFromSpecificConfigurations <- function(param_values,
                                                specific_configurations) {
-  ccm <- list()
-  lapply(1:(length(param_values) - 1), function(i) {
-    param1 <- names(param_values)[i]
-    lapply(param_values[[i]], function(value1) {
-      lapply((i + 1):length(param_values), function(j) {
-        param2 <- names(param_values)[j]
-        lapply(param_values[[j]], function(value2) {
-          ccm[[buildHashValue(param1, value1, param2, value2)]] <<-
-            value2 %in% specific_configurations[[param1]][[value1]][[param2]]
+  # Old code was wrong (does not include value combinations on same hierarchy):
+  ccm <- initializeCCM(param_values, def_val = FALSE) # first set all combinations to inconsistent
+  # Then, set only valid combinations consistent:
+  lapply(names(specific_configurations), function(param1) {
+    lapply(names(specific_configurations[[param1]]), function(value1) {
+      configs <- specific_configurations[[param1]][[value1]]
+      # add relations from higher to lower hierarchy
+      lapply(names(configs), function(param2) {
+        lapply(configs[[param2]], function(value2) {
+          ccm[[buildHashValue(param1, value1, param2, value2)]] <<- TRUE
+        })
+      })
+      # add relations within the same (lower) hierarchy, compare with all items of higher index
+      lapply(1:(length(configs) - 1), function(i) {
+        param2 <- names(configs)[i]
+        lapply(configs[[param2]], function(value2) {
+          lapply((i + 1):length(configs), function(j) {
+            param3 <- names(configs)[j]
+            lapply(configs[[param3]], function(value3) {
+              ccm[[buildHashValue(param2, value2, param3, value3)]] <<- TRUE
+            })
+          })
         })
       })
     })

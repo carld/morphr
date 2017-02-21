@@ -37,52 +37,61 @@ installMorphField <- function(input, output, session, id,
   proxy <- dataTableProxy(id)
   field_df <- paramValuesToDataFrame(param_values)
 
-  # immediately deselect empty cells, they shall not be selectable
+  # Immediately deselect empty cells, they shall not be selectable
   observeEvent(input[[paste0(id, "_cells_selected")]], {
     sel_cells <- input[[paste0(id, "_cells_selected")]]
-    last_selected_cell <- sel_cells[nrow(sel_cells),]
-    row <- last_selected_cell[1]
-    col <- last_selected_cell[2]
-    cell_content <- field_df[row, col + 1]
-    if (is.null(cell_content) || cell_content == "") {
-      proxy %>% selectCells(sel_cells[-nrow(sel_cells),])
+    # print("selected cells:")
+    # print(sel_cells)
+    if (isLastSelectedCellEmpty(sel_cells, field_df)) {
+      # print("Deselecting empty cell:")
+      # print(getLastSelectedCell(sel_cells))
+      proxy %>% selectCells(removeLastSelectedCell(sel_cells))
     }
   })
 
-  if (!is.null(specific_configurations)) {
-    # enforce the specific configurations for automatic cell selection
-    observeEvent(input[[paste0(id, "_cells_selected")]], {
-      sel_cells <- input[[paste0(id, "_cells_selected")]]
-      last_selected_cell <- sel_cells[nrow(sel_cells),]
-      last_selected_cell <- matrix(last_selected_cell, ncol = 2)
-      row <- last_selected_cell[1]
-      col <- last_selected_cell[2]
-      if (is.null(row) || is.null(col) ||
-          is.na(row) || is.na(col)) return()
-      clicked_cell <- input[[paste0(id, "_cell_clicked")]]
-      if (is.null(clicked_cell$row) || is.null(clicked_cell$col) ||
-          is.na(clicked_cell$row) || is.na(clicked_cell$col)) return()
-      # if last clicked cell is last selected cell (if a cell was selected)
-      if (clicked_cell$row == row && clicked_cell$col == col) {
-        # determined_cells <- determineCells(field_df, specific_configurations,
-        #                                    row, col)
-        consistent_cells <- findConsistentCells(param_values, ccm, sel_cells)
-        print("selected cells:")
-        print(sel_cells)
-        print("last_selected_cell:")
-        print(last_selected_cell)
-        print("consistent_cells:")
-        print(consistent_cells)
-        proxy %>% setCellsConsistent(consistent_cells)
-        # if (!is.null(determined_cells)) {
-        #   proxy %>% selectCells(last_selected_cell)
-        #   proxy %>% setCellsConsistent(determined_cells)
-        # }
-      }
-    })
-  }
+  # Update the field with the new consistent cells after selection
+  observeEvent(input[[paste0(id, "_cells_selected")]], {
+    sel_cells <- input[[paste0(id, "_cells_selected")]]
+    ## clicked_cell <- input[[paste0(id, "_cell_clicked")]]
+    ## # if last clicked cell is last selected cell (if a cell was selected)
+    ## if (clicked_cell$row == row && clicked_cell$col == col) {
+    # print("selected cells:")
+    # print(sel_cells)
+    # print("last_selected_cell:")
+    # print(getLastSelectedCell(sel_cells))
+    if (isLastSelectedCellEmpty(sel_cells, field_df)) {
+      # print("Last selected cell is empty, ignoring it...")
+      sel_cells <- removeLastSelectedCell(sel_cells)
+      # print("selected cells:")
+      # print(sel_cells)
+    }
+    consistent_cells <- findConsistentCells(param_values, ccm, sel_cells)
+    # print("consistent_cells:")
+    # print(consistent_cells)
+    proxy %>% setCellsConsistent(consistent_cells)
+  })
 
   return(proxy)
+}
+
+
+getLastSelectedCell <- function(sel_cells) {
+  matrix(sel_cells[nrow(sel_cells), ], ncol = 2)
+}
+
+
+isLastSelectedCellEmpty <- function(sel_cells, field_df) {
+  if (nrow(sel_cells) == 0) return(FALSE)
+  last_selected_cell <- getLastSelectedCell(sel_cells)
+  row <- last_selected_cell[1]
+  col <- last_selected_cell[2]
+  cell_content <- field_df[row, col + 1]
+  return(is.null(cell_content) || is.na(cell_content) || cell_content == "")
+}
+
+
+removeLastSelectedCell <- function(sel_cells) {
+  matrix(sel_cells[-nrow(sel_cells), ], ncol = 2)
 }
 
 
