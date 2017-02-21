@@ -1,6 +1,6 @@
 Package: morphr
 Type: Package
-Title: A Tool for General Morphological Analysis (GMA) using the JavaScript Library 'DataTables'
+Title: A Tool for Morphological Analysis (MA) using the JavaScript library 'DataTables'
 Version: 0.0.1
 Date: 2017-02-15
 Authors@R: c(
@@ -17,11 +17,11 @@ Authors@R: c(
     )
 Maintainer: Markus Voge <markus.voge@ea-aw.de>
 Description: Data objects in R that describe a morphological field can be
-    rendered as HTML tables using the JavaScript library 'DataTables' (typically
-    via R Markdown or Shiny). The 'DataTables' library has been included in this
-    R package. The package is built upon RStudio's R package 'DT'.
-#URL: http://rstudio.github.io/DT
-#BugReports: https://github.com/rstudio/DT/issues
+    rendered as HTML tables using the JavaScript library 'DataTables' (via
+    Shiny). The 'DataTables' library has been included in this R package.
+    The package is built upon RStudio's excellent R package 'DT'.
+URL: https://github.com/sgrubsmyon/morphr
+BugReports: https://github.com/sgrubsmyon/morphr/issues
 License: GPL-3 | file LICENSE
 Imports:
     htmltools (>= 0.3.5),

@@ -1,10 +1,11 @@
-The DT package as a whole is distributed under GPL-3 (GNU GENERAL PUBLIC
+The morphr package as a whole is distributed under GPL-3 (GNU GENERAL PUBLIC
 LICENSE version 3).
 
-The DT package inludes other open source software components. The following
+The morphr package inludes other open source software components. The following
 is a list of these components (full copies of the license agreements used by
 these components are included below):
 
+- DT, https://github.com/rstudio/DT (GPL-3)
 - jQuery, https://github.com/jquery/jquery
 - DataTables, https://github.com/DataTables/DataTables
 - selectize.js, https://github.com/brianreavis/selectize.js
