@@ -9,10 +9,10 @@ Analysis (MA) is a structured method for exploring and constraining a complex
 multi-dimensional, possibly non-quantifiable, problem space. It can be used to
 assess mutual consistency of the problem parameters and thus reduce the
 initially large number of parameter combinations. MA was developed by
-astrophysicist Fritz Zwicky ([[4]](#zwi47), [[5]](#zwi48), [[6]](#zwi67),
+astrophysicist Fritz Zwicky (e.g. [[4]](#zwi47), [[5]](#zwi48), [[6]](#zwi67),
 [[7]](#zwi69)) and is since the mid-1990s advanced and applied by the Swedish
 Morphological Society, in particular by Tom Ritchey, under the term "General
-Morphological Analysis" ([[8]](#swemorph), [[9]](#rit11)).
+Morphological Analysis" (e.g. [[8]](#swemorph), [[9]](#rit11)).
 
 The purpose of this package is to bring Morphological Analysis tools into a 
 modern, mobile, cross-platform computing environment and to provide easy access.
@@ -43,8 +43,8 @@ license.
 <a name="wikipedia-de"></a>[3]: https://de.wikipedia.org/wiki/Morphologische_Analyse_(Kreativit%C3%A4tstechnik)  
 <a name="zwi47"></a>[4]: Zwicky, F. (1947). Morphology and nomenclature of jet engines. *Aeronautical Engineering Review*, Vol. 6, No. 6, pp. 49--50.  
 <a name="zwi48"></a>[5]: Zwicky, F. (1948). Morphological astronomy. *Observatory*, Vol. 68, No 845, pp. 121--143.  
-<a name="zwi67"></a>[6]: Zwicky, F. & Wilson, A. (Eds.) (1967). *New methods of thought an procedure: Contributions to the symposium on methodologies*. Berlin: Springer.  
-<a name="zwi69"></a>[7]: Zwicky, F. (1969). *Discovery, invention, research -- through the morphological approach*. Toronto: The Macmillan Company.  
+<a name="zwi67"></a>[6]: Zwicky, F. & Wilson, A. (Eds.) (1967). *New methods of thought and procedure: Contributions to the symposium on methodologies*. Berlin: Springer.  
+<a name="zwi69"></a>[7]: Zwicky, F. (1969). *Discovery, invention, research -- through the morphological approach*. New York: The MacMillan Company.  
 <a name="swemorph"></a>[8]: http://www.swemorph.com/ma.html, *General Morphological Analysis - A general method for non-quantified modeling*, Swedish Morphological Society, 2002 (Revised 2013), Licensed under a [Creative Commons Attribution](https://creativecommons.org/licenses/by-nd/3.0/)  
 <a name="rit11"></a>[9]: Ritchey, T. (2011). [*Wicked Problems -- Social Messes, Decision Support Modelling with Morphological Analaysis*](https://link.springer.com/book/10.1007/978-3-642-19653-9), Volume 17 of the series Risk, Governane and Society, Springer-Verlag Berlin Heidelberg.
 
@@ -72,7 +72,7 @@ This package provides a function `installMorphField()` to display R data, which
 represents a morphological field, via the [DataTables](http://datatables.net/) 
 library (N.B. not to be confused with the **data.table** package). The 
 morphological field widget is installed into the `output` object of a 
-[Shiny](https://shiny.rstudio.org) application and can be displayed by putting a
+[Shiny](https://shiny.rstudio.com/) application and can be displayed by putting a
 `morphFieldOutput()` call into the applications `ui`. This package is built upon
 RStudio's excellent package [DT](https://github.com/rstudio/DT).
 
