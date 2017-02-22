@@ -18,6 +18,14 @@
 #' To see a live demo, run \code{shiny::runApp(system.file("examples", "morphr-simple", package="morphr"))}.
 "_PACKAGE"
 
+# This command in the "Tools" -> "Project Options" -> "Build Tools"
+# configuration (behind -v) breaks new roxygen2 version 6. I have now checked to
+# use devtools to build documentation ("Generate documentation with Roxygen" and
+# "Configure" -> "Build & Reload") and it generates the files correctly,
+# including comment at the top). See also
+# https://stackoverflow.com/questions/29135971/namespace-not-generated-by-roxygen2-skipped-confusion-with-hadley-book.
+# Removed command:
+# && Rscript -e "Rd2roxygen::rab(install=T,build=F)"
 
 ################################################################################
 
