@@ -129,7 +129,7 @@ paramValuesToDataFrame <- function(param_values) {
       c(li, rep("", max_length - length(li)))
     })
     # Turn it into a data.frame, because that is what is expected by DT
-    ret_val <- as.data.frame(ret_val)
+    ret_val <- as.data.frame(ret_val, optional = TRUE) # optional keeps whitespace in column names
   }
   ret_val
 }
