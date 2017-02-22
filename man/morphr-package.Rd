@@ -1,0 +1,50 @@
+% Please edit documentation in R/morphr.R
+\docType{package}
+\name{morphr-package}
+\alias{morphr}
+\alias{morphr-package}
+\title{Visualize a Morphological Field Using Shiny}
+\description{
+With this package you can create an interactive widget that represents a
+morphological field. A morphological field is a collection of parameters that
+can take on several possible values. Each parameter and its values are
+written into one column of a table. If the CCM (cross-consistency matrix) is
+specified for the field, it is possible to select any cell and thus constrain
+the possible configurations (parameter value combinations). The cells that
+are part of consistent configurations are marked with a color, updated at
+each click. It is therefore easy to explore the field and the relations
+between its parameters.
+}
+\details{
+The only two functions you're likely to need from \pkg{morphr} are
+\code{\link{installMorphField}} to install the widget in a \pkg{shiny} server
+function and \code{\link{morphFieldOutput}} to install it in a \pkg{shiny}
+UI function.
+
+To see a live demo, run \code{shiny::runApp(system.file("examples", "morphr-simple", package="morphr"))}.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/sgrubsmyon/morphr}
+  \item Report bugs at \url{https://github.com/sgrubsmyon/morphr/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Markus Voge \email{markus.voge@ea-aw.de}
+
+Other contributors:
+\itemize{
+  \item Yihui Xie \email{xie@yihui.name} (Author and maintainer of the R package DT that this package is built upon) [contributor, copyright holder]
+  \item Joe Cheng (Contributor to DT) [contributor, copyright holder]
+  \item JJ Allaire (Contributor to DT) [contributor, copyright holder]
+  \item jQuery contributors (jQuery in htmlwidgets/lib) [contributor, copyright holder]
+  \item SpryMedia Limited (DataTables in htmlwidgets/lib) [contributor, copyright holder]
+  \item Brian Reavis (selectize.js in htmlwidgets/lib) [contributor, copyright holder]
+  \item Leon Gersen (noUiSlider in htmlwidgets/lib) [contributor, copyright holder]
+  \item Bartek Szopka (jquery.highlight.js in htmlwidgets/lib) [contributor, copyright holder]
+  \item RStudio Inc [copyright holder]
+}
+
+}

@@ -22,7 +22,7 @@ ui <- fluidPage(
 )
 
 # Define server logic
-server <- function(input, output) {
+server <- function(input, output, session) {
 
   param_values <- list(
     "Parameter A" = c("A1", "A2", "A3", "A4"),
@@ -51,7 +51,7 @@ server <- function(input, output) {
     )
   )
 
-  morphr::installMorphField(input, output, session, id = "morphfield",
+  morphr::installMorphField(input, output, id = "morphfield",
                             param_values = param_values,
                             specific_configurations = specific_configurations)
 

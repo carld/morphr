@@ -1,16 +1,16 @@
 % Please edit documentation in R/morphr-shiny.R, R/shiny.R
 \name{setCellsConsistent}
+\alias{setCellsConsistent}
+\alias{dataTableProxy}
+\alias{selectRows}
+\alias{selectColumns}
+\alias{selectCells}
 \alias{addRow}
 \alias{clearSearch}
-\alias{dataTableProxy}
-\alias{reloadData}
-\alias{selectCells}
-\alias{selectColumns}
 \alias{selectPage}
-\alias{selectRows}
-\alias{setCellsConsistent}
 \alias{updateCaption}
 \alias{updateSearch}
+\alias{reloadData}
 \title{Manipulate an existing DataTables instance in a Shiny app}
 \usage{
 setCellsConsistent(proxy, consistent)
@@ -39,6 +39,11 @@ reloadData(proxy, resetPaging = TRUE, clearSelection = c("all", "none",
 }
 \arguments{
 \item{proxy}{a proxy object returned by \code{dataTableProxy()}}
+
+\item{consistent}{a matrix of two columns (row and column indices, respectively) for
+cell indices that identify the cells that should be marked consistent, i.e.
+appearing in a possible configuration; you may use NULL to clear existing
+consistency markings}
 
 \item{outputId}{the id of the table to be manipulated (the same id as the one
 you used in \code{\link{dataTableOutput}()})}

@@ -1,8 +1,8 @@
 % Please edit documentation in R/format.R
 \name{styleInterval}
-\alias{styleColorBar}
-\alias{styleEqual}
 \alias{styleInterval}
+\alias{styleEqual}
+\alias{styleColorBar}
 \title{Conditional CSS styles}
 \usage{
 styleInterval(cuts, values)

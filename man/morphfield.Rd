@@ -22,14 +22,16 @@ ignored. See details.}
 \description{
 This function creates an HTML widget to display a morphological field (a kind
 of table where each column represents the possible configurations of a
-certain parameter) using the JavaScript library DataTables.
+certain parameter) using the JavaScript library DataTables. This function is
+called internally by \code{\link{installMorphField}()}.
 }
-\details{
-The \code{param_values} are the only required argument to this function. They
-contain the column-wise elements of the morphological field in form of a
-named list. The names are the column headers (names of the parameters of the
-field). The values are vectors/lists with the character strings that
-represent the possible values that the parameter can take on.
+\section{Details}{
+
+
+The \code{param_values} contain the column-wise elements of the morphological
+field in form of a named list. The names are the column headers (names of the
+parameters of the field). The values are vectors/lists with the character
+strings that represent the possible values that the parameter can take on.
 
 There are two ways to constrain the possible configurations, i.e. parameter
 value combinations, of the morphological field. Number one is to provide a
@@ -38,6 +40,10 @@ pair-wise parameter combinations (see below for details). Number two is to
 provide a list of \emph{specific configurations}, which instead of listing
 all value combinations lists only the valid configurations. Internally, the
 specific configurations are converted to a CCM as well.
+}
+
+\section{Cross-consistency matrix (CCM)}{
+
 
 The \emph{CCM} contains a logical for each pair-wise comparison of the
 parameter values of a morphological field, being TRUE if the combination of
@@ -63,11 +69,16 @@ matrix columns/rows are named.) I find it a bit easier to use
 \code{\link{buildHashValue}()} on the value pair and use the hash for the
 lookup in a named list, where one does not need to remember which value is
 column, which is row.
+}
+
+\section{Specific configurations}{
+
 
 With \emph{specific configurations}, one can define one or more parameter
 columns to \emph{specify} the field. This means that choosing a value in the
 specifying column sets the values of some or all other columns. It constrains
-the field. The \code{specific_configurations} are expected to be a named list
+the field. Specifying columns are marked with a darker grey than normal
+columns. The \code{specific_configurations} are expected to be a named list
 of named lists of named lists. The top-level hierarchy names represent the
 parameter names that are specifying. The next level names represent the
 parameter's values that are specifying. The deepest level names represent the

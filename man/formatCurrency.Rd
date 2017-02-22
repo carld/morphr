@@ -1,11 +1,11 @@
 % Please edit documentation in R/format.R
 \name{formatCurrency}
 \alias{formatCurrency}
-\alias{formatDate}
+\alias{formatString}
 \alias{formatPercentage}
 \alias{formatRound}
 \alias{formatSignif}
-\alias{formatString}
+\alias{formatDate}
 \alias{formatStyle}
 \title{Format table columns}
 \usage{

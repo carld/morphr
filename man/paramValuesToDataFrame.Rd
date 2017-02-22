@@ -5,6 +5,11 @@
 \usage{
 paramValuesToDataFrame(param_values)
 }
+\arguments{
+\item{param_values}{A named list of vectors/lists. The names of the list are
+the names of the parameters (columns) in the morphological field. The
+vectors/lists contain the possible values that the parameter can have.}
+}
 \description{
 A morphological field can consist of parameters with variable number of
 values. However, a DataTable accepts only a data.frame, which must

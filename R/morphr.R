@@ -1,70 +1,38 @@
+#' Visualize a Morphological Field Using Shiny
+#'
+#' With this package you can create an interactive widget that represents a
+#' morphological field. A morphological field is a collection of parameters that
+#' can take on several possible values. Each parameter and its values are
+#' written into one column of a table. If the CCM (cross-consistency matrix) is
+#' specified for the field, it is possible to select any cell and thus constrain
+#' the possible configurations (parameter value combinations). The cells that
+#' are part of consistent configurations are marked with a color, updated at
+#' each click. It is therefore easy to explore the field and the relations
+#' between its parameters.
+#'
+#' The only two functions you're likely to need from \pkg{morphr} are
+#' \code{\link{installMorphField}} to install the widget in a \pkg{shiny} server
+#' function and \code{\link{morphFieldOutput}} to install it in a \pkg{shiny}
+#' UI function.
+#'
+#' To see a live demo, run \code{shiny::runApp(system.file("examples", "morphr-simple", package="morphr"))}.
+"_PACKAGE"
+
+
+################################################################################
+
+
 #' Create an HTML morphological field widget using the DataTables library
 #'
 #' This function creates an HTML widget to display a morphological field (a kind
 #' of table where each column represents the possible configurations of a
-#' certain parameter) using the JavaScript library DataTables.
+#' certain parameter) using the JavaScript library DataTables. This function is
+#' called internally by \code{\link{installMorphField}()}.
 #'
-#' The \code{param_values} are the only required argument to this function. They
-#' contain the column-wise elements of the morphological field in form of a
-#' named list. The names are the column headers (names of the parameters of the
-#' field). The values are vectors/lists with the character strings that
-#' represent the possible values that the parameter can take on.
-#'
-#' There are two ways to constrain the possible configurations, i.e. parameter
-#' value combinations, of the morphological field. Number one is to provide a
-#' \emph{cross-consistency matrix (CCM)}, which lists the validity status of all
-#' pair-wise parameter combinations (see below for details). Number two is to
-#' provide a list of \emph{specific configurations}, which instead of listing
-#' all value combinations lists only the valid configurations. Internally, the
-#' specific configurations are converted to a CCM as well.
-#'
-#' The \emph{CCM} contains a logical for each pair-wise comparison of the
-#' parameter values of a morphological field, being TRUE if the combination of
-#' the two values is consistent or valid, otherwise FALSE. It is a symmetric
-#' matrix with empty diagonal. This means that the result of assessing the
-#' consistency of value1 in param1 (column1 of the morphological field) with
-#' value2 in param2 is the same as the consistency of value2 in param2 with
-#' value1 in param1 (hence the symmetry). Parameter values are not cross-checked
-#' with other values of the same parameter (hence the empty diagonal).
-#'
-#' The CCM is stored as a list whose names are hash strings of the two compared
-#' parameter/value pairs. Those hash strings can be created with the function
-#' \code{\link{buildHashValue}()}. One could also store the CCM as a simple
-#' matrix, but this has two drawbacks: (1) Even when a matrix is devlared to be
-#' symmetric with \code{\link{Matrix::forceSymmetric}()}, this does not appear
-#' to make the matrix \emph{stay} symmetric when it is modified, i.e. updating
-#' the upper/lower triangle does not change the lower/upper triangle
-#' accordingly. One must therefore decide for one half of the matrix and
-#' remember to operate only on that. (2) It is slightly less straight forward to
-#' look up the consistency for a given pair of values. One must first find the
-#' indices corresponding to them. (However, this would be more trivial when the
-#' matrix columns/rows are named.) I find it a bit easier to use
-#' \code{\link{buildHashValue}()} on the value pair and use the hash for the
-#' lookup in a named list, where one does not need to remember which value is
-#' column, which is row.
-#'
-#' With \emph{specific configurations}, one can define one or more parameter
-#' columns to \emph{specify} the field. This means that choosing a value in the
-#' specifying column sets the values of some or all other columns. It constrains
-#' the field. The \code{specific_configurations} are expected to be a named list
-#' of named lists of named lists. The top-level hierarchy names represent the
-#' parameter names that are specifying. The next level names represent the
-#' parameter's values that are specifying. The deepest level names represent the
-#' parameter names that are specified and the values (list elements) are the
-#' parameter value(s) that are specified (i.e. considered possible) in this
-#' configuration. Defaults to NULL, i.e. no specification and the field is
-#' \emph{open}.
-#'
-#' @param param_values A named list of vectors/lists. The names of the list are
-#'   the names of the parameters (columns) in the morphological field. The
-#'   vectors/lists contain the possible values that the parameter can have.
-#' @param ccm Optional. The cross-consistency matrix (CCM) for the morphological
-#'   field can be given to constrain the possible configurations of the field.
-#'   If provided, the \code{specific_configurations} are ignored. See details.
-#' @param specific_configurations Optional. The specific configurations are a
-#'   list of only the valid parameter configrations as alternative to the CCM.
-#'   If the \code{ccm} is also given, \code{specific_configurations} are
-#'   ignored. See details.
+#' @inheritSection installMorphField Details
+#' @inheritSection installMorphField Cross-consistency matrix (CCM)
+#' @inheritSection installMorphField Specific configurations
+#' @inheritParams installMorphField
 #' @export
 morphfield <- function(param_values, ccm = NULL, specific_configurations = NULL) {
   field_df <- paramValuesToDataFrame(param_values)
@@ -118,6 +86,7 @@ morphfield <- function(param_values, ccm = NULL, specific_configurations = NULL)
 #' a list of lists (each list representing one list of parameter configurations,
 #' i.e. one column) and fills the empty cells with empty character strings to
 #' create a fixed dimension data.frame.
+#' @inheritParams morphfield
 #' @export
 paramValuesToDataFrame <- function(param_values) {
   ret_val <- param_values
@@ -207,29 +176,6 @@ findConsistentCells <- function(param_values, ccm, selected_cells = NULL) {
 }
 
 
-determineCells <- function(field_df, specific_configurations, row, col) {
-  col_names <- names(field_df)
-  col_name <- col_names[col + 1] # + 1 needed because JavaScript starts counting at 0
-  determined_cells <- NULL
-  if (col_name %in% names(specific_configurations)) {
-    row_name <- field_df[row, col + 1] # + 1 see above
-    if (row_name %in% names(specific_configurations[[col_name]])) {
-      determined_col_names <- names(specific_configurations[[col_name]][[row_name]])
-      determined_cols <- match(determined_col_names, col_names)
-      determined_row_names <- specific_configurations[[col_name]][[row_name]]
-      determined_rows <- sapply(determined_col_names, function(c) {
-        match(determined_row_names[[c]], field_df[[c]])
-      })
-      determined_cells <- matrix(
-        c(determined_rows, determined_cols - 1), # - 1 needed because JavaScript starts counting at 0
-        ncol = 2
-      )
-    }
-  }
-  determined_cells
-}
-
-
 #' Build a single hash value from two parameter/value combinations
 #'
 #' This function simply combines four strings (with two strings forming a pair
@@ -260,6 +206,15 @@ buildHashValue <- function(param1, value1, param2, value2) {
 }
 
 
+#' Create a CCM from parameter values with a single default value
+#'
+#' The CCM (cross-consistency matrix) from this function will have the same
+#' logical value \code{def_val} for all value combinations. Use this to create
+#' either a completely unconstrained CCM (all \code{TRUE}), or a completely
+#' impossible CCM (all \code{FALSE}).
+#'
+#' @inheritParams morphfield
+#' @param def_val Logical for the initialization of all CCM entries.
 #' @export
 initializeCCM <- function(param_values, def_val = TRUE) {
   ccm <- list()
@@ -277,13 +232,24 @@ initializeCCM <- function(param_values, def_val = TRUE) {
   ccm
 }
 
-
+#' Create a completely unconstrained CCM from parameter values
+#'
+#' All entries in the CCM (cross-consistency matrix) will be \code{TRUE}.
+#'
+#' @inheritParams morphfield
 #' @export
 buildUnconstrainedCCM <- function(param_values) {
   initializeCCM(param_values, def_val = TRUE)
 }
 
 
+#' Convert specific configurations to CCM
+#'
+#' If you specify your morphological field with \code{specific_configurations},
+#' then they can be converted to a CCM (cross-consistency matrix) using this
+#' function.
+#'
+#' @inheritParams morphfield
 #' @export
 buildCCMFromSpecificConfigurations <- function(param_values,
                                                specific_configurations) {

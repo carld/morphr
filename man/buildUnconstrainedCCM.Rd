@@ -1,0 +1,15 @@
+% Please edit documentation in R/morphr.R
+\name{buildUnconstrainedCCM}
+\alias{buildUnconstrainedCCM}
+\title{Create a completely unconstrained CCM from parameter values}
+\usage{
+buildUnconstrainedCCM(param_values)
+}
+\arguments{
+\item{param_values}{A named list of vectors/lists. The names of the list are
+the names of the parameters (columns) in the morphological field. The
+vectors/lists contain the possible values that the parameter can have.}
+}
+\description{
+All entries in the CCM (cross-consistency matrix) will be \code{TRUE}.
+}

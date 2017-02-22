@@ -1,7 +1,7 @@
 % Please edit documentation in R/datatables.R
 \name{tableHeader}
-\alias{tableFooter}
 \alias{tableHeader}
+\alias{tableFooter}
 \title{Generate a table header or footer from column names}
 \usage{
 tableHeader(names, escape = TRUE)

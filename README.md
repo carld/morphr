@@ -108,7 +108,7 @@ server <- function(input, output) {
     )
   )
 
-  morphr::installMorphField(input, output, session, id = "morphfield",
+  morphr::installMorphField(input, output, id = "morphfield",
                             param_values = param_values,
                             specific_configurations = specific_configurations)
 }

@@ -1,19 +1,18 @@
 % Please edit documentation in R/morphr-shiny.R
 \name{installMorphField}
 \alias{installMorphField}
-\alias{morphFieldOutput}
-\alias{renderMorphField}
-\title{Helper functions for using morphr in Shiny}
+\title{Install a morphological field widget in Shiny}
 \usage{
-installMorphField(input, output, session, id, param_values, ccm = NULL, 
+installMorphField(input, output, id, param_values, ccm = NULL, 
     specific_configurations = NULL, styleFunc = NULL)
-
-morphFieldOutput(outputId, width = "100\%", height = "auto")
-
-renderMorphField(expr, server = TRUE, env = parent.frame(), quoted = FALSE, 
-    ...)
 }
 \arguments{
+\item{input}{The Shiny session's input object (the same as is passed into the
+Shiny server function as an argument).}
+
+\item{output}{The Shiny session's output object (the same as is passed into
+the Shiny server function as an argument).}
+
 \item{id}{The unique ID string that the morphological field will have in the
 HTML document. This ID can be used with functions like
 \code{\link{dataTableProxy}}() to programmatically alter the field/table.}
@@ -31,37 +30,83 @@ list of only the valid parameter configrations as alternative to the CCM.
 If the \code{ccm} is also given, \code{specific_configurations} are
 ignored. See details.}
 
-\item{outputId}{output variable to read the value from}
-
-\item{width}{the width of the table container}
-
-\item{height}{the height of the table container}
-
-\item{expr}{An expression that returns an R object that can be used as an
-argument to \code{cat}.}
-
-\item{server}{whether to use server-side processing. If \code{TRUE}, then the
-data is kept on the server and the browser requests a page at a time; if
-\code{FALSE}, then the entire data frame is sent to the browser at once.
-Highly recommended for medium to large data frames, which can cause
-browsers to slow down or crash.}
-
-\item{env}{The environment in which to evaluate \code{expr}.}
-
-\item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This
-is useful if you want to save an expression in a variable.}
-
-\item{...}{ignored when \code{expr} returns a table widget, and passed as
-additional arguments to \code{datatable()} when \code{expr} returns a data
-object}
+\item{styleFunc}{Optional function to style the field. It should accept the field
+returned by \code{\link{morphfield}()} (actually a datatable as returned by
+\code{\link{datatable}()}), modify it with \code{
+field <- field \%>\% \link{formatStyle}(...)
+}
+or similar, and then return it.}
+}
+\value{
+The proxy object to the morphological field as returned by
+  \code{\link{dataTableProxy}()}.
 }
 \description{
 If you want to use the built-in functionality, you must use the function
-\code{installMorphField} instead of \code{output$mf <- renderMorphField(...)}.
-This is because it makes use of shiny's reactivity, so it needs to install
-the morph field widget in the output object and observe the input object.
-Besides that, there are the two usual functions \code{fooOutput()} and
-\code{renderFoo()} typical for the \pkg{shiny} package. The former is used to
-create a container for the morphological field, and the latter is used in the
-server logic to render the field.
+\code{installMorphField} instead of \code{output$mf <-
+\link{renderMorphField}(...)}. This is because it makes use of shiny's
+reactivity, so it needs to install the morph field widget in the output
+object and observe the input object.
+}
+\section{Details}{
+
+
+The \code{param_values} contain the column-wise elements of the morphological
+field in form of a named list. The names are the column headers (names of the
+parameters of the field). The values are vectors/lists with the character
+strings that represent the possible values that the parameter can take on.
+
+There are two ways to constrain the possible configurations, i.e. parameter
+value combinations, of the morphological field. Number one is to provide a
+\emph{cross-consistency matrix (CCM)}, which lists the validity status of all
+pair-wise parameter combinations (see below for details). Number two is to
+provide a list of \emph{specific configurations}, which instead of listing
+all value combinations lists only the valid configurations. Internally, the
+specific configurations are converted to a CCM as well.
+}
+
+\section{Cross-consistency matrix (CCM)}{
+
+
+The \emph{CCM} contains a logical for each pair-wise comparison of the
+parameter values of a morphological field, being TRUE if the combination of
+the two values is consistent or valid, otherwise FALSE. It is a symmetric
+matrix with empty diagonal. This means that the result of assessing the
+consistency of value1 in param1 (column1 of the morphological field) with
+value2 in param2 is the same as the consistency of value2 in param2 with
+value1 in param1 (hence the symmetry). Parameter values are not cross-checked
+with other values of the same parameter (hence the empty diagonal).
+
+The CCM is stored as a list whose names are hash strings of the two compared
+parameter/value pairs. Those hash strings can be created with the function
+\code{\link{buildHashValue}()}. One could also store the CCM as a simple
+matrix, but this has two drawbacks: (1) Even when a matrix is devlared to be
+symmetric with \code{\link{Matrix::forceSymmetric}()}, this does not appear
+to make the matrix \emph{stay} symmetric when it is modified, i.e. updating
+the upper/lower triangle does not change the lower/upper triangle
+accordingly. One must therefore decide for one half of the matrix and
+remember to operate only on that. (2) It is slightly less straight forward to
+look up the consistency for a given pair of values. One must first find the
+indices corresponding to them. (However, this would be more trivial when the
+matrix columns/rows are named.) I find it a bit easier to use
+\code{\link{buildHashValue}()} on the value pair and use the hash for the
+lookup in a named list, where one does not need to remember which value is
+column, which is row.
+}
+
+\section{Specific configurations}{
+
+
+With \emph{specific configurations}, one can define one or more parameter
+columns to \emph{specify} the field. This means that choosing a value in the
+specifying column sets the values of some or all other columns. It constrains
+the field. Specifying columns are marked with a darker grey than normal
+columns. The \code{specific_configurations} are expected to be a named list
+of named lists of named lists. The top-level hierarchy names represent the
+parameter names that are specifying. The next level names represent the
+parameter's values that are specifying. The deepest level names represent the
+parameter names that are specified and the values (list elements) are the
+parameter value(s) that are specified (i.e. considered possible) in this
+configuration. Defaults to NULL, i.e. no specification and the field is
+\emph{open}.
 }
