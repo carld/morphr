@@ -112,6 +112,8 @@ installMorphField <- function(input, output, id,
   proxy <- dataTableProxy(id)
   field_df <- paramValuesToDataFrame(param_values)
 
+  # shinyBS::popify(span("Hoch"), "Bla", "Blubb")
+
   # Immediately deselect empty cells, they shall not be selectable
   observeEvent(input[[paste0(id, "_cells_selected")]], {
     sel_cells <- input[[paste0(id, "_cells_selected")]]
@@ -190,9 +192,9 @@ morphFieldOutput <- function(outputId, width = '100%', height = 'auto') {
     c(
       crosstalk::crosstalkLibs(),
       list(htmltools::htmlDependency(
-        "morphr-css", "0.0.1",
+        "morphr", "0.0.1",
         c(file = system.file("htmlwidgets", package = "morphr")),
-        stylesheet = "css/morphr.css"
+        stylesheet = "css/morphr.css", script = "morphr.js"
       ))
     ),
     append = TRUE

@@ -882,6 +882,8 @@ HTMLWidgets.widget({
       }
     }
 
+    morphr_renderValue(methods, server, table, tweakCellIndex);
+
     // expose some table info to Shiny
     var updateTableInfo = function(e, settings) {
       // TODO: is anyone interested in the page info?
