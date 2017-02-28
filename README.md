@@ -45,7 +45,7 @@ license.
 <a name="zwi48"></a>[5]: Zwicky, F. (1948). Morphological astronomy. *Observatory*, Vol. 68, No 845, pp. 121--143.  
 <a name="zwi67"></a>[6]: Zwicky, F. & Wilson, A. (Eds.) (1967). *New methods of thought and procedure: Contributions to the symposium on methodologies*. Berlin: Springer.  
 <a name="zwi69"></a>[7]: Zwicky, F. (1969). *Discovery, invention, research -- through the morphological approach*. New York: The MacMillan Company.  
-<a name="swemorph"></a>[8]: http://www.swemorph.com/ma.html, *General Morphological Analysis - A general method for non-quantified modeling*, Swedish Morphological Society, 2002 (Revised 2013), Licensed under a [Creative Commons Attribution](https://creativecommons.org/licenses/by-nd/3.0/)  
+<a name="swemorph"></a>[8]: [*General Morphological Analysis - A general method for non-quantified modeling*](http://www.swemorph.com/ma.html), Swedish Morphological Society, 2002 (Revised 2013), Licensed under a [Creative Commons Attribution](https://creativecommons.org/licenses/by-nd/3.0/)  
 <a name="rit11"></a>[9]: Ritchey, T. (2011). [*Wicked Problems -- Social Messes, Decision Support Modelling with Morphological Analaysis*](https://link.springer.com/book/10.1007/978-3-642-19653-9), Volume 17 of the series Risk, Governane and Society, Springer-Verlag Berlin Heidelberg.
 
 
