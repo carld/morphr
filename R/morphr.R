@@ -42,8 +42,9 @@
 #' @inheritSection installMorphField Specific configurations
 #' @inheritParams installMorphField
 #' @export
-morphfield <- function(param_values, ccm = NULL, specific_configurations = NULL) {
-  field_df <- paramValuesToDataFrame(param_values)
+morphfield <- function(param_values, ccm = NULL, specific_configurations = NULL,
+                       param_descriptions = NULL) {
+  field_df <- paramValuesToDataFrame(param_values, param_descriptions)
   if (is.null(ccm)) {
     if (!is.null(specific_configurations)) {
       ccm <- buildCCMFromSpecificConfigurations(param_values, specific_configurations)
@@ -72,7 +73,9 @@ morphfield <- function(param_values, ccm = NULL, specific_configurations = NULL)
     selection = list(
       mode = "multiple",
       target = "cell"
-    )
+    ),
+    # Do not escape HTML
+    escape = FALSE
   )
 
   if (!is.null(specific_configurations)) {
@@ -94,17 +97,26 @@ morphfield <- function(param_values, ccm = NULL, specific_configurations = NULL)
 #' a list of lists (each list representing one list of parameter configurations,
 #' i.e. one column) and fills the empty cells with empty character strings to
 #' create a fixed dimension data.frame.
-#' @inheritParams morphfield
+#' @inheritParams installMorphField
 #' @export
-paramValuesToDataFrame <- function(param_values) {
+paramValuesToDataFrame <- function(param_values, param_descriptions = NULL) {
   ret_val <- param_values
   if (class(ret_val) == "list") {
     # Make sure that all list items have same length.
     # If not: fill with empty character strings
     max_length <- max(sapply(ret_val, length))
-    ret_val <- lapply(ret_val, function(li) {
-      c(li, rep("", max_length - length(li)))
+    ret_val <- lapply(names(ret_val), function(param1) {
+      items <- sapply(ret_val[[param1]], function(value1) {
+        desc <- param_descriptions[[param1]][[value1]]
+        if (!is.null(desc)) {
+          as.character(shinyBS::popify(htmltools::span(value1), value1, desc))
+        } else {
+          value1
+        }
+      }, USE.NAMES = FALSE)
+      c(items, rep("", max_length - length(items)))
     })
+    names(ret_val) <- names(param_values)
     # Turn it into a data.frame, because that is what is expected by DT
     ret_val <- as.data.frame(ret_val, optional = TRUE) # optional keeps whitespace in column names
   }
@@ -122,7 +134,7 @@ paramValuesToDataFrame <- function(param_values) {
 #' selected). However, selected cells restrict the consistent configurations to
 #' only those including one of the selected cells (in each column where selected
 #' cells are present).
-#' @inheritParams morphfield
+#' @inheritParams installMorphField
 #' @param selected_cells A two-column matrix with the row and column indices of
 #'   selected cells, starting at 1 for rows (0 is header) and at 0 for columns.
 #'   It is obtained from \code{input$tableId_cells_selected}.
@@ -221,7 +233,7 @@ buildHashValue <- function(param1, value1, param2, value2) {
 #' either a completely unconstrained CCM (all \code{TRUE}), or a completely
 #' impossible CCM (all \code{FALSE}).
 #'
-#' @inheritParams morphfield
+#' @inheritParams installMorphField
 #' @param def_val Logical for the initialization of all CCM entries.
 #' @export
 initializeCCM <- function(param_values, def_val = TRUE) {
@@ -244,7 +256,7 @@ initializeCCM <- function(param_values, def_val = TRUE) {
 #'
 #' All entries in the CCM (cross-consistency matrix) will be \code{TRUE}.
 #'
-#' @inheritParams morphfield
+#' @inheritParams installMorphField
 #' @export
 buildUnconstrainedCCM <- function(param_values) {
   initializeCCM(param_values, def_val = TRUE)
@@ -257,7 +269,7 @@ buildUnconstrainedCCM <- function(param_values) {
 #' then they can be converted to a CCM (cross-consistency matrix) using this
 #' function.
 #'
-#' @inheritParams morphfield
+#' @inheritParams installMorphField
 #' @export
 buildCCMFromSpecificConfigurations <- function(param_values,
                                                specific_configurations) {

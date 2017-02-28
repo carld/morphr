@@ -1,7 +1,10 @@
 table.dataTable tr.selected td, table.dataTable td.selected {
-  position: relative;
+  /*position: relative;*/
+  background: #b0bed9;
+  background: rgba(255, 0, 72, 0.4) !important; /* red */
 }
 
+/* Transparent overlay: (makes tooltip/popver unusable) (need "position: relative" above)
 table.dataTable tr.selected td:before, table.dataTable td.selected:before {
   content: " ";
   z-index: 10;
@@ -12,13 +15,17 @@ table.dataTable tr.selected td:before, table.dataTable td.selected:before {
   left: 0;
   right: 0;
   background: #b0bed9;
-  background: rgba(255, 0, 72, 0.4); /* red */
+  background: rgba(255, 0, 72, 0.4); /* red * /
 }
+*/
 
 table.dataTable tr.consistent td, table.dataTable td.consistent {
-  position: relative;
+  /*position: relative;*/
+  background: #b0bed9;
+  background: rgba(0, 29, 255, 0.4) !important; /* blue */
 }
 
+/* Transparent overlay: (makes tooltip/popver unusable) (need "position: relative" above)
 table.dataTable tr.consistent td:before, table.dataTable td.consistent:before {
   content: " ";
   z-index: 10;
@@ -29,5 +36,11 @@ table.dataTable tr.consistent td:before, table.dataTable td.consistent:before {
   left: 0;
   right: 0;
   background: #b0bed9;
-  background: rgba(0, 29, 255, 0.4); /* blue */
+  background: rgba(0, 29, 255, 0.4); /* blue * /
+}
+*/
+
+/* Popover text color like it is defined for body (override inline cell style) */
+.popover {
+  color: #333;
 }

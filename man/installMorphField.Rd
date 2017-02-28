@@ -5,7 +5,8 @@
 \title{Install a morphological field widget in Shiny}
 \usage{
 installMorphField(input, output, id, param_values, ccm = NULL,
-  specific_configurations = NULL, styleFunc = NULL)
+  specific_configurations = NULL, param_descriptions = NULL,
+  styleFunc = NULL)
 }
 \arguments{
 \item{input}{The Shiny session's input object (the same as is passed into the
@@ -30,6 +31,12 @@ If provided, the \code{specific_configurations} are ignored. See details.}
 list of only the valid parameter configrations as alternative to the CCM.
 If the \code{ccm} is also given, \code{specific_configurations} are
 ignored. See details.}
+
+\item{param_descriptions}{Optional. Each parameter value in param_values can
+have an accompanying (long) description that will be shown as tooltip/popup.
+The structure of \code{param_descriptions} is like that of \code{param_values},
+but instead of containing parameter values as list elements, the parameter
+values must be names whose values are the description texts.}
 
 \item{styleFunc}{Optional function to style the field. It should accept the field
 returned by \code{\link{morphfield}()} (actually a datatable as returned by
