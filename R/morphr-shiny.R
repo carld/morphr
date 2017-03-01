@@ -73,6 +73,11 @@
 #' @param param_values A named list of vectors/lists. The names of the list are
 #'   the names of the parameters (columns) in the morphological field. The
 #'   vectors/lists contain the possible values that the parameter can have.
+#' @param value_descriptions Optional. Each parameter value in param_values can
+#'   have an accompanying (long) description that will be shown as tooltip/popover.
+#'   The structure of \code{value_descriptions} is like that of \code{param_values},
+#'   but instead of containing parameter values as list elements, the parameter
+#'   values must be names whose list elements are the description texts.
 #' @param ccm Optional. The cross-consistency matrix (CCM) for the morphological
 #'   field can be given to constrain the possible configurations of the field.
 #'   If provided, the \code{specific_configurations} are ignored. See details.
@@ -80,11 +85,6 @@
 #'   list of only the valid parameter configrations as alternative to the CCM.
 #'   If the \code{ccm} is also given, \code{specific_configurations} are
 #'   ignored. See details.
-#' @param param_descriptions Optional. Each parameter value in param_values can
-#'   have an accompanying (long) description that will be shown as tooltip/popup.
-#'   The structure of \code{param_descriptions} is like that of \code{param_values},
-#'   but instead of containing parameter values as list elements, the parameter
-#'   values must be names whose values are the description texts.
 #' @param styleFunc Optional function to style the field. It should accept the field
 #'   returned by \code{\link{morphfield}()} (actually a datatable as returned by
 #'   \code{\link{datatable}()}), modify it with \code{
@@ -95,9 +95,9 @@
 #'   \code{\link{dataTableProxy}()}.
 #' @export
 installMorphField <- function(input, output, id,
-                              param_values, ccm = NULL,
+                              param_values, value_descriptions = NULL,
+                              ccm = NULL,
                               specific_configurations = NULL,
-                              param_descriptions = NULL,
                               styleFunc = NULL) {
   if (is.null(ccm)) {
     if (!is.null(specific_configurations)) {
@@ -107,7 +107,7 @@ installMorphField <- function(input, output, id,
     }
   }
 
-  field <- morphfield(param_values, ccm, specific_configurations, param_descriptions)
+  field <- morphfield(param_values, value_descriptions, ccm, specific_configurations)
   if (!is.null(styleFunc)) {
     field <- styleFunc(field)
   }
@@ -116,7 +116,7 @@ installMorphField <- function(input, output, id,
   )
 
   proxy <- dataTableProxy(id)
-  field_df <- paramValuesToDataFrame(param_values, param_descriptions)
+  field_df <- paramValuesToDataFrame(param_values, value_descriptions)
 
   # Immediately deselect empty cells, they shall not be selectable
   observeEvent(input[[paste0(id, "_cells_selected")]], {

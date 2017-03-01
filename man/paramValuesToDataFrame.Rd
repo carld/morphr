@@ -4,18 +4,18 @@
 \alias{paramValuesToDataFrame}
 \title{Create a fixed dimension data.frame from variable length lists of morphological field parameter values}
 \usage{
-paramValuesToDataFrame(param_values, param_descriptions = NULL)
+paramValuesToDataFrame(param_values, value_descriptions = NULL)
 }
 \arguments{
 \item{param_values}{A named list of vectors/lists. The names of the list are
 the names of the parameters (columns) in the morphological field. The
 vectors/lists contain the possible values that the parameter can have.}
 
-\item{param_descriptions}{Optional. Each parameter value in param_values can
-have an accompanying (long) description that will be shown as tooltip/popup.
-The structure of \code{param_descriptions} is like that of \code{param_values},
+\item{value_descriptions}{Optional. Each parameter value in param_values can
+have an accompanying (long) description that will be shown as tooltip/popover.
+The structure of \code{value_descriptions} is like that of \code{param_values},
 but instead of containing parameter values as list elements, the parameter
-values must be names whose values are the description texts.}
+values must be names whose list elements are the description texts.}
 }
 \description{
 A morphological field can consist of parameters with variable number of

@@ -42,9 +42,9 @@
 #' @inheritSection installMorphField Specific configurations
 #' @inheritParams installMorphField
 #' @export
-morphfield <- function(param_values, ccm = NULL, specific_configurations = NULL,
-                       param_descriptions = NULL) {
-  field_df <- paramValuesToDataFrame(param_values, param_descriptions)
+morphfield <- function(param_values, value_descriptions = NULL,
+                       ccm = NULL, specific_configurations = NULL) {
+  field_df <- paramValuesToDataFrame(param_values, value_descriptions)
   if (is.null(ccm)) {
     if (!is.null(specific_configurations)) {
       ccm <- buildCCMFromSpecificConfigurations(param_values, specific_configurations)
@@ -99,7 +99,7 @@ morphfield <- function(param_values, ccm = NULL, specific_configurations = NULL,
 #' create a fixed dimension data.frame.
 #' @inheritParams installMorphField
 #' @export
-paramValuesToDataFrame <- function(param_values, param_descriptions = NULL) {
+paramValuesToDataFrame <- function(param_values, value_descriptions = NULL) {
   ret_val <- param_values
   if (class(ret_val) == "list") {
     # Make sure that all list items have same length.
@@ -107,7 +107,7 @@ paramValuesToDataFrame <- function(param_values, param_descriptions = NULL) {
     max_length <- max(sapply(ret_val, length))
     ret_val <- lapply(names(ret_val), function(param1) {
       items <- sapply(ret_val[[param1]], function(value1) {
-        desc <- param_descriptions[[param1]][[value1]]
+        desc <- value_descriptions[[param1]][[value1]]
         if (!is.null(desc)) {
           as.character(shinyBS::popify(htmltools::span(value1), value1, desc))
         } else {
@@ -300,4 +300,32 @@ buildCCMFromSpecificConfigurations <- function(param_values,
     })
   })
   ccm
+}
+
+
+#' Convert a long table format data.frame to a nested list
+#'
+#' Use this function if you have a data.frame in long table format (with
+#' redundant information in some columns) and need a nested list expected as
+#' input to \code{\link{installMorphField}}, e.g. arguments \code{param_values},
+#' \code{value_descriptions}, \code{specific_configurations}.
+#'
+#' The redundant columns must be on the left, the non-redundant on the right
+#' side of the data.frame.
+#'
+#' @param df A \code{data.frame} to be converted to a nested list.
+#' @return The converted data as nested list.
+#' @export
+buildNestedListFromDataFrame <- function(df) {
+  dff <- df
+  if ("factor" %in% class(dff[[1]])) {
+    # create new factor omitting the missing levels
+    dff[[1]] <- factor(dff[[1]], levels = unique(as.character(dff[[1]])))
+  }
+  nested_list <- split(dff[-1], dff[1])
+  if (ncol(nested_list[[1]]) == 0) {
+    return(names(nested_list))
+  }
+  nested_list <- lapply(nested_list, buildNestedListFromDataFrame)
+  return(nested_list)
 }
