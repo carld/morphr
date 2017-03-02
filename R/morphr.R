@@ -323,7 +323,10 @@ buildNestedListFromDataFrame <- function(df) {
     dff[[1]] <- factor(dff[[1]], levels = unique(as.character(dff[[1]])))
   }
   nested_list <- split(dff[-1], dff[1])
-  if (ncol(nested_list[[1]]) == 0) {
+  if (length(nested_list) == 0) { # happens if last col's item is NA
+    return()
+  }
+  if (ncol(nested_list[[1]]) == 0) { # happens normally on last col
     return(names(nested_list))
   }
   nested_list <- lapply(nested_list, buildNestedListFromDataFrame)
