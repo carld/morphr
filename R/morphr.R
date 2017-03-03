@@ -119,7 +119,10 @@ paramValuesToDataFrame <- function(param_values, value_descriptions = NULL) {
       items <- sapply(ret_val[[param1]], function(value1) {
         desc <- value_descriptions[[param1]][[value1]]
         if (!is.null(desc)) {
-          as.character(shinyBS::popify(htmltools::span(value1), value1, desc))
+          as.character(shinyBS::popify(
+            htmltools::span(value1), value1, desc,
+            options = list(container = "body")
+          ))
         } else {
           value1
         }
