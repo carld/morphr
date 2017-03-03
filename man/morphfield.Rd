@@ -27,6 +27,10 @@ list of only the valid parameter configrations as alternative to the CCM.
 If the \code{ccm} is also given, \code{specific_configurations} are
 ignored. See details.}
 }
+\value{
+List with items \code{field} (a \code{\link{datatable}} object) and
+  \code{field_df} (the \code{data.frame} used to create the datatable object).
+}
 \description{
 This function creates an HTML widget to display a morphological field (a kind
 of table where each column represents the possible configurations of a

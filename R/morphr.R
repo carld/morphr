@@ -41,6 +41,8 @@
 #' @inheritSection installMorphField Cross-consistency matrix (CCM)
 #' @inheritSection installMorphField Specific configurations
 #' @inheritParams installMorphField
+#' @return List with items \code{field} (a \code{\link{datatable}} object) and
+#'   \code{field_df} (the \code{data.frame} used to create the datatable object).
 #' @export
 morphfield <- function(param_values, value_descriptions = NULL,
                        ccm = NULL, specific_configurations = NULL) {
@@ -85,7 +87,9 @@ morphfield <- function(param_values, value_descriptions = NULL,
                   color = "white", backgroundColor = "gray")
   }
 
-  return(field)
+  return(list(
+    field = field, field_df = field_df
+  ))
 }
 
 
@@ -100,6 +104,12 @@ morphfield <- function(param_values, value_descriptions = NULL,
 #' @inheritParams installMorphField
 #' @export
 paramValuesToDataFrame <- function(param_values, value_descriptions = NULL) {
+  # Need to set seed manually to ensure random unique IDs of the tipify/popify elements
+  # (Not understood why, but every morphfield was using the same ID sequence as the previous,
+  # only omitting the first 8 IDs of the previous field.)
+  t <- as.character(as.numeric(Sys.time()))
+  set.seed(as.integer(as.numeric(substr(t, 7, nchar(t))) * 1e5))
+
   ret_val <- param_values
   if (class(ret_val) == "list") {
     # Make sure that all list items have same length.

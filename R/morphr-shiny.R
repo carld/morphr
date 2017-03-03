@@ -107,7 +107,9 @@ installMorphField <- function(input, output, id,
     }
   }
 
-  field <- morphfield(param_values, value_descriptions, ccm, specific_configurations)
+  l <- morphfield(param_values, value_descriptions, ccm, specific_configurations)
+  field <- l$field
+  field_df <- l$field_df
   if (!is.null(styleFunc)) {
     field <- styleFunc(field)
   }
@@ -116,7 +118,6 @@ installMorphField <- function(input, output, id,
   )
 
   proxy <- dataTableProxy(id)
-  field_df <- paramValuesToDataFrame(param_values, value_descriptions)
 
   # Immediately deselect empty cells, they shall not be selectable
   observeEvent(input[[paste0(id, "_cells_selected")]], {
