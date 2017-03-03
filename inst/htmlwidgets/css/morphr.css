@@ -41,6 +41,19 @@ table.dataTable tr.consistent td:before, table.dataTable td.consistent:before {
 */
 
 /* Popover text color like it is defined for body (override inline cell style) */
+/* max-width must be larger to accomodate long texts */
+/* Setting width explicitly seems to fix positioning problems on multiple screens,
+   width is set dynamically with Shiny depending on length of text */
 .popover {
   color: #333;
+  max-width: 1000px;
 }
+
+/* Maybe an idea: make popover scrollable, but then it must open on click,
+   not on hover */
+/*
+.popover-content {
+  overflow-y : scroll;
+  height: 500px;
+}
+*/

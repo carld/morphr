@@ -115,13 +115,25 @@ paramValuesToDataFrame <- function(param_values, value_descriptions = NULL) {
     # Make sure that all list items have same length.
     # If not: fill with empty character strings
     max_length <- max(sapply(ret_val, length))
-    ret_val <- lapply(names(ret_val), function(param1) {
-      items <- sapply(ret_val[[param1]], function(value1) {
+    cols <- length(ret_val)
+    ret_val <- lapply(seq_along(ret_val), function(i) {
+      param1 <- names(ret_val)[i]
+      placement <- if (i/cols <= 0.5) "right" else "left"
+      items <- sapply(ret_val[[i]], function(value1) {
         desc <- value_descriptions[[param1]][[value1]]
         if (!is.null(desc)) {
+          width <- if (nchar(desc) < 200) "300px" else "1000px"
           as.character(shinyBS::popify(
             htmltools::span(value1), value1, desc,
-            options = list(container = "body")
+            placement = placement,
+            options = list(
+              container = "body",
+              template = paste0('<div class="popover" role="tooltip">',
+                                '  <div class="arrow"></div>',
+                                '  <h3 class="popover-title"></h3>',
+                                sprintf('  <div class="popover-content" style="width: %s;"></div>', width),
+                                '</div>')
+            )
           ))
         } else {
           value1
