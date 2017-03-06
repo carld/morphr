@@ -4,7 +4,7 @@
 \alias{morphfield}
 \title{Create an HTML morphological field widget using the DataTables library}
 \usage{
-morphfield(param_values, value_descriptions = NULL, ccm = NULL,
+morphfield(param_values, value_descriptions = NULL,
   specific_configurations = NULL)
 }
 \arguments{
@@ -17,10 +17,6 @@ have an accompanying (long) description that will be shown as tooltip/popover.
 The structure of \code{value_descriptions} is like that of \code{param_values},
 but instead of containing parameter values as list elements, the parameter
 values must be names whose list elements are the description texts.}
-
-\item{ccm}{Optional. The cross-consistency matrix (CCM) for the morphological
-field can be given to constrain the possible configurations of the field.
-If provided, the \code{specific_configurations} are ignored. See details.}
 
 \item{specific_configurations}{Optional. The specific configurations are a
 list of only the valid parameter configrations as alternative to the CCM.

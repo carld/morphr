@@ -45,15 +45,8 @@
 #'   \code{field_df} (the \code{data.frame} used to create the datatable object).
 #' @export
 morphfield <- function(param_values, value_descriptions = NULL,
-                       ccm = NULL, specific_configurations = NULL) {
+                       specific_configurations = NULL) {
   field_df <- paramValuesToDataFrame(param_values, value_descriptions)
-  if (is.null(ccm)) {
-    if (!is.null(specific_configurations)) {
-      ccm <- buildCCMFromSpecificConfigurations(param_values, specific_configurations)
-    } else {
-      ccm <- buildUnconstrainedCCM(param_values)
-    }
-  }
 
   field <- datatable(
     field_df,
@@ -93,6 +86,12 @@ morphfield <- function(param_values, value_descriptions = NULL,
 }
 
 
+#' Parse strings, replace invalid characters like '\n'
+parseMorphFieldString <- function(string) {
+  gsub("\n", "</br>", string)
+}
+
+
 #' Create a fixed dimension data.frame from variable length lists of morphological field parameter values
 #'
 #' A morphological field can consist of parameters with variable number of
@@ -120,8 +119,10 @@ paramValuesToDataFrame <- function(param_values, value_descriptions = NULL) {
       param1 <- names(ret_val)[i]
       placement <- if (i/cols <= 0.5) "right" else "left"
       items <- sapply(ret_val[[i]], function(value1) {
+        value1 <- parseMorphFieldString(value1)
         desc <- value_descriptions[[param1]][[value1]]
         if (!is.null(desc)) {
+          desc <- parseMorphFieldString(desc)
           width <- if (nchar(desc) < 200) "300px" else "1000px"
           as.character(shinyBS::popify(
             htmltools::span(value1), value1, desc,

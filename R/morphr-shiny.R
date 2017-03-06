@@ -107,7 +107,7 @@ installMorphField <- function(input, output, id,
     }
   }
 
-  l <- morphfield(param_values, value_descriptions, ccm, specific_configurations)
+  l <- morphfield(param_values, value_descriptions, specific_configurations)
   field <- l$field
   field_df <- l$field_df
   if (!is.null(styleFunc)) {
