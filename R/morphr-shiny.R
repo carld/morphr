@@ -21,6 +21,12 @@
 #' all value combinations lists only the valid configurations. Internally, the
 #' specific configurations are converted to a CCM as well.
 #'
+#' Note: If you plan to replace/update an existing field with another field that
+#' has the same ID as the old one, then you should not use
+#' \code{installMorphField}. Instead, use \code{\link{renderMorphField}} every
+#' time you update the field, and run \code{\link{reactivateMorphField}} only
+#' once on the ID of the field.
+#'
 #' @section Cross-consistency matrix (CCM):
 #'
 #' The \emph{CCM} contains a logical for each pair-wise comparison of the
@@ -99,14 +105,6 @@ installMorphField <- function(input, output, id,
                               ccm = NULL,
                               specific_configurations = NULL,
                               styleFunc = NULL) {
-  if (is.null(ccm)) {
-    if (!is.null(specific_configurations)) {
-      ccm <- buildCCMFromSpecificConfigurations(param_values, specific_configurations)
-    } else {
-      ccm <- buildUnconstrainedCCM(param_values)
-    }
-  }
-
   l <- morphfield(param_values, value_descriptions, specific_configurations)
   field <- l$field
   field_df <- l$field_df
@@ -116,7 +114,62 @@ installMorphField <- function(input, output, id,
   output[[id]] <- renderMorphField(
     field
   )
+  proxy <- reactivateMorphField(input, output, id,
+                                param_values = function() {param_values},
+                                ccm = function() {ccm},
+                                specific_configurations = function() {specific_configurations},
+                                field_df = function() {field_df})
+  return(proxy)
+}
 
+
+#' Make a morphological field reactive
+#'
+#' If you want interactive features, i.e. that you can click cells to specify
+#' a certain configuration and see the values compatible with that configuration,
+#' then you need to run this function. It installs shiny observers that provide
+#' the interactivity. This function is called internally by
+#' \code{\link{installMorphField}}.
+#'
+#' If you plan to update/replace the same field several times (while keeping the
+#' ID the same), then you should not use \code{\link{installMorphField}}, but
+#' instead use \code{\link{renderMorphField}} to update the field. This function
+#' should be run only once, while \code{\link{renderMorphField}} is run many
+#' times to update the field. If \code{reactivateMorphField} runs many times (or
+#' \code{\link{installMorphField}} runs many times) together with the field
+#' update, then there will be bugs introduced because the old observers will
+#' remain in place using outdated data. Multiple observes will run, one for each
+#' representation of the field (from the first one to the current one), while
+#' only one should run for the current field.
+#'
+#' The single execution of \code{reactivateMorphField} must have access to the
+#' data attributed with the current field. Because this data may only become
+#' available while the updated field is installed with
+#' \code{\link{renderMorphField}}, one method to achieve this is to use
+#' \code{\link{reactive}} expressions for each of the data returning functions
+#' in the arguments \code{param_values}, \code{ccm},
+#' \code{specific_configurations}, and \code{field_df}. These reactive
+#' expressions are then used both in the field update code with
+#' \code{\link{renderMorphField}} and given to \code{reactivateMorphField}.
+#'
+#' @inheritParams installMorphField
+#' @param param_values A function returning the \code{param_values}, see
+#'   \code{\link{installMorphField}}.
+#' @param ccm A function returning the \code{ccm}, see
+#'   \code{\link{installMorphField}}.
+#' @param specific_configurations A function returning the
+#'   \code{specific_configurations}, see \code{\link{installMorphField}}.
+#' @param field_df A function returning the \code{field_df}, as returned by
+#'   \code{\link{paramValuesToDataFrame}}. Can be provided if it already exists
+#'   anyway to save some time. If not provided, \code{field_df} is calculated
+#'   by applying \code{\link{paramValuesToDataFrame}} on \code{param_values}.
+#' @return The proxy object to the morphological field as returned by
+#'   \code{\link{dataTableProxy}()}.
+#' @export
+reactivateMorphField <- function(input, output, id, param_values,
+                                 ccm = function() {NULL},
+                                 specific_configurations = function() {NULL},
+                                 field_df = function() {NULL}) {
   proxy <- dataTableProxy(id)
 
   # Immediately deselect empty cells, they shall not be selectable
@@ -124,6 +177,10 @@ installMorphField <- function(input, output, id,
     sel_cells <- input[[paste0(id, "_cells_selected")]]
     # print("selected cells:")
     # print(sel_cells)
+    field_df <- field_df()
+    if (is.null(field_df)) {
+      field_df <- paramValuesToDataFrame(param_values())
+    }
     if (isLastSelectedCellEmpty(sel_cells, field_df)) {
       # print("Deselecting empty cell:")
       # print(getLastSelectedCell(sel_cells))
@@ -141,13 +198,26 @@ installMorphField <- function(input, output, id,
     # print(sel_cells)
     # print("last_selected_cell:")
     # print(getLastSelectedCell(sel_cells))
+    field_df <- field_df()
+    if (is.null(field_df)) {
+      field_df <- paramValuesToDataFrame(param_values())
+    }
     if (isLastSelectedCellEmpty(sel_cells, field_df)) {
       # print("Last selected cell is empty, ignoring it...")
       sel_cells <- removeLastSelectedCell(sel_cells)
       # print("selected cells:")
       # print(sel_cells)
     }
-    consistent_cells <- findConsistentCells(param_values, ccm, sel_cells)
+    ccm <- ccm()
+    if (is.null(ccm)) {
+      if (!is.null(specific_configurations())) {
+        ccm <- buildCCMFromSpecificConfigurations(param_values(),
+                                                  specific_configurations())
+      } else {
+        ccm <- buildUnconstrainedCCM(param_values())
+      }
+    }
+    consistent_cells <- findConsistentCells(param_values(), ccm, sel_cells)
     # print("consistent_cells:")
     # print(consistent_cells)
     proxy %>% setCellsConsistent(consistent_cells)

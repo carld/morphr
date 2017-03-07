@@ -48,6 +48,12 @@ pair-wise parameter combinations (see below for details). Number two is to
 provide a list of \emph{specific configurations}, which instead of listing
 all value combinations lists only the valid configurations. Internally, the
 specific configurations are converted to a CCM as well.
+
+Note: If you plan to replace/update an existing field with another field that
+has the same ID as the old one, then you should not use
+\code{installMorphField}. Instead, use \code{\link{renderMorphField}} every
+time you update the field, and run \code{\link{reactivateMorphField}} only
+once on the ID of the field.
 }
 
 \section{Cross-consistency matrix (CCM)}{
