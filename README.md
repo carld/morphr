@@ -61,11 +61,13 @@ See `morphr` in action in the following screenshot:
 
 ![Example for using the morphr package](usage_example.gif)
 
-The parameter values and the mutual consistency of the field were specified in
-R. In the web browser, one can then constrain the field by selecting a certain 
-parameter value with a mosue click. The response is that the selected cell is 
+The parameter values and the mutual consistency of the field are specified in R.
+In the web browser, one can then constrain the field by selecting a certain 
+parameter value with a mouse click. The response is that the selected cell is 
 colored red and the cells remaining consistent with the selection are colored 
 blue. One can select as many cells as desired, the field is updated accordingly.
+To compare two parameter values, one can select the first, then the second, and
+observe how the field changes.
 
 Many morphological fields have input and output columns, i.e. some parameters
 may be controllable and within reach to a policy maker, while others indicate
