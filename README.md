@@ -2,29 +2,35 @@
 
 <!-- [![Build Status](https://travis-ci.org/rstudio/DT.svg)](https://travis-ci.org/rstudio/DT) -->
 
-This package provides an interactive graphical representation of a
-*morphological field*, a.k.a. morphological box, or "Zwicky box", see
-[[1]](#wikipedia1), [[2]](#wikipedia2), [[3]](#wikipedia-de). Morphological
-Analysis (MA) is a structured method for exploring and constraining a complex
-multi-dimensional, possibly non-quantifiable, problem space. It can be used to
-assess mutual consistency of the problem parameters and thus reduce the
-initially large number of parameter combinations. MA was developed by
-astrophysicist Fritz Zwicky (e.g. [[4]](#zwi47), [[5]](#zwi48), [[6]](#zwi67),
-[[7]](#zwi69)) and is since the mid-1990s advanced and applied by the Swedish
-Morphological Society, in particular by Tom Ritchey, under the term "General
-Morphological Analysis" (e.g. [[8]](#swemorph), [[9]](#rit11)).
+This package provides an interactive graphical representation of a 
+*morphological field*, a.k.a. morphological box, or "Zwicky box", see 
+[[1]](#wikipedia1), [[2]](#wikipedia2), [[3]](#wikipedia-de). A morphological 
+field is a tabular representation where each parameter of the problem 
+corresponds to a column whose rows are filled with the parameter values. Each 
+parameter value is mutually checked for consistency with all other parameter 
+values. This enables to systematically exclude inconsistent configurations and 
+therefore greatly reduce the problem space.
+
+Morphological Analysis (MA) is a structured method for exploring and
+constraining a complex multi-dimensional, possibly non-quantifiable, problem
+space. MA was developed by the astrophysicist Fritz Zwicky (e.g. [[4]](#zwi47),
+[[5]](#zwi48), [[6]](#zwi67), [[7]](#zwi69)) and is since the mid-1990s advanced
+and applied by the Swedish Morphological Society, in particular by Tom Ritchey
+et al., under the term "General Morphological Analysis" (e.g. [[8]](#swemorph),
+[[9]](#rit11)).
 
 The purpose of this package is to bring Morphological Analysis tools into a 
 modern, mobile, cross-platform computing environment and to provide easy access.
-Because it requires only a web browser to run, it can be used from almost any
-platform. Perhaps this easy access will encourage more widespread usage of
-Morphological Analysis techniques for structured scientific problem solving and
+Because it requires only a web browser to run, it can be used from almost any 
+platform. Perhaps this easy access will encourage more widespread usage of 
+Morphological Analysis techniques for structured scientific problem solving and 
 decision making.
 <!-- Hopefully, this package will be a little contribution to the solution of complex
 problems of our time. -->
 
-Please note that Morphological Analysis as a scientific method is not trademarked
-or even copyrightable. The Swedish Morphological Society write on their website:
+Please note that Morphological Analysis as a scientific method is not
+trademarked or even copyrightable. The Swedish Morphological Society write on
+their website:
 
 > The term and the procedures embodied in "morphological analysis" are not
 > trademarked or copyrighted. Morphological analysis is a basic scientific method,
@@ -34,7 +40,7 @@ or even copyrightable. The Swedish Morphological Society write on their website:
 > -- <cite>[Swedish Morphological Society](http://www.swemorph.com/legal.html)</cite>
 
 The code of this package is publicly available and released under the GPL-3 (GNU
-GENERAL PUBLIC LICENSE version 3). It is built upon RStudio's
+GENERAL PUBLIC LICENSE version 3). It is built upon RStudio's 
 [DT](https://github.com/rstudio/DT) package, which is distributed under the same
 license.
 
@@ -47,6 +53,26 @@ license.
 <a name="zwi69"></a>[7]: Zwicky, F. (1969). *Discovery, invention, research -- through the morphological approach*. New York: The MacMillan Company.  
 <a name="swemorph"></a>[8]: [*General Morphological Analysis - A general method for non-quantified modeling*](http://www.swemorph.com/ma.html), Swedish Morphological Society, 2002 (Revised 2013), Licensed under a [Creative Commons Attribution](https://creativecommons.org/licenses/by-nd/3.0/)  
 <a name="rit11"></a>[9]: Ritchey, T. (2011). [*Wicked Problems -- Social Messes, Decision Support Modelling with Morphological Analaysis*](https://link.springer.com/book/10.1007/978-3-642-19653-9), Volume 17 of the series Risk, Governane and Society, Springer-Verlag Berlin Heidelberg.
+
+
+## Example
+
+See `morphr` in action in the following screenshot:
+
+![Example for using the morphr package](usage_example.gif)
+
+The parameter values and the mutual consistency of the field were specified in
+R. In the web browser, one can then constrain the field by selecting a certain 
+parameter value with a mosue click. The response is that the selected cell is 
+colored red and the cells remaining consistent with the selection are colored 
+blue. One can select as many cells as desired, the field is updated accordingly.
+
+Many morphological fields have input and output columns, i.e. some parameters
+may be controllable and within reach to a policy maker, while others indicate
+certain outcomes in response to the input parameters. One can either select
+a certain configuration of input parameter values and see the resulting
+outcome(s), or one can do it the other way around and select certain desired
+outcomes to see in what range the input parameters must be for that outcome.
 
 
 ## Installation
