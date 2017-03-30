@@ -67,7 +67,7 @@ parameter value with a mouse click. The response is that the selected cell is
 colored red and the cells remaining consistent with the selection are colored 
 blue. One can select as many cells as desired, the field is updated accordingly.
 To compare two parameter values, one can select the first, then the second, and
-observe how the field changes.
+observe how the field changes. A click on a selected cell deselects it.
 
 Many morphological fields have input and output columns, i.e. some parameters
 may be controllable and within reach to a policy maker, while others indicate
