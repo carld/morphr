@@ -146,3 +146,10 @@ shinyApp(ui = ui, server = server)
 
 Or execute `shiny::runApp(system.file("examples", "morphr-simple", package="morphr"))`
 in RStudio.
+
+
+## Contact info
+
+This package is authored and maintained by Markus Voge (<markus.voge@ea-aw.de>).
+Feel free to contact me if you want to utilize `morphr` and need any advice or
+help.
