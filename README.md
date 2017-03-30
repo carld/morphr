@@ -11,12 +11,13 @@ parameter value is mutually checked for consistency with all other parameter
 values. This enables to systematically exclude inconsistent configurations and 
 therefore greatly reduce the problem space.
 
-Morphological Analysis (MA) is a structured method for exploring and
-constraining a complex multi-dimensional, possibly non-quantifiable, problem
-space. MA was developed by the astrophysicist Fritz Zwicky (e.g. [[4]](#zwi47),
+Morphological Analysis (MA)---not to be confused with morphology in linguistics,
+biology or image processing---is a structured method for exploring and 
+constraining a complex multi-dimensional, possibly non-quantifiable, problem 
+space. MA was developed by the astrophysicist Fritz Zwicky (e.g. [[4]](#zwi47), 
 [[5]](#zwi48), [[6]](#zwi67), [[7]](#zwi69)) and is since the mid-1990s advanced
-and applied by the Swedish Morphological Society, in particular by Tom Ritchey
-et al., under the term "General Morphological Analysis" (e.g. [[8]](#swemorph),
+and applied by the Swedish Morphological Society, in particular by Tom Ritchey 
+et al., under the term "General Morphological Analysis" (e.g. [[8]](#swemorph), 
 [[9]](#rit11)).
 
 The purpose of this package is to bring Morphological Analysis tools into a 
