@@ -53,14 +53,15 @@ morphfield <- function(param_values, value_descriptions = NULL,
     options = list(
       # Disable search/filter box:
       searching = FALSE,
-      # Disable sorting by columns for all columns:
-      columnDefs = list(
-        list(orderable = FALSE, targets = 0:(ncol(field_df) - 1))
-      ),
       # Show all rows on one page and no navigation:
       paging = FALSE,
       # Do not show info about data in footer:
-      info = FALSE
+      info = FALSE,
+      # Disable sorting by columns for all columns:
+      ordering = FALSE,
+      # enable addition of button(s) that are registered with shiny: see https://github.com/rstudio/DT/issues/178
+      preDrawCallback = JS('function() { Shiny.unbindAll(this.api().table().node()); }'),
+      drawCallback = JS('function() { Shiny.bindAll(this.api().table().node()); } ')
     ),
     # Disable display of rownames:
     rownames = FALSE,
@@ -86,7 +87,7 @@ morphfield <- function(param_values, value_descriptions = NULL,
 }
 
 
-#' Parse strings, replace invalid characters like '\n'
+#' Parse strings, replace invalid characters like '\\n'
 parseMorphFieldString <- function(string) {
   gsub("\n", "</br>", string)
 }
@@ -144,7 +145,7 @@ paramValuesToDataFrame <- function(param_values, value_descriptions = NULL) {
     })
     names(ret_val) <- names(param_values)
     # Turn it into a data.frame, because that is what is expected by DT
-    ret_val <- as.data.frame(ret_val, optional = TRUE) # optional keeps whitespace in column names
+    ret_val <- as.data.frame(ret_val, optional = TRUE, stringsAsFactors = FALSE) # optional keeps whitespace in column names
   }
   ret_val
 }
@@ -299,7 +300,6 @@ buildUnconstrainedCCM <- function(param_values) {
 #' @export
 buildCCMFromSpecificConfigurations <- function(param_values,
                                                specific_configurations) {
-  # Old code was wrong (does not include value combinations on same hierarchy):
   ccm <- initializeCCM(param_values, def_val = FALSE) # first set all combinations to inconsistent
   # Then, set only valid combinations consistent:
   lapply(names(specific_configurations), function(param1) {
@@ -308,21 +308,22 @@ buildCCMFromSpecificConfigurations <- function(param_values,
       # add relations from higher to lower hierarchy
       lapply(names(configs), function(param2) {
         lapply(configs[[param2]], function(value2) {
-          ccm[[buildHashValue(param1, value1, param2, value2)]] <<- TRUE
+          ccm[[buildHashValue(param1, value1, param2, value2)]] <<- TRUE # cross-correlation between specifying and specified parameter
         })
       })
-      # add relations within the same (lower) hierarchy, compare with all items of higher index
-      lapply(1:(length(configs) - 1), function(i) {
-        param2 <- names(configs)[i]
-        lapply(configs[[param2]], function(value2) {
-          lapply((i + 1):length(configs), function(j) {
-            param3 <- names(configs)[j]
-            lapply(configs[[param3]], function(value3) {
-              ccm[[buildHashValue(param2, value2, param3, value3)]] <<- TRUE
+      if (length(configs) > 1) { # for more than one specified parameter: need to cross-correlate the specified parameters among themselves as well
+        lapply(1:(length(configs) - 1), function(i) {
+          param2 <- names(configs)[i]
+          lapply(configs[[param2]], function(value2) {
+            lapply((i + 1):length(configs), function(j) {
+              param3 <- names(configs)[j]
+              lapply(configs[[param3]], function(value3) {
+                ccm[[buildHashValue(param2, value2, param3, value3)]] <<- TRUE
+              })
             })
           })
         })
-      })
+      }
     })
   })
   ccm

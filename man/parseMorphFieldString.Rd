@@ -2,10 +2,10 @@
 % Please edit documentation in R/morphr.R
 \name{parseMorphFieldString}
 \alias{parseMorphFieldString}
-\title{Parse strings, replace invalid characters like '\n'}
+\title{Parse strings, replace invalid characters like '\\n'}
 \usage{
 parseMorphFieldString(string)
 }
 \description{
-Parse strings, replace invalid characters like '\n'
+Parse strings, replace invalid characters like '\\n'
 }
