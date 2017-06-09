@@ -53,7 +53,8 @@ server <- function(input, output, session) {
 
   morphr::installMorphField(input, output, id = "morphfield",
                             param_values = param_values,
-                            specific_configurations = specific_configurations)
+                            specific_configurations = specific_configurations,
+                            editable = TRUE)
 
 }
 

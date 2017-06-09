@@ -5,7 +5,8 @@
 \title{Install a morphological field widget in Shiny}
 \usage{
 installMorphField(input, output, id, param_values, value_descriptions = NULL,
-  ccm = NULL, specific_configurations = NULL, styleFunc = NULL)
+  ccm = NULL, specific_configurations = NULL, styleFunc = NULL,
+  editable = FALSE)
 }
 \arguments{
 \item{input}{The Shiny session's input object (the same as is passed into the
@@ -43,6 +44,9 @@ returned by \code{\link{morphfield}()} (actually a datatable as returned by
 field <- field \%>\% \link{formatStyle}(...)
 }
 or similar, and then return it.}
+
+\item{editable}{Logical, if TRUE, a button is shown to enter the field edit
+mode.}
 }
 \value{
 The proxy object to the morphological field as returned by
@@ -73,7 +77,7 @@ specific configurations are converted to a CCM as well.
 
 Note: If you plan to replace/update an existing field with another field that
 has the same ID as the old one, then you should not use
-\code{installMorphField}. Instead, use \code{\link{renderMorphField}} every
+\code{installMorphField}. Instead, use \code{\link{placeMorphFieldUI}} every
 time you update the field, and run \code{\link{reactivateMorphField}} only
 once on the ID of the field.
 }

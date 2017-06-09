@@ -23,7 +23,7 @@
 #'
 #' Note: If you plan to replace/update an existing field with another field that
 #' has the same ID as the old one, then you should not use
-#' \code{installMorphField}. Instead, use \code{\link{renderMorphField}} every
+#' \code{installMorphField}. Instead, use \code{\link{placeMorphFieldUI}} every
 #' time you update the field, and run \code{\link{reactivateMorphField}} only
 #' once on the ID of the field.
 #'
@@ -97,6 +97,8 @@
 #'   field <- field \%>\% \link{formatStyle}(...)
 #'   }
 #'   or similar, and then return it.
+#' @param editable Logical, if TRUE, a button is shown to enter the field edit
+#'   mode.
 #' @return The proxy object to the morphological field as returned by
 #'   \code{\link{dataTableProxy}()}.
 #' @export
@@ -104,22 +106,58 @@ installMorphField <- function(input, output, id,
                               param_values, value_descriptions = NULL,
                               ccm = NULL,
                               specific_configurations = NULL,
-                              styleFunc = NULL) {
-  l <- morphfield(param_values, value_descriptions, specific_configurations)
+                              styleFunc = NULL,
+                              editable = FALSE) {
+  field_df <- placeMorphFieldUI(output, id, param_values, value_descriptions,
+                                specific_configurations, styleFunc, editable)
+  proxy <- reactivateMorphField(input, output, id,
+                                param_values = function() {param_values},
+                                value_descriptions = function() {value_descriptions},
+                                ccm = function() {ccm},
+                                specific_configurations = function() {specific_configurations},
+                                field_df = function() {field_df},
+                                styleFunc = styleFunc)
+  return(proxy)
+}
+
+
+#' Place a morphological field widget into Shiny UI
+#'
+#' This function only puts the widget into the Shiny UI, i.e. the \code{output}
+#' object, but does not reactivate it. \code{\link{reactivateMorphField}} can be
+#' called afterwards for the reactivation. Alternatively, use
+#' \code{\link{installMorphfield}} to do both at the same time. Use this function
+#' with \code{\link{reactivateMorphField}} to avoid multiple reactivation.
+#' See \code{\link{reactivateMorphField}} for details.
+#'
+#' @inheritParams installMorphField
+#' @export
+placeMorphFieldUI <- function(output, id, param_values,
+                              value_descriptions = NULL,
+                              specific_configurations = NULL,
+                              styleFunc = NULL, editable = FALSE,
+                              edit_mode = FALSE) {
+  l <- morphfield(param_values, value_descriptions, specific_configurations,
+                  edit_mode)
   field <- l$field
   field_df <- l$field_df
   if (!is.null(styleFunc)) {
     field <- styleFunc(field)
   }
-  output[[id]] <- renderMorphField(
-    field
-  )
-  proxy <- reactivateMorphField(input, output, id,
-                                param_values = function() {param_values},
-                                ccm = function() {ccm},
-                                specific_configurations = function() {specific_configurations},
-                                field_df = function() {field_df})
-  return(proxy)
+  output[[id]] <- renderMorphField(field)
+  if (editable) {
+    insertUI(
+      selector = paste0("#", id),
+      where = "beforeBegin",
+      ui = tagList(
+        actionButton(paste0(id, "_edit_btn"), "", icon = icon("edit"),
+                     style = "font-size: 10px;"),
+        tags$head(shinyBS::bsTooltip(paste0(id, "_edit_btn"), "Edit",
+                                     placement = "right"))
+      )
+    )
+  }
+  field_df
 }
 
 
@@ -133,8 +171,8 @@ installMorphField <- function(input, output, id,
 #'
 #' If you plan to update/replace the same field several times (while keeping the
 #' ID the same), then you should not use \code{\link{installMorphField}}, but
-#' instead use \code{\link{renderMorphField}} to update the field. This function
-#' should be run only once, while \code{\link{renderMorphField}} is run many
+#' instead use \code{\link{placeMorphFieldUI}} to update the field. This function
+#' should be run only once, while \code{\link{placeMorphFieldUI}} is run many
 #' times to update the field. If \code{reactivateMorphField} runs many times (or
 #' \code{\link{installMorphField}} runs many times) together with the field
 #' update, then there will be bugs introduced because the old observers will
@@ -145,15 +183,17 @@ installMorphField <- function(input, output, id,
 #' The single execution of \code{reactivateMorphField} must have access to the
 #' data attributed with the current field. Because this data may only become
 #' available while the updated field is installed with
-#' \code{\link{renderMorphField}}, one method to achieve this is to use
+#' \code{\link{placeMorphFieldUI}}, one method to achieve this is to use
 #' \code{\link{reactive}} expressions for each of the data returning functions
 #' in the arguments \code{param_values}, \code{ccm},
 #' \code{specific_configurations}, and \code{field_df}. These reactive
 #' expressions are then used both in the field update code with
-#' \code{\link{renderMorphField}} and given to \code{reactivateMorphField}.
+#' \code{\link{placeMorphFieldUI}} and given to \code{reactivateMorphField}.
 #'
 #' @inheritParams installMorphField
 #' @param param_values A function returning the \code{param_values}, see
+#'   \code{\link{installMorphField}}.
+#' @param param_values A function returning the \code{value_descriptions}, see
 #'   \code{\link{installMorphField}}.
 #' @param ccm A function returning the \code{ccm}, see
 #'   \code{\link{installMorphField}}.
@@ -167,9 +207,11 @@ installMorphField <- function(input, output, id,
 #'   \code{\link{dataTableProxy}()}.
 #' @export
 reactivateMorphField <- function(input, output, id, param_values,
+                                 value_descriptions = function() {NULL},
                                  ccm = function() {NULL},
                                  specific_configurations = function() {NULL},
-                                 field_df = function() {NULL}) {
+                                 field_df = function() {NULL},
+                                 styleFunc = NULL) {
   proxy <- dataTableProxy(id)
 
   # Immediately deselect empty cells, they shall not be selectable
@@ -223,6 +265,16 @@ reactivateMorphField <- function(input, output, id, param_values,
     proxy %>% setCellsConsistent(consistent_cells)
   })
 
+  observeEvent(input[[paste0(id, "_edit_btn")]], {
+    if (input[[paste0(id, "_edit_btn")]] %% 2) { # toggle (edit_mode = TRUE if button is odd)
+      placeMorphFieldUI(output, id, param_values(), value_descriptions(),
+                        specific_configurations(), styleFunc, edit_mode = TRUE)
+    } else {
+      placeMorphFieldUI(output, id, param_values(), value_descriptions(),
+                        specific_configurations(), styleFunc)
+    }
+  })
+
   return(proxy)
 }
 
@@ -238,7 +290,9 @@ isLastSelectedCellEmpty <- function(sel_cells, field_df) {
   row <- last_selected_cell[1]
   col <- last_selected_cell[2]
   cell_content <- field_df[row, col + 1]
-  return(is.null(cell_content) || is.na(cell_content) || cell_content == "")
+  ret_val <- is.null(cell_content) || is.na(cell_content) || cell_content == "" ||
+    grepl(pattern = "^<button ", x = cell_content)
+  return(ret_val)
 }
 
 

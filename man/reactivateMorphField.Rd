@@ -4,9 +4,10 @@
 \alias{reactivateMorphField}
 \title{Make a morphological field reactive}
 \usage{
-reactivateMorphField(input, output, id, param_values, ccm = function() {    
-  NULL }, specific_configurations = function() {     NULL },
-  field_df = function() {     NULL })
+reactivateMorphField(input, output, id, param_values,
+  value_descriptions = function() {     NULL }, ccm = function() {     NULL
+  }, specific_configurations = function() {     NULL },
+  field_df = function() {     NULL }, styleFunc = NULL)
 }
 \arguments{
 \item{input}{The Shiny session's input object (the same as is passed into the
@@ -22,6 +23,12 @@ HTML document. This ID can be used with functions like
 \item{param_values}{A function returning the \code{param_values}, see
 \code{\link{installMorphField}}.}
 
+\item{value_descriptions}{Optional. Each parameter value in param_values can
+have an accompanying (long) description that will be shown as tooltip/popover.
+The structure of \code{value_descriptions} is like that of \code{param_values},
+but instead of containing parameter values as list elements, the parameter
+values must be names whose list elements are the description texts.}
+
 \item{ccm}{A function returning the \code{ccm}, see
 \code{\link{installMorphField}}.}
 
@@ -32,6 +39,16 @@ HTML document. This ID can be used with functions like
 \code{\link{paramValuesToDataFrame}}. Can be provided if it already exists
 anyway to save some time. If not provided, \code{field_df} is calculated
 by applying \code{\link{paramValuesToDataFrame}} on \code{param_values}.}
+
+\item{styleFunc}{Optional function to style the field. It should accept the field
+returned by \code{\link{morphfield}()} (actually a datatable as returned by
+\code{\link{datatable}()}), modify it with \code{
+field <- field \%>\% \link{formatStyle}(...)
+}
+or similar, and then return it.}
+
+\item{param_values}{A function returning the \code{value_descriptions}, see
+\code{\link{installMorphField}}.}
 }
 \value{
 The proxy object to the morphological field as returned by
@@ -47,8 +64,8 @@ the interactivity. This function is called internally by
 \details{
 If you plan to update/replace the same field several times (while keeping the
 ID the same), then you should not use \code{\link{installMorphField}}, but
-instead use \code{\link{renderMorphField}} to update the field. This function
-should be run only once, while \code{\link{renderMorphField}} is run many
+instead use \code{\link{placeMorphFieldUI}} to update the field. This function
+should be run only once, while \code{\link{placeMorphFieldUI}} is run many
 times to update the field. If \code{reactivateMorphField} runs many times (or
 \code{\link{installMorphField}} runs many times) together with the field
 update, then there will be bugs introduced because the old observers will
@@ -59,10 +76,10 @@ only one should run for the current field.
 The single execution of \code{reactivateMorphField} must have access to the
 data attributed with the current field. Because this data may only become
 available while the updated field is installed with
-\code{\link{renderMorphField}}, one method to achieve this is to use
+\code{\link{placeMorphFieldUI}}, one method to achieve this is to use
 \code{\link{reactive}} expressions for each of the data returning functions
 in the arguments \code{param_values}, \code{ccm},
 \code{specific_configurations}, and \code{field_df}. These reactive
 expressions are then used both in the field update code with
-\code{\link{renderMorphField}} and given to \code{reactivateMorphField}.
+\code{\link{placeMorphFieldUI}} and given to \code{reactivateMorphField}.
 }

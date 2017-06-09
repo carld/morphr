@@ -5,7 +5,7 @@
 \title{Create an HTML morphological field widget using the DataTables library}
 \usage{
 morphfield(param_values, value_descriptions = NULL,
-  specific_configurations = NULL)
+  specific_configurations = NULL, edit_mode = FALSE)
 }
 \arguments{
 \item{param_values}{A named list of vectors/lists. The names of the list are
@@ -51,7 +51,7 @@ specific configurations are converted to a CCM as well.
 
 Note: If you plan to replace/update an existing field with another field that
 has the same ID as the old one, then you should not use
-\code{installMorphField}. Instead, use \code{\link{renderMorphField}} every
+\code{installMorphField}. Instead, use \code{\link{placeMorphFieldUI}} every
 time you update the field, and run \code{\link{reactivateMorphField}} only
 once on the ID of the field.
 }
