@@ -138,7 +138,7 @@ placeMorphFieldUI <- function(output, id, param_values,
                               styleFunc = NULL, editable = FALSE,
                               edit_mode = FALSE) {
   l <- morphfield(param_values, value_descriptions, specific_configurations,
-                  edit_mode)
+                  edit_mode, id)
   field <- l$field
   field_df <- l$field_df
   if (!is.null(styleFunc)) {

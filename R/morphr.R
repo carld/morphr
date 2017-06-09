@@ -45,7 +45,8 @@
 #'   \code{field_df} (the \code{data.frame} used to create the datatable object).
 #' @export
 morphfield <- function(param_values, value_descriptions = NULL,
-                       specific_configurations = NULL, edit_mode = FALSE) {
+                       specific_configurations = NULL, edit_mode = FALSE,
+                       id = NULL) {
   field_df <- paramValuesToDataFrame(param_values, value_descriptions)
   if (edit_mode) {
     last_non_empty_index <- lapply(field_df, function(col) {
@@ -54,7 +55,7 @@ morphfield <- function(param_values, value_descriptions = NULL,
     })
     for (i in seq_along(last_non_empty_index)) {
       field_df[last_non_empty_index[[i]] + 1, i] <- as.character(
-        actionButton(paste0("test_column_", i), "Add Item")
+        actionButton(paste0(id, "_add_item_btn_", i), "Add Item")
       )
     }
   }

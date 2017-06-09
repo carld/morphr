@@ -5,7 +5,7 @@
 \title{Create an HTML morphological field widget using the DataTables library}
 \usage{
 morphfield(param_values, value_descriptions = NULL,
-  specific_configurations = NULL, edit_mode = FALSE)
+  specific_configurations = NULL, edit_mode = FALSE, id = NULL)
 }
 \arguments{
 \item{param_values}{A named list of vectors/lists. The names of the list are
@@ -22,6 +22,10 @@ values must be names whose list elements are the description texts.}
 list of only the valid parameter configrations as alternative to the CCM.
 If the \code{ccm} is also given, \code{specific_configurations} are
 ignored. See details.}
+
+\item{id}{The unique ID string that the morphological field will have in the
+HTML document. This ID can be used with functions like
+\code{\link{dataTableProxy}}() to programmatically alter the field/table.}
 }
 \value{
 List with items \code{field} (a \code{\link{datatable}} object) and
