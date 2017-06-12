@@ -116,7 +116,7 @@ installMorphField <- function(input, output, id,
                                 ccm = function() {ccm},
                                 specific_configurations = function() {specific_configurations},
                                 field_df = function() {field_df},
-                                styleFunc = styleFunc)
+                                styleFunc = styleFunc, editable = editable)
   return(proxy)
 }
 
@@ -137,6 +137,20 @@ placeMorphFieldUI <- function(output, id, param_values,
                               specific_configurations = NULL,
                               styleFunc = NULL, editable = FALSE,
                               edit_mode = FALSE) {
+  field_df <- placeMorphFieldUIWithoutToolbar(
+    output, id, param_values, value_descriptions, specific_configurations,
+    styleFunc, edit_mode
+  )
+  if (editable) {
+    placeMorphFieldUIToolbar(id)
+  }
+  field_df
+}
+
+placeMorphFieldUIWithoutToolbar <- function(output, id, param_values,
+                                           value_descriptions = NULL,
+                                           specific_configurations = NULL,
+                                           styleFunc = NULL, edit_mode = FALSE) {
   l <- morphfield(param_values, value_descriptions, specific_configurations,
                   edit_mode, id)
   field <- l$field
@@ -145,19 +159,28 @@ placeMorphFieldUI <- function(output, id, param_values,
     field <- styleFunc(field)
   }
   output[[id]] <- renderMorphField(field)
-  if (editable) {
-    insertUI(
-      selector = paste0("#", id),
-      where = "beforeBegin",
-      ui = tagList(
-        actionButton(paste0(id, "_edit_btn"), "", icon = icon("edit"),
-                     style = "font-size: 10px;"),
-        tags$head(shinyBS::bsTooltip(paste0(id, "_edit_btn"), "Edit",
-                                     placement = "right"))
-      )
-    )
-  }
   field_df
+}
+
+placeMorphFieldUIToolbar <- function(id) {
+  insertUI(
+    selector = paste0("#", id),
+    where = "beforeBegin",
+    ui = tagList(
+      actionButton(paste0(id, "_edit_btn"), "", icon = icon("edit"),
+                   style = "font-size: 10px;"),
+      tags$head(shinyBS::bsTooltip(paste0(id, "_edit_btn"), "Edit",
+                                   placement = "right")),
+      # Insert JS event handlers for buttons in table:
+      tags$head(tags$script(HTML(sprintf(
+        "
+        $(document).on('click', '.add-item-btn', function () {
+          Shiny.onInputChange('%s_add_item_btn', this.id + ' ' + Math.random());
+        });
+        ", id
+      ))))
+    )
+  )
 }
 
 
@@ -172,7 +195,7 @@ placeMorphFieldUI <- function(output, id, param_values,
 #' If you plan to update/replace the same field several times (while keeping the
 #' ID the same), then you should not use \code{\link{installMorphField}}, but
 #' instead use \code{\link{placeMorphFieldUI}} to update the field. This function
-#' should be run only once, while \code{\link{placeMorphFieldUI}} is run many
+#' should be run only once, while \code{\link{placeMorphFieldUI}} can be run many
 #' times to update the field. If \code{reactivateMorphField} runs many times (or
 #' \code{\link{installMorphField}} runs many times) together with the field
 #' update, then there will be bugs introduced because the old observers will
@@ -211,7 +234,24 @@ reactivateMorphField <- function(input, output, id, param_values,
                                  ccm = function() {NULL},
                                  specific_configurations = function() {NULL},
                                  field_df = function() {NULL},
-                                 styleFunc = NULL) {
+                                 styleFunc = NULL, editable = FALSE) {
+  proxy <- reactivateMorphFieldWithoutToolbar(
+    input, id, param_values, ccm, specific_configurations, field_df
+  )
+
+  if (editable) {
+    reactivateMorphFieldToolbar(input, output, id, param_values,
+                               value_descriptions, ccm, specific_configurations,
+                               field_df, styleFunc)
+  }
+
+  return(proxy)
+}
+
+reactivateMorphFieldWithoutToolbar <- function(input, id, param_values,
+                                              ccm = function() {NULL},
+                                              specific_configurations = function() {NULL},
+                                              field_df = function() {NULL}) {
   proxy <- dataTableProxy(id)
 
   # Immediately deselect empty cells, they shall not be selectable
@@ -265,17 +305,77 @@ reactivateMorphField <- function(input, output, id, param_values,
     proxy %>% setCellsConsistent(consistent_cells)
   })
 
+  return(proxy)
+}
+
+reactivateMorphFieldToolbar <- function(input, output, id, param_values,
+                                       value_descriptions = function() {NULL},
+                                       ccm = function() {NULL},
+                                       specific_configurations = function() {NULL},
+                                       field_df = function() {NULL},
+                                       styleFunc = NULL) {
   observeEvent(input[[paste0(id, "_edit_btn")]], {
-    if (input[[paste0(id, "_edit_btn")]] %% 2) { # toggle (edit_mode = TRUE if button is odd)
-      placeMorphFieldUI(output, id, param_values(), value_descriptions(),
-                        specific_configurations(), styleFunc, edit_mode = TRUE)
+    btn_count <- input[[paste0(id, "_edit_btn")]]
+    if (btn_count %% 2) { # toggle (edit_mode = TRUE if button is odd)
+      # new_id <- paste0(id, "_", btn_count)
+      # # Remove the uneditable field, insert new editable field (must have unique ID to keep buttons in table working)
+      # removeUI(paste0("#", id))
+      # insertUI(paste0("#", id, "_container"), ui = morphFieldOutputWithoutContainer(new_id))
+      placeMorphFieldUIWithoutToolbar(output, id, param_values(), value_descriptions(),
+                                      specific_configurations(), styleFunc,
+                                      edit_mode = TRUE)
+      # reactivateMorphFieldWithoutToolbar(input, new_id, param_values, ccm,
+      #                                   specific_configurations, field_df)
     } else {
-      placeMorphFieldUI(output, id, param_values(), value_descriptions(),
-                        specific_configurations(), styleFunc)
+      # old_id <- paste0(id, "_", btn_count - 1)
+      # # Remove the editable field, insert new (old) uneditable field
+      # removeUI(paste0("#", old_id))
+      # insertUI(paste0("#", id, "_container"), ui = morphFieldOutputWithoutContainer(id))
+      placeMorphFieldUIWithoutToolbar(output, id, param_values(), value_descriptions(),
+                                      specific_configurations(), styleFunc)
     }
   })
 
-  return(proxy)
+  addItemModal <- function(col, failed = FALSE) {
+    modalDialog(
+      textInput(paste0(id, "_new_item"), "New item",
+                placeholder = 'Enter item text here...'),
+      div(
+        textInput(paste0(id, "_new_item_col"), "Column", value = col),
+        style = "display: none;"
+      ),
+      if (failed)
+        div(tags$b("Invalid item text.", style = "color: red;")),
+      footer = tagList(
+        modalButton("Cancel"),
+        actionButton(paste0(id, "_add_item_ok"), "OK")
+      )
+    )
+  }
+
+  observeEvent(input[[paste0(id, "_add_item_btn")]], {
+    print(input[[paste0(id, "_add_item_btn")]])
+    col <- as.integer(sub(
+      pattern = sprintf("%s_add_item_btn_([0-9]+).*", id),
+      replacement = "\\1",
+      x = input[[paste0(id, "_add_item_btn")]]
+    ))
+    showModal(addItemModal(col))
+  })
+
+  observeEvent(input[[paste0(id, "_add_item_ok")]], {
+    col <- as.integer(input[[paste0(id, "_new_item_col")]])
+    new_item <- input[[paste0(id, "_new_item")]]
+    print(col)
+    print(new_item)
+    if (!is.null(new_item) && nzchar(trimws(new_item))) {
+      removeModal()
+      param_values <- param_values()
+      param_values[[col]] <- c(param_values[[col]], new_item)
+    } else {
+      showModal(addItemModal(col, failed = TRUE))
+    }
+  })
 }
 
 
@@ -314,6 +414,13 @@ removeLastSelectedCell <- function(sel_cells) {
 #' @inheritParams shiny::textOutput
 #' @export
 morphFieldOutput <- function(outputId, width = '100%', height = 'auto') {
+  div(
+    id = paste0(outputId, "_container"),
+    morphFieldOutputWithoutContainer(outputId, width = '100%', height = 'auto')
+  )
+}
+
+morphFieldOutputWithoutContainer <- function(outputId, width = '100%', height = 'auto') {
   htmltools::attachDependencies(
     htmlwidgets::shinyWidgetOutput(
       outputId, 'datatables', width, height, package = 'morphr'

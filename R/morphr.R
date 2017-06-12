@@ -55,7 +55,7 @@ morphfield <- function(param_values, value_descriptions = NULL,
     })
     for (i in seq_along(last_non_empty_index)) {
       field_df[last_non_empty_index[[i]] + 1, i] <- as.character(
-        actionButton(paste0(id, "_add_item_btn_", i), "Add Item")
+        actionButton(paste0(id, "_add_item_btn_", i), "Add Item", class = "add-item-btn")
       )
     }
   }

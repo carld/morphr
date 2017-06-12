@@ -7,7 +7,7 @@
 reactivateMorphField(input, output, id, param_values,
   value_descriptions = function() {     NULL }, ccm = function() {     NULL
   }, specific_configurations = function() {     NULL },
-  field_df = function() {     NULL }, styleFunc = NULL)
+  field_df = function() {     NULL }, styleFunc = NULL, editable = FALSE)
 }
 \arguments{
 \item{input}{The Shiny session's input object (the same as is passed into the
@@ -47,6 +47,9 @@ field <- field \%>\% \link{formatStyle}(...)
 }
 or similar, and then return it.}
 
+\item{editable}{Logical, if TRUE, a button is shown to enter the field edit
+mode.}
+
 \item{param_values}{A function returning the \code{value_descriptions}, see
 \code{\link{installMorphField}}.}
 }
@@ -65,7 +68,7 @@ the interactivity. This function is called internally by
 If you plan to update/replace the same field several times (while keeping the
 ID the same), then you should not use \code{\link{installMorphField}}, but
 instead use \code{\link{placeMorphFieldUI}} to update the field. This function
-should be run only once, while \code{\link{placeMorphFieldUI}} is run many
+should be run only once, while \code{\link{placeMorphFieldUI}} can be run many
 times to update the field. If \code{reactivateMorphField} runs many times (or
 \code{\link{installMorphField}} runs many times) together with the field
 update, then there will be bugs introduced because the old observers will
