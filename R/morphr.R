@@ -55,7 +55,8 @@ morphfield <- function(param_values, value_descriptions = NULL,
     })
     for (i in seq_along(last_non_empty_index)) {
       field_df[last_non_empty_index[[i]] + 1, i] <- as.character(
-        actionButton(paste0(id, "_add_item_btn_", i), "Add Item", class = "add-item-btn")
+        actionButton(paste0(id, "_add_item_btn_", i), "Add Item",
+                     class = paste0("add-item-btn-", id))
       )
     }
   }
@@ -79,7 +80,7 @@ morphfield <- function(param_values, value_descriptions = NULL,
     rownames = FALSE,
     # Enable cell selection:
     selection = list(
-      mode = "multiple",
+      mode = if (edit_mode) "single" else "multiple",
       target = "cell"
     ),
     # Do not escape HTML

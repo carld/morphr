@@ -6,7 +6,7 @@
 \usage{
 installMorphField(input, output, id, param_values, value_descriptions = NULL,
   ccm = NULL, specific_configurations = NULL, styleFunc = NULL,
-  editable = FALSE)
+  editable = FALSE, edit_mode = FALSE)
 }
 \arguments{
 \item{input}{The Shiny session's input object (the same as is passed into the
