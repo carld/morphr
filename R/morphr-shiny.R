@@ -561,6 +561,40 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
     installModMorphField(input, output, id, param_values, value_descriptions(),
                          ccm(), specific_configurations(), styleFunc)
   })
+
+  modColModal <- function(failed = FALSE) {
+    modalDialog(
+      selectizeInput(paste0(id, "_mod_col"), "Select column to rename",
+                     choices = names(param_values())),
+      textInput(paste0(id, "_mod_col_title"), "Rename column to:",
+                placeholder = "Enter new column title here..."),
+      if (failed)
+        div(tags$b("Invalid column title.", style = "color: red;")),
+      footer = tagList(
+        modalButton("Cancel"),
+        actionButton(paste0(id, "_mod_col_ok"), "OK")
+      )
+    )
+  }
+
+  observeEvent(input[[paste0(id, "_mod_col_btn")]], {
+    showModal(modColModal())
+  })
+
+  observeEvent(input[[paste0(id, "_mod_col_ok")]], {
+    mod_col <- input[[paste0(id, "_mod_col")]]
+    mod_col_title <- input[[paste0(id, "_mod_col_title")]]
+    if (!is.null(mod_col_title) && nzchar(trimws(mod_col_title))) {
+      removeModal()
+      param_values <- param_values()
+      col <- which(names(param_values) == mod_col)
+      names(param_values)[col] <- mod_col_title
+      installModMorphField(input, output, id, param_values, value_descriptions(),
+                           ccm(), specific_configurations(), styleFunc)
+    } else {
+      showModal(modColModal(failed = TRUE))
+    }
+  })
 }
 
 
