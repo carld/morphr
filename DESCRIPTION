@@ -28,7 +28,8 @@ Imports:
     htmlwidgets (>= 0.6),
     magrittr,
     crosstalk,
-    shinyBS
+    shinyBS,
+    shinyjs
 Suggests:
     jsonlite (>= 0.9.16),
     knitr (>= 1.8),
