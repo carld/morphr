@@ -448,6 +448,10 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
     col <- as.integer(input[[paste0(id, "_rem_item_col")]])
     param_values <- param_values()
     param_values[[col]] <- param_values[[col]][-row]
+    if (length(param_values[[col]]) == 0) {
+      # Remove empty column
+      param_values <- param_values[-col]
+    }
     installModMorphField(input, output, id, param_values, value_descriptions(),
                          ccm(), specific_configurations(), styleFunc)
   })
@@ -523,7 +527,6 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
         names(new_pv) <- new_col
         param_values <- param_values()
         param_values <- c(param_values, new_pv)
-        print(param_values)
         installModMorphField(input, output, id, param_values, value_descriptions(),
                              ccm(), specific_configurations(), styleFunc)
       } else {
@@ -532,6 +535,31 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
     } else {
       showModal(addColModal(title_failed = TRUE))
     }
+  })
+
+  remColModal <- function() {
+    modalDialog(
+      selectizeInput(paste0(id, "_rem_col"), "Select column to remove",
+                     choices = names(param_values())),
+      footer = tagList(
+        modalButton("Cancel"),
+        actionButton(paste0(id, "_rem_col_ok"), "Remove it!")
+      )
+    )
+  }
+
+  observeEvent(input[[paste0(id, "_rem_col_btn")]], {
+    showModal(remColModal())
+  })
+
+  observeEvent(input[[paste0(id, "_rem_col_ok")]], {
+    removeModal()
+    rem_col <- input[[paste0(id, "_rem_col")]]
+    param_values <- param_values()
+    col <- which(names(param_values) == rem_col)
+    param_values <- param_values[-col]
+    installModMorphField(input, output, id, param_values, value_descriptions(),
+                         ccm(), specific_configurations(), styleFunc)
   })
 }
 
