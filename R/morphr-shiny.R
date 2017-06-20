@@ -175,7 +175,13 @@ placeEditButtonRow <- function(id, edit_mode = FALSE) {
           actionButton(paste0(id, "_rem_item_btn"), "Remove Selected Item",
                        class = "disabled", disabled = ""),
           actionButton(paste0(id, "_mod_item_btn"), "Modify Selected Item",
-                       class = "disabled", disabled = "")
+                       class = "disabled", disabled = ""),
+          div(
+            class = "pull-right",
+            actionButton(paste0(id, "_add_col_btn"), "Add Column"),
+            actionButton(paste0(id, "_rem_col_btn"), "Remove Column"),
+            actionButton(paste0(id, "_mod_col_btn"), "Modify Column")
+          )
         )
       )
     )
@@ -483,6 +489,48 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
                            ccm(), specific_configurations(), styleFunc)
     } else {
       showModal(modItemModal(row, col, failed = TRUE))
+    }
+  })
+
+  addColModal <- function(title_failed = FALSE, item_failed = FALSE) {
+    modalDialog(
+      textInput(paste0(id, "_new_col"), "New column title",
+                placeholder = "Enter column title here..."),
+      textInput(paste0(id, "_new_first_item"), "First item",
+                placeholder = "Enter item text here..."),
+      if (title_failed)
+        div(tags$b("Invalid column title.", style = "color: red;")),
+      if (item_failed)
+        div(tags$b("Invalid item text.", style = "color: red;")),
+      footer = tagList(
+        modalButton("Cancel"),
+        actionButton(paste0(id, "_add_col_ok"), "OK")
+      )
+    )
+  }
+
+  observeEvent(input[[paste0(id, "_add_col_btn")]], {
+    showModal(addColModal())
+  })
+
+  observeEvent(input[[paste0(id, "_add_col_ok")]], {
+    new_col <- input[[paste0(id, "_new_col")]]
+    new_first_item <- input[[paste0(id, "_new_first_item")]]
+    if (!is.null(new_col) && nzchar(trimws(new_col))) {
+      if (!is.null(new_first_item) && nzchar(trimws(new_first_item))) {
+        removeModal()
+        new_pv <- list(c(new_first_item))
+        names(new_pv) <- new_col
+        param_values <- param_values()
+        param_values <- c(param_values, new_pv)
+        print(param_values)
+        installModMorphField(input, output, id, param_values, value_descriptions(),
+                             ccm(), specific_configurations(), styleFunc)
+      } else {
+        showModal(addColModal(item_failed = TRUE))
+      }
+    } else {
+      showModal(addColModal(title_failed = TRUE))
     }
   })
 }
