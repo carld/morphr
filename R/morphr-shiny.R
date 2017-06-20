@@ -362,22 +362,12 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
     prev_mode <- input[[paste0(id, "_edit_mode")]]
     if (!prev_mode) { # toggle (edit_mode was previously off, turn it on)
       updateCheckboxInput(getDefaultReactiveDomain(), paste0(id, "_edit_mode"), value = TRUE)
-      # new_id <- paste0(id, "_", btn_count)
-      # # Remove the uneditable field, insert new editable field (must have unique ID to keep buttons in table working)
-      # removeUI(paste0("#", id))
-      # insertUI(paste0("#", id, "_container"), ui = morphFieldOutputWithoutContainer(new_id))
       placeMorphFieldUIWithoutToolbar(output, id, param_values(), value_descriptions(),
                                       specific_configurations(), styleFunc,
                                       edit_mode = TRUE)
       placeEditButtonRow(id, edit_mode = TRUE)
-      # reactivateMorphFieldWithoutToolbar(input, new_id, param_values, ccm,
-      #                                   specific_configurations, field_df)
     } else {
       updateCheckboxInput(getDefaultReactiveDomain(), paste0(id, "_edit_mode"), value = FALSE)
-      # old_id <- paste0(id, "_", btn_count - 1)
-      # # Remove the editable field, insert new (old) uneditable field
-      # removeUI(paste0("#", old_id))
-      # insertUI(paste0("#", id, "_container"), ui = morphFieldOutputWithoutContainer(id))
       placeMorphFieldUIWithoutToolbar(output, id, param_values(), value_descriptions(),
                                       specific_configurations(), styleFunc)
       placeEditButtonRow(id)
@@ -424,14 +414,46 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
     }
   })
 
+  remItemModal <- function(item, row, col) {
+    modalDialog(
+      sprintf("Really remove item '%s'?", item),
+      div(
+        textInput(paste0(id, "_rem_item_row"), "Row", value = row),
+        textInput(paste0(id, "_rem_item_col"), "Column", value = col),
+        style = "display: none;"
+      ),
+      footer = tagList(
+        modalButton("Cancel"),
+        actionButton(paste0(id, "_rem_item_ok"), "OK")
+      )
+    )
+  }
+
   observeEvent(input[[paste0(id, "_rem_item_btn")]], {
     sel_cells <- input[[paste0(id, "_cells_selected")]]
     row <- sel_cells[1, 1]
     col <- sel_cells[1, 2] + 1
+    showModal(remItemModal(param_values()[[col]][row], row, col))
+  })
+
+  observeEvent(input[[paste0(id, "_rem_item_ok")]], {
+    removeModal()
+    row <- as.integer(input[[paste0(id, "_rem_item_row")]])
+    col <- as.integer(input[[paste0(id, "_rem_item_col")]])
     param_values <- param_values()
     param_values[[col]] <- param_values[[col]][-row]
     installModMorphField(input, output, id, param_values, value_descriptions(),
                          ccm(), specific_configurations(), styleFunc)
+  })
+
+  observeEvent(input[[paste0(id, "_mod_item_btn")]], {
+    sel_cells <- input[[paste0(id, "_cells_selected")]]
+    row <- sel_cells[1, 1]
+    col <- sel_cells[1, 2] + 1
+    # param_values <- param_values()
+    # param_values[[col]] <- param_values[[col]][-row]
+    # installModMorphField(input, output, id, param_values, value_descriptions(),
+    #                      ccm(), specific_configurations(), styleFunc)
   })
 }
 
