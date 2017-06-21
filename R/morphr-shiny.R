@@ -624,7 +624,6 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
 
   observeEvent(input[[paste0(id, "_file_input")]], {
     removeModal()
-    print(input[[paste0(id, "_file_input")]])
     object <- readRDS(input[[paste0(id, "_file_input")]]$datapath)
     installModMorphField(input, output, id, object$param_values,
                          object$value_descriptions, object$ccm,
