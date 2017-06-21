@@ -196,10 +196,26 @@ placeMorphFieldUIToolbar <- function(id, edit_mode) {
     where = "beforeBegin",
     ui = tagList(
       shinyjs::useShinyjs(),
-      actionButton(paste0(id, "_edit_btn"), "", icon = icon("edit"),
-                   style = "font-size: 10px;"),
-      tags$head(shinyBS::bsTooltip(paste0(id, "_edit_btn"), "Edit",
+      # Edit mode toggle button:
+      actionButton(paste0(id, "_edit_btn"), "", icon = icon("edit")),
+                   # style = "font-size: 10px;"),
+      tags$head(shinyBS::bsTooltip(paste0(id, "_edit_btn"), "Toggle Edit Mode",
                                    placement = "right")),
+
+      # Download button:
+      downloadButton(paste0(id, "_download_btn"), "Download Field",
+                     icon = icon("download")),
+
+      # Upload button:
+      actionButton(paste0(id, "_upload_btn"), "Upload Field",
+                   icon = icon("upload")),
+
+      # Hidden edit mode check box:
+      div(
+        style = "display: none;",
+        checkboxInput(paste0(id, "_edit_mode"), "Edit Mode", value = edit_mode)
+      ),
+
       # Insert JS event handlers for buttons in table:
       tags$head(tags$script(HTML(sprintf(
         "
@@ -207,12 +223,7 @@ placeMorphFieldUIToolbar <- function(id, edit_mode) {
           Shiny.onInputChange('%s_add_item_btn', this.id + ' ' + Math.random());
         });
         ", id, id
-      )))),
-
-      div(
-        style = "display: none;",
-        checkboxInput(paste0(id, "_edit_mode"), "Edit Mode", value = edit_mode)
-      )
+      ))))
     )
   )
 }
@@ -350,6 +361,8 @@ installModMorphField <- function(input, output, id, param_values, value_descript
   orig_id <- sub(pattern = "__modified__[0-9]+$", replacement = "", x = id)
   new_id <- sprintf("%s__modified__%d", orig_id, as.integer(runif(1)*1e9))
   removeUI(selector = sprintf("#%s_edit_btn", id))
+  removeUI(selector = sprintf("#%s_download_btn", id))
+  removeUI(selector = sprintf("#%s_upload_btn", id))
   removeUI(selector = sprintf("#%s_edit_btn_row", id))
   removeUI(selector = sprintf("#%s", id))
   insertUI(paste0("#", orig_id, "_container"), ui = morphFieldOutputWithoutContainer(new_id))
@@ -448,10 +461,6 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
     col <- as.integer(input[[paste0(id, "_rem_item_col")]])
     param_values <- param_values()
     param_values[[col]] <- param_values[[col]][-row]
-    if (length(param_values[[col]]) == 0) {
-      # Remove empty column
-      param_values <- param_values[-col]
-    }
     installModMorphField(input, output, id, param_values, value_descriptions(),
                          ccm(), specific_configurations(), styleFunc)
   })
@@ -496,16 +505,12 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
     }
   })
 
-  addColModal <- function(title_failed = FALSE, item_failed = FALSE) {
+  addColModal <- function(failed = FALSE) {
     modalDialog(
       textInput(paste0(id, "_new_col"), "New column title",
                 placeholder = "Enter column title here..."),
-      textInput(paste0(id, "_new_first_item"), "First item",
-                placeholder = "Enter item text here..."),
-      if (title_failed)
+      if (failed)
         div(tags$b("Invalid column title.", style = "color: red;")),
-      if (item_failed)
-        div(tags$b("Invalid item text.", style = "color: red;")),
       footer = tagList(
         modalButton("Cancel"),
         actionButton(paste0(id, "_add_col_ok"), "OK")
@@ -519,21 +524,16 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
 
   observeEvent(input[[paste0(id, "_add_col_ok")]], {
     new_col <- input[[paste0(id, "_new_col")]]
-    new_first_item <- input[[paste0(id, "_new_first_item")]]
     if (!is.null(new_col) && nzchar(trimws(new_col))) {
-      if (!is.null(new_first_item) && nzchar(trimws(new_first_item))) {
-        removeModal()
-        new_pv <- list(c(new_first_item))
-        names(new_pv) <- new_col
-        param_values <- param_values()
-        param_values <- c(param_values, new_pv)
-        installModMorphField(input, output, id, param_values, value_descriptions(),
-                             ccm(), specific_configurations(), styleFunc)
-      } else {
-        showModal(addColModal(item_failed = TRUE))
-      }
+      removeModal()
+      new_pv <- list(c())
+      names(new_pv) <- new_col
+      param_values <- param_values()
+      param_values <- c(param_values, new_pv)
+      installModMorphField(input, output, id, param_values, value_descriptions(),
+                           ccm(), specific_configurations(), styleFunc)
     } else {
-      showModal(addColModal(title_failed = TRUE))
+      showModal(addColModal(failed = TRUE))
     }
   })
 
@@ -594,6 +594,41 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
     } else {
       showModal(modColModal(failed = TRUE))
     }
+  })
+
+  output[[paste0(id, "_download_btn")]] <- downloadHandler(
+    filename = function() {
+      paste0('morphfield-data-', Sys.Date(), '.rds')
+    },
+    content = function(con) {
+      object <- list(
+        param_values = param_values(),
+        value_descriptions = value_descriptions(),
+        ccm = ccm(),
+        specific_configurations = specific_configurations()
+      )
+      saveRDS(object, con)
+    }
+  )
+
+  uploadModal <- function() {
+    modalDialog(
+      fileInput(paste0(id, "_file_input"), "Select file to upload"),
+      footer = modalButton("Cancel")
+    )
+  }
+
+  observeEvent(input[[paste0(id, "_upload_btn")]], {
+    showModal(uploadModal())
+  })
+
+  observeEvent(input[[paste0(id, "_file_input")]], {
+    removeModal()
+    print(input[[paste0(id, "_file_input")]])
+    object <- readRDS(input[[paste0(id, "_file_input")]]$datapath)
+    installModMorphField(input, output, id, object$param_values,
+                         object$value_descriptions, object$ccm,
+                         object$specific_configurations, styleFunc)
   })
 }
 

@@ -51,7 +51,8 @@ morphfield <- function(param_values, value_descriptions = NULL,
   if (edit_mode) {
     last_non_empty_index <- lapply(field_df, function(col) {
       non_empty <- (1:length(col))[nchar(col) > 0]
-      non_empty[length(non_empty)]
+      lne <- length(non_empty)
+      if (lne == 0) 0 else non_empty[lne]
     })
     for (i in seq_along(last_non_empty_index)) {
       field_df[last_non_empty_index[[i]] + 1, i] <- as.character(
@@ -71,10 +72,10 @@ morphfield <- function(param_values, value_descriptions = NULL,
       # Do not show info about data in footer:
       info = FALSE,
       # Disable sorting by columns for all columns:
-      ordering = FALSE,
+      ordering = FALSE
       # enable addition of button(s) that are registered with shiny: see https://github.com/rstudio/DT/issues/178
-      preDrawCallback = JS('function() { Shiny.unbindAll(this.api().table().node()); }'),
-      drawCallback = JS('function() { Shiny.bindAll(this.api().table().node()); } ')
+      # preDrawCallback = JS('function() { Shiny.unbindAll(this.api().table().node()); }'),
+      # drawCallback = JS('function() { Shiny.bindAll(this.api().table().node()); } ')
     ),
     # Disable display of rownames:
     rownames = FALSE,
@@ -154,6 +155,7 @@ paramValuesToDataFrame <- function(param_values, value_descriptions = NULL) {
           value1
         }
       }, USE.NAMES = FALSE)
+      if (length(items) == 0) items <- NULL
       c(items, rep("", max_length - length(items)))
     })
     names(ret_val) <- names(param_values)
