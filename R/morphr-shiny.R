@@ -171,11 +171,27 @@ placeEditButtonRow <- function(id, edit_mode = FALSE) {
       ui = fluidRow(
         id = paste0(id, "_edit_btn_row"),
         column(
-          12,
+          4,
           actionButton(paste0(id, "_rem_item_btn"), "Remove Selected Item",
                        class = "disabled", disabled = ""),
           actionButton(paste0(id, "_mod_item_btn"), "Modify Selected Item",
-                       class = "disabled", disabled = ""),
+                       class = "disabled", disabled = "")
+        ),
+        column(
+          4,
+          actionButton(paste0(id, "_set_spec_col_btn"), "Set Specifying Column",
+                       class = "pull-left"),
+          {
+            d <- checkboxInput(paste0(id, "_edit_spec"), "Edit Specifications")
+            d$attribs$class <- paste(d$attribs$class, "pull-left")
+            d$attribs$style <- "width: auto; margin-left: 10px; margin-right: 10px;"
+            d
+          },
+          actionButton(paste0(id, "_save_spec_btn"), "Save Specification",
+                       class = "pull-left disabled", disabled = "")
+        ),
+        column(
+          4,
           div(
             class = "pull-right",
             actionButton(paste0(id, "_add_col_btn"), "Add Column"),
@@ -197,18 +213,22 @@ placeMorphFieldUIToolbar <- function(id, edit_mode) {
     ui = tagList(
       shinyjs::useShinyjs(),
       # Edit mode toggle button:
-      actionButton(paste0(id, "_edit_btn"), "", icon = icon("edit")),
-                   # style = "font-size: 10px;"),
+      actionButton(paste0(id, "_edit_btn"), "", icon = icon("edit"),
+                   style = "font-size: 10px;"),
       tags$head(shinyBS::bsTooltip(paste0(id, "_edit_btn"), "Toggle Edit Mode",
                                    placement = "right")),
 
       # Download button:
-      downloadButton(paste0(id, "_download_btn"), "Download Field",
-                     icon = icon("download")),
+      downloadButton(paste0(id, "_download_btn"), "", icon = icon("download"),
+                     style = "font-size: 10px;"),
+      tags$head(shinyBS::bsTooltip(paste0(id, "_download_btn"), "Download Field",
+                                   placement = "right")),
 
       # Upload button:
-      actionButton(paste0(id, "_upload_btn"), "Upload Field",
-                   icon = icon("upload")),
+      actionButton(paste0(id, "_upload_btn"), "", icon = icon("upload"),
+                   style = "font-size: 10px;"),
+      tags$head(shinyBS::bsTooltip(paste0(id, "_upload_btn"), "Upload Field",
+                                   placement = "right")),
 
       # Hidden edit mode check box:
       div(
@@ -628,6 +648,30 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
     installModMorphField(input, output, id, object$param_values,
                          object$value_descriptions, object$ccm,
                          object$specific_configurations, styleFunc)
+  })
+
+  specColumnModal <- function() {
+    modalDialog(
+      selectizeInput(paste0(id, "_spec_col"), "Which column shall be specifying?",
+                     choices = names(param_values())),
+      footer = tagList(
+        modalButton("Cancel"),
+        actionButton(paste0(id, "_spec_col_ok"), "OK")
+      )
+    )
+  }
+
+  observeEvent(input[[paste0(id, "_set_spec_col_btn")]], {
+    showModal(specColumnModal())
+  })
+
+  observeEvent(input[[paste0(id, "_spec_col_ok")]], {
+    removeModal()
+    spec_col <- input[[paste0(id, "_spec_col")]]
+    specific_configurations <- list(list())
+    names(specific_configurations) <- spec_col
+    installModMorphField(input, output, id, param_values(), value_descriptions(),
+                         ccm(), specific_configurations, styleFunc)
   })
 }
 
