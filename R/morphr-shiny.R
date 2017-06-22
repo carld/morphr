@@ -377,7 +377,7 @@ reactivateMorphFieldWithoutToolbar <- function(input, id, param_values,
 }
 
 installModMorphField <- function(input, output, id, param_values, value_descriptions,
-                                 ccm, specific_configurations, styleFunc) {
+                                 ccm, specific_configurations, styleFunc, edit_mode = TRUE) {
   orig_id <- sub(pattern = "__modified__[0-9]+$", replacement = "", x = id)
   new_id <- sprintf("%s__modified__%d", orig_id, as.integer(runif(1)*1e9))
   removeUI(selector = sprintf("#%s_edit_btn", id))
@@ -388,7 +388,7 @@ installModMorphField <- function(input, output, id, param_values, value_descript
   insertUI(paste0("#", orig_id, "_container"), ui = morphFieldOutputWithoutContainer(new_id))
   installMorphField(input, output, new_id, param_values, value_descriptions,
                     ccm, specific_configurations, styleFunc,
-                    editable = TRUE, edit_mode = TRUE)
+                    editable = TRUE, edit_mode = edit_mode)
 }
 
 reactivateMorphFieldToolbar <- function(input, output, id, param_values,
@@ -647,7 +647,8 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
     object <- readRDS(input[[paste0(id, "_file_input")]]$datapath)
     installModMorphField(input, output, id, object$param_values,
                          object$value_descriptions, object$ccm,
-                         object$specific_configurations, styleFunc)
+                         object$specific_configurations, styleFunc,
+                         edit_mode = input[[paste0(id, "_edit_mode")]])
   })
 
   specColumnModal <- function() {
