@@ -46,7 +46,7 @@
 #' @export
 morphfield <- function(param_values, value_descriptions = NULL,
                        specific_configurations = NULL, edit_mode = FALSE,
-                       id = NULL) {
+                       id = NULL, set_spec_mode = FALSE) {
   field_df <- paramValuesToDataFrame(param_values, value_descriptions)
   if (edit_mode) {
     last_non_empty_index <- lapply(field_df, function(col) {
@@ -81,7 +81,7 @@ morphfield <- function(param_values, value_descriptions = NULL,
     rownames = FALSE,
     # Enable cell selection:
     selection = list(
-      mode = if (edit_mode) "single" else "multiple",
+      mode = if (edit_mode && !set_spec_mode) "single" else "multiple",
       target = "cell"
     ),
     # Do not escape HTML

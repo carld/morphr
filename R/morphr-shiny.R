@@ -105,11 +105,11 @@
 installMorphField <- function(input, output, id,
                               param_values, value_descriptions = NULL,
                               ccm = NULL, specific_configurations = NULL,
-                              styleFunc = NULL,
-                              editable = FALSE, edit_mode = FALSE) {
+                              styleFunc = NULL, editable = FALSE,
+                              edit_mode = FALSE, edit_spec_mode = FALSE) {
   field_df <- placeMorphFieldUI(output, id, param_values, value_descriptions,
                                 specific_configurations, styleFunc,
-                                editable, edit_mode)
+                                editable, edit_mode, edit_spec_mode)
   proxy <- reactivateMorphField(input, output, id,
                                 param_values = function() {param_values},
                                 value_descriptions = function() {value_descriptions},
@@ -136,14 +136,14 @@ placeMorphFieldUI <- function(output, id, param_values,
                               value_descriptions = NULL,
                               specific_configurations = NULL,
                               styleFunc = NULL, editable = FALSE,
-                              edit_mode = FALSE) {
+                              edit_mode = FALSE, edit_spec_mode = FALSE) {
   field_df <- placeMorphFieldUIWithoutToolbar(
     output, id, param_values, value_descriptions, specific_configurations,
-    styleFunc, edit_mode
+    styleFunc, edit_mode, edit_spec_mode
   )
   if (editable) {
     placeMorphFieldUIToolbar(id, edit_mode)
-    placeEditButtonRow(id, edit_mode)
+    placeEditButtonRow(id, edit_mode, edit_spec_mode)
   }
   field_df
 }
@@ -151,9 +151,10 @@ placeMorphFieldUI <- function(output, id, param_values,
 placeMorphFieldUIWithoutToolbar <- function(output, id, param_values,
                                             value_descriptions = NULL,
                                             specific_configurations = NULL,
-                                            styleFunc = NULL, edit_mode = FALSE) {
+                                            styleFunc = NULL, edit_mode = FALSE,
+                                            edit_spec_mode = FALSE) {
   l <- morphfield(param_values, value_descriptions, specific_configurations,
-                  edit_mode, id)
+                  edit_mode, id, edit_spec_mode)
   field <- l$field
   field_df <- l$field_df
   if (!is.null(styleFunc)) {
@@ -163,7 +164,7 @@ placeMorphFieldUIWithoutToolbar <- function(output, id, param_values,
   field_df
 }
 
-placeEditButtonRow <- function(id, edit_mode = FALSE) {
+placeEditButtonRow <- function(id, edit_mode = FALSE, edit_spec_mode = FALSE) {
   if (edit_mode) {
     insertUI(
       selector = paste0("#", id),
@@ -182,7 +183,8 @@ placeEditButtonRow <- function(id, edit_mode = FALSE) {
           actionButton(paste0(id, "_set_spec_col_btn"), "Set Specifying Column",
                        class = "pull-left"),
           {
-            d <- checkboxInput(paste0(id, "_edit_spec"), "Edit Specifications")
+            d <- checkboxInput(paste0(id, "_edit_spec_mode"), "Edit Specifications",
+                               value = edit_spec_mode)
             d$attribs$class <- paste(d$attribs$class, "pull-left")
             d$attribs$style <- "width: auto; margin-left: 10px; margin-right: 10px;"
             d
@@ -232,18 +234,21 @@ placeMorphFieldUIToolbar <- function(id, edit_mode) {
 
       # Hidden edit mode check box:
       div(
+        id = paste0(id, "_edit_mode_div"),
         style = "display: none;",
         checkboxInput(paste0(id, "_edit_mode"), "Edit Mode", value = edit_mode)
       ),
 
       # Insert JS event handlers for buttons in table:
-      tags$head(tags$script(HTML(sprintf(
-        "
+      singleton(
+        tags$head(tags$script(HTML(sprintf(
+          "
         $(document).on('click', '.add-item-btn-%s', function () {
           Shiny.onInputChange('%s_add_item_btn', this.id + ' ' + Math.random());
         });
         ", id, id
-      ))))
+        ))))
+      )
     )
   )
 }
@@ -301,7 +306,7 @@ reactivateMorphField <- function(input, output, id, param_values,
                                  field_df = function() {NULL},
                                  styleFunc = NULL, editable = FALSE) {
   proxy <- reactivateMorphFieldWithoutToolbar(
-    input, id, param_values, ccm, specific_configurations, field_df
+    input, id, param_values, ccm, specific_configurations, field_df, editable
   )
 
   if (editable) {
@@ -316,21 +321,18 @@ reactivateMorphField <- function(input, output, id, param_values,
 reactivateMorphFieldWithoutToolbar <- function(input, id, param_values,
                                               ccm = function() {NULL},
                                               specific_configurations = function() {NULL},
-                                              field_df = function() {NULL}) {
+                                              field_df = function() {NULL},
+                                              editable = FALSE) {
   proxy <- dataTableProxy(id)
 
   # Immediately deselect empty cells, they shall not be selectable
   observeEvent(input[[paste0(id, "_cells_selected")]], {
     sel_cells <- input[[paste0(id, "_cells_selected")]]
-    # print("selected cells:")
-    # print(sel_cells)
     field_df <- field_df()
     if (is.null(field_df)) {
       field_df <- paramValuesToDataFrame(param_values())
     }
     if (isLastSelectedCellEmpty(sel_cells, field_df)) {
-      # print("Deselecting empty cell:")
-      # print(getLastSelectedCell(sel_cells))
       proxy %>% selectCells(removeLastSelectedCell(sel_cells))
     }
   })
@@ -338,25 +340,16 @@ reactivateMorphFieldWithoutToolbar <- function(input, id, param_values,
   # Update the field with the new consistent cells after selection
   observeEvent(input[[paste0(id, "_cells_selected")]], {
     sel_cells <- input[[paste0(id, "_cells_selected")]]
-    if (input[[paste0(id, "_edit_mode")]]) {
-      if (nrow(sel_cells) == 1) {
-        shinyjs::enable(selector = paste0("#", id, "_rem_item_btn"))
-        shinyjs::enable(selector = paste0("#", id, "_mod_item_btn"))
-      } else {
-        shinyjs::disable(selector = paste0("#", id, "_rem_item_btn"))
-        shinyjs::disable(selector = paste0("#", id, "_mod_item_btn"))
-      }
-      return() # do nothing else
-    }
     field_df <- field_df()
     if (is.null(field_df)) {
       field_df <- paramValuesToDataFrame(param_values())
     }
+    if (editable) {
+      updateEditButtons(input, id, sel_cells, field_df, specific_configurations())
+      return() # do nothing else
+    }
     if (isLastSelectedCellEmpty(sel_cells, field_df)) {
-      # print("Last selected cell is empty, ignoring it...")
       sel_cells <- removeLastSelectedCell(sel_cells)
-      # print("selected cells:")
-      # print(sel_cells)
     }
     ccm <- ccm()
     if (is.null(ccm)) {
@@ -368,8 +361,6 @@ reactivateMorphFieldWithoutToolbar <- function(input, id, param_values,
       }
     }
     consistent_cells <- findConsistentCells(param_values(), ccm, sel_cells)
-    # print("consistent_cells:")
-    # print(consistent_cells)
     proxy %>% setCellsConsistent(consistent_cells)
   })
 
@@ -377,18 +368,20 @@ reactivateMorphFieldWithoutToolbar <- function(input, id, param_values,
 }
 
 installModMorphField <- function(input, output, id, param_values, value_descriptions,
-                                 ccm, specific_configurations, styleFunc, edit_mode = TRUE) {
+                                 ccm, specific_configurations, styleFunc, edit_mode = TRUE,
+                                 edit_spec_mode = FALSE) {
   orig_id <- sub(pattern = "__modified__[0-9]+$", replacement = "", x = id)
   new_id <- sprintf("%s__modified__%d", orig_id, as.integer(runif(1)*1e9))
   removeUI(selector = sprintf("#%s_edit_btn", id))
   removeUI(selector = sprintf("#%s_download_btn", id))
   removeUI(selector = sprintf("#%s_upload_btn", id))
+  removeUI(selector = sprintf("#%s_edit_mode_div", id))
   removeUI(selector = sprintf("#%s_edit_btn_row", id))
   removeUI(selector = sprintf("#%s", id))
   insertUI(paste0("#", orig_id, "_container"), ui = morphFieldOutputWithoutContainer(new_id))
   installMorphField(input, output, new_id, param_values, value_descriptions,
                     ccm, specific_configurations, styleFunc,
-                    editable = TRUE, edit_mode = edit_mode)
+                    editable = TRUE, edit_mode = edit_mode, edit_spec_mode = edit_spec_mode)
 }
 
 reactivateMorphFieldToolbar <- function(input, output, id, param_values,
@@ -648,13 +641,15 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
     installModMorphField(input, output, id, object$param_values,
                          object$value_descriptions, object$ccm,
                          object$specific_configurations, styleFunc,
-                         edit_mode = input[[paste0(id, "_edit_mode")]])
+                         edit_mode = input[[paste0(id, "_edit_mode")]],
+                         edit_spec_mode = input[[paste0(id, "_edit_spec_mode")]])
   })
 
   specColumnModal <- function() {
     modalDialog(
       selectizeInput(paste0(id, "_spec_col"), "Which column shall be specifying?",
                      choices = names(param_values())),
+      div(tags$b("WARNING: Already set specifications will be lost.")),
       footer = tagList(
         modalButton("Cancel"),
         actionButton(paste0(id, "_spec_col_ok"), "OK")
@@ -672,10 +667,57 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
     specific_configurations <- list(list())
     names(specific_configurations) <- spec_col
     installModMorphField(input, output, id, param_values(), value_descriptions(),
-                         ccm(), specific_configurations, styleFunc)
+                         ccm(), specific_configurations, styleFunc,
+                         edit_spec_mode = input[[paste0(id, "_edit_spec_mode")]])
+  })
+
+  observeEvent(input[[paste0(id, "_edit_spec_mode")]], {
+    placeMorphFieldUIWithoutToolbar(
+      output, id, param_values(), value_descriptions(),
+      specific_configurations(), styleFunc,
+      edit_mode = TRUE, edit_spec_mode = input[[paste0(id, "_edit_spec_mode")]]
+    )
+    disableAllEditButtons(id)
   })
 }
 
+
+updateEditButtons <- function(input, id, sel_cells, field_df,
+                              specific_configurations) {
+  if (input[[paste0(id, "_edit_mode")]]) {
+    if (!input[[paste0(id, "_edit_spec_mode")]]) {
+      if (nrow(sel_cells) == 1) {
+        shinyjs::enable(selector = paste0("#", id, "_rem_item_btn"))
+        shinyjs::enable(selector = paste0("#", id, "_mod_item_btn"))
+      } else {
+        shinyjs::disable(selector = paste0("#", id, "_rem_item_btn"))
+        shinyjs::disable(selector = paste0("#", id, "_mod_item_btn"))
+      }
+    } else {
+      if (nrow(sel_cells) == 0) {
+        n_spec_col <- 0
+      } else {
+        cols <- sel_cells[, 2]
+        # Calculate number of cell selections in specifying column: must be 1!
+        n_spec_col <- sum(sapply(cols, function(col) {
+          column <- names(field_df)[col + 1]
+          names(specific_configurations) == column
+        }))
+      }
+      if (n_spec_col == 1) {
+        shinyjs::enable(selector = paste0("#", id, "_save_spec_btn"))
+      } else {
+        shinyjs::disable(selector = paste0("#", id, "_save_spec_btn"))
+      }
+    }
+  }
+}
+
+disableAllEditButtons <- function(id) {
+  shinyjs::disable(selector = paste0("#", id, "_rem_item_btn"))
+  shinyjs::disable(selector = paste0("#", id, "_mod_item_btn"))
+  shinyjs::disable(selector = paste0("#", id, "_save_spec_btn"))
+}
 
 getLastSelectedCell <- function(sel_cells) {
   matrix(sel_cells[nrow(sel_cells), ], ncol = 2)
@@ -749,13 +791,6 @@ morphFieldOutputWithoutContainer <- function(outputId, width = '100%', height = 
 #' @export
 renderMorphField <- function(expr, server = TRUE, env = parent.frame(),
                              quoted = FALSE, ...) {
-  # if (!quoted) expr = substitute(expr)
-  # shinyRenderWidget(expr, sigmaOutput, env, quoted = TRUE)
-  # shiny::markRenderFunction(morphFieldOutput, function(shinysession, name, ...) {
-  #   print(names(shinysession))
-  #   print(names(shinysession$output))
-  #   print("Hallo Welt!")
-  # })
   renderDataTable(expr = expr, server = server, quoted = quoted, ...) # must not give the default env (parent.frame()) to renderDataTable, or the expr will not be found in scope
 }
 

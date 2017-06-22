@@ -5,7 +5,8 @@
 \title{Create an HTML morphological field widget using the DataTables library}
 \usage{
 morphfield(param_values, value_descriptions = NULL,
-  specific_configurations = NULL, edit_mode = FALSE, id = NULL)
+  specific_configurations = NULL, edit_mode = FALSE, id = NULL,
+  set_spec_mode = FALSE)
 }
 \arguments{
 \item{param_values}{A named list of vectors/lists. The names of the list are
