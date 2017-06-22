@@ -318,6 +318,14 @@ reactivateMorphField <- function(input, output, id, param_values,
   return(proxy)
 }
 
+getFieldDF <- function(field_df, param_values) {
+  field_df <- field_df()
+  if (is.null(field_df)) {
+    field_df <- paramValuesToDataFrame(param_values())
+  }
+  field_df
+}
+
 reactivateMorphFieldWithoutToolbar <- function(input, id, param_values,
                                               ccm = function() {NULL},
                                               specific_configurations = function() {NULL},
@@ -328,10 +336,7 @@ reactivateMorphFieldWithoutToolbar <- function(input, id, param_values,
   # Immediately deselect empty cells, they shall not be selectable
   observeEvent(input[[paste0(id, "_cells_selected")]], {
     sel_cells <- input[[paste0(id, "_cells_selected")]]
-    field_df <- field_df()
-    if (is.null(field_df)) {
-      field_df <- paramValuesToDataFrame(param_values())
-    }
+    field_df <- getFieldDF(field_df, param_values)
     if (isLastSelectedCellEmpty(sel_cells, field_df)) {
       proxy %>% selectCells(removeLastSelectedCell(sel_cells))
     }
@@ -340,13 +345,10 @@ reactivateMorphFieldWithoutToolbar <- function(input, id, param_values,
   # Update the field with the new consistent cells after selection
   observeEvent(input[[paste0(id, "_cells_selected")]], {
     sel_cells <- input[[paste0(id, "_cells_selected")]]
-    field_df <- field_df()
-    if (is.null(field_df)) {
-      field_df <- paramValuesToDataFrame(param_values())
-    }
+    field_df <- getFieldDF(field_df, param_values)
     if (editable) {
       updateEditButtons(input, id, sel_cells, field_df, specific_configurations())
-      return() # do nothing else
+      if (input[[paste0(id, "_edit_mode")]]) return() # do nothing else
     }
     if (isLastSelectedCellEmpty(sel_cells, field_df)) {
       sel_cells <- removeLastSelectedCell(sel_cells)
@@ -652,7 +654,7 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
       div(tags$b("WARNING: Already set specifications will be lost.")),
       footer = tagList(
         modalButton("Cancel"),
-        actionButton(paste0(id, "_spec_col_ok"), "OK")
+        actionButton(paste0(id, "_set_spec_col_ok"), "OK")
       )
     )
   }
@@ -661,7 +663,7 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
     showModal(specColumnModal())
   })
 
-  observeEvent(input[[paste0(id, "_spec_col_ok")]], {
+  observeEvent(input[[paste0(id, "_set_spec_col_ok")]], {
     removeModal()
     spec_col <- input[[paste0(id, "_spec_col")]]
     specific_configurations <- list(list())
@@ -678,6 +680,28 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
       edit_mode = TRUE, edit_spec_mode = input[[paste0(id, "_edit_spec_mode")]]
     )
     disableAllEditButtons(id)
+  })
+
+  observeEvent(input[[paste0(id, "_save_spec_btn")]], {
+    sel_cells <- input[[paste0(id, "_cells_selected")]]
+    specific_configurations <- specific_configurations()
+    spec_param <- names(specific_configurations)
+    field_df <- getFieldDF(field_df, param_values)
+    spec_col <- which(names(field_df) == spec_param)
+    spec_row <- sel_cells[, 1][sel_cells[, 2] + 1 == spec_col]
+    spec_value <- field_df[spec_row, spec_col]
+    mask <- sel_cells[, 2] + 1 != spec_col
+    other_rows <- sel_cells[, 1][mask]
+    other_cols <- sel_cells[, 2][mask] + 1
+    other_params <- names(field_df)[other_cols]
+    other_values <- lapply(1:length(other_rows), function(i) {
+      field_df[other_rows[i], other_cols[i]]
+    })
+    names(other_values) <- other_params
+    specific_configurations[[spec_param]][[spec_value]] <- other_values
+    installModMorphField(input, output, id, param_values(), value_descriptions(),
+                         ccm(), specific_configurations, styleFunc,
+                         edit_spec_mode = input[[paste0(id, "_edit_spec_mode")]])
   })
 }
 
