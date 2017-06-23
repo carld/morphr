@@ -79,6 +79,9 @@
 #' @param param_values A named list of vectors/lists. The names of the list are
 #'   the names of the parameters (columns) in the morphological field. The
 #'   vectors/lists contain the possible values that the parameter can have.
+#'   If \code{param_values} is NULL (default), then an empty field is created.
+#'   Use \code{editable = TRUE} in \code{\link{installMorphField}} to fill the
+#'   empty field in the browser.
 #' @param value_descriptions Optional. Each parameter value in param_values can
 #'   have an accompanying (long) description that will be shown as tooltip/popover.
 #'   The structure of \code{value_descriptions} is like that of \code{param_values},
@@ -103,7 +106,7 @@
 #'   \code{\link{dataTableProxy}()}.
 #' @export
 installMorphField <- function(input, output, id,
-                              param_values, value_descriptions = NULL,
+                              param_values = NULL, value_descriptions = NULL,
                               ccm = NULL, specific_configurations = NULL,
                               styleFunc = NULL, editable = FALSE,
                               edit_mode = FALSE, edit_spec_mode = FALSE) {
@@ -132,7 +135,7 @@ installMorphField <- function(input, output, id,
 #'
 #' @inheritParams installMorphField
 #' @export
-placeMorphFieldUI <- function(output, id, param_values,
+placeMorphFieldUI <- function(output, id, param_values = NULL,
                               value_descriptions = NULL,
                               specific_configurations = NULL,
                               styleFunc = NULL, editable = FALSE,
@@ -148,7 +151,7 @@ placeMorphFieldUI <- function(output, id, param_values,
   field_df
 }
 
-placeMorphFieldUIWithoutToolbar <- function(output, id, param_values,
+placeMorphFieldUIWithoutToolbar <- function(output, id, param_values = NULL,
                                             value_descriptions = NULL,
                                             specific_configurations = NULL,
                                             styleFunc = NULL, edit_mode = FALSE,

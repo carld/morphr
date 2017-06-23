@@ -44,7 +44,7 @@
 #' @return List with items \code{field} (a \code{\link{datatable}} object) and
 #'   \code{field_df} (the \code{data.frame} used to create the datatable object).
 #' @export
-morphfield <- function(param_values, value_descriptions = NULL,
+morphfield <- function(param_values = NULL, value_descriptions = NULL,
                        specific_configurations = NULL, edit_mode = FALSE,
                        id = NULL, set_spec_mode = FALSE) {
   field_df <- paramValuesToDataFrame(param_values, value_descriptions)
@@ -117,7 +117,7 @@ parseMorphFieldString <- function(string) {
 #' create a fixed dimension data.frame.
 #' @inheritParams installMorphField
 #' @export
-paramValuesToDataFrame <- function(param_values, value_descriptions = NULL) {
+paramValuesToDataFrame <- function(param_values = NULL, value_descriptions = NULL) {
   # Need to set seed manually to ensure random unique IDs of the tipify/popify elements
   # (Not understood why, but every morphfield was using the same ID sequence as the previous,
   # only omitting the first 8 IDs of the previous field.)
@@ -125,6 +125,7 @@ paramValuesToDataFrame <- function(param_values, value_descriptions = NULL) {
   set.seed(as.integer(as.numeric(substr(t, 7, nchar(t))) * 1e5))
 
   ret_val <- param_values
+  if (is.null(ret_val)) ret_val <- list(list())
   if (class(ret_val) == "list") {
     # Make sure that all list items have same length.
     # If not: fill with empty character strings

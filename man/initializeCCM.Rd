@@ -9,7 +9,10 @@ initializeCCM(param_values, def_val = TRUE)
 \arguments{
 \item{param_values}{A named list of vectors/lists. The names of the list are
 the names of the parameters (columns) in the morphological field. The
-vectors/lists contain the possible values that the parameter can have.}
+vectors/lists contain the possible values that the parameter can have.
+If \code{param_values} is NULL (default), then an empty field is created.
+Use \code{editable = TRUE} in \code{\link{installMorphField}} to fill the
+empty field in the browser.}
 
 \item{def_val}{Logical for the initialization of all CCM entries.}
 }
