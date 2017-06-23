@@ -51,6 +51,82 @@ server <- function(input, output, session) {
     )
   )
 
+  # OR:
+  specific_configurations <- list(
+    list(
+      sources = list(
+        list(
+          param = "Parameter A",
+          value = "A1"
+        )
+      ),
+      targets = list(
+        list(
+          param = "Parameter B",
+          value = c("B2", "B3")
+        ),
+        list(
+          param = "Parameter C",
+          value = "C1"
+        )
+      )
+    ),
+    list(
+      sources = list(
+        list(
+          param = "Parameter A",
+          value = "A2"
+        )
+      ),
+      targets = list(
+        list(
+          param = "Parameter B",
+          values = "B4"
+        ),
+        list(
+          param = "Parameter C",
+          values = "C2"
+        )
+      )
+    ),
+    list(
+      sources = list(
+        list(
+          param = "Parameter A",
+          value = "A3"
+        )
+      ),
+      targets = list(
+        list(
+          param = "Parameter B",
+          values = "B1"
+        ),
+        list(
+          param = "Parameter C",
+          values = "C1"
+        )
+      )
+    ),
+    list(
+      sources = list(
+        list(
+          param = "Parameter A",
+          value = "A4"
+        )
+      ),
+      targets = list(
+        list(
+          param = "Parameter B",
+          values = "B3"
+        ),
+        list(
+          param = "Parameter C",
+          values = "C2"
+        )
+      )
+    )
+  )
+
   morphr::installMorphField(input, output, id = "morphfield",
                             param_values = param_values,
                             specific_configurations = specific_configurations,
