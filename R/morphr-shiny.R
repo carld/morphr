@@ -693,11 +693,13 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
     mask <- sel_cells[, 2] + 1 != spec_col
     other_rows <- sel_cells[, 1][mask]
     other_cols <- sel_cells[, 2][mask] + 1
-    other_params <- names(field_df)[other_cols]
-    other_values <- lapply(1:length(other_rows), function(i) {
-      field_df[other_rows[i], other_cols[i]]
+    other_cols_unique <- unique(other_cols)
+    other_params_unique <- unique(names(field_df)[other_cols])
+    other_values <- lapply(other_cols_unique, function(col) {
+      rows <- other_rows[other_cols == col]
+      field_df[rows, col]
     })
-    names(other_values) <- other_params
+    names(other_values) <- other_params_unique
     specific_configurations[[spec_param]][[spec_value]] <- other_values
     installModMorphField(input, output, id, param_values(), value_descriptions(),
                          ccm(), specific_configurations, styleFunc,
