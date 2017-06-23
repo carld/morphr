@@ -240,6 +240,9 @@ placeMorphFieldUIToolbar <- function(id, edit_mode) {
       ),
 
       # Insert JS event handlers for buttons in table:
+      # (Helpful resources:
+      # https://stackoverflow.com/questions/40631788/shiny-observe-triggered-by-dynamicaly-generated-inputs/40643541#40643541
+      # https://stackoverflow.com/questions/40168801/r-shiny-last-clicked-button-id)
       singleton(
         tags$head(tags$script(HTML(sprintf(
           "
