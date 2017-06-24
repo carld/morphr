@@ -110,16 +110,26 @@ installMorphField <- function(input, output, id,
                               ccm = NULL, specific_configurations = NULL,
                               styleFunc = NULL, editable = FALSE,
                               edit_mode = FALSE, edit_spec_mode = FALSE) {
-  field_df <- placeMorphFieldUI(output, id, param_values, value_descriptions,
-                                specific_configurations, styleFunc,
-                                editable, edit_mode, edit_spec_mode)
-  proxy <- reactivateMorphField(input, output, id,
-                                param_values = function() {param_values},
-                                value_descriptions = function() {value_descriptions},
-                                ccm = function() {ccm},
-                                specific_configurations = function() {specific_configurations},
-                                field_df = function() {field_df},
-                                styleFunc = styleFunc, editable = editable)
+  proxy <- NULL
+  # Server code must be wrapped into any renderXXX() function in order
+  # to be executed not directly, but later when the UI is ready.
+  # Otherwise, you can get the error: 'ID not found in the DOM' when insertUI
+  # is used.
+  output[[id]] <- renderMorphField({
+    l <- placeMorphFieldUI(output, id, param_values, value_descriptions,
+                           specific_configurations, styleFunc,
+                           editable, edit_mode, edit_spec_mode)
+    field <- l$field
+    field_df <- l$field_df
+    proxy <<- reactivateMorphField(input, output, id,
+                                   param_values = function() {param_values},
+                                   value_descriptions = function() {value_descriptions},
+                                   ccm = function() {ccm},
+                                   specific_configurations = function() {specific_configurations},
+                                   field_df = function() {field_df},
+                                   styleFunc = styleFunc, editable = editable)
+    field
+  })
   return(proxy)
 }
 
@@ -140,7 +150,7 @@ placeMorphFieldUI <- function(output, id, param_values = NULL,
                               specific_configurations = NULL,
                               styleFunc = NULL, editable = FALSE,
                               edit_mode = FALSE, edit_spec_mode = FALSE) {
-  field_df <- placeMorphFieldUIWithoutToolbar(
+  l <- placeMorphFieldUIWithoutToolbar(
     output, id, param_values, value_descriptions, specific_configurations,
     styleFunc, edit_mode, edit_spec_mode
   )
@@ -148,7 +158,7 @@ placeMorphFieldUI <- function(output, id, param_values = NULL,
     placeMorphFieldUIToolbar(id, edit_mode)
     placeEditButtonRow(id, edit_mode, edit_spec_mode)
   }
-  field_df
+  l
 }
 
 placeMorphFieldUIWithoutToolbar <- function(output, id, param_values = NULL,
@@ -163,8 +173,7 @@ placeMorphFieldUIWithoutToolbar <- function(output, id, param_values = NULL,
   if (!is.null(styleFunc)) {
     field <- styleFunc(field)
   }
-  output[[id]] <- renderMorphField(field)
-  field_df
+  list(field = field, field_df = field_df)
 }
 
 placeEditButtonRow <- function(id, edit_mode = FALSE, edit_spec_mode = FALSE) {
