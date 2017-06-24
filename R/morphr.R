@@ -281,17 +281,19 @@ buildHashValue <- function(param1, value1, param2, value2) {
 #' @export
 initializeCCM <- function(param_values, def_val = TRUE) {
   ccm <- list()
-  lapply(1:(length(param_values) - 1), function(i) {
-    param1 <- names(param_values)[i]
-    lapply(param_values[[i]], function(value1) {
-      lapply((i + 1):length(param_values), function(j) {
-        param2 <- names(param_values)[j]
-        lapply(param_values[[j]], function(value2) {
-          ccm[[buildHashValue(param1, value1, param2, value2)]] <<- def_val
+  if (length(param_values) > 1) {
+    lapply(1:(length(param_values) - 1), function(i) {
+      param1 <- names(param_values)[i]
+      lapply(param_values[[i]], function(value1) {
+        lapply((i + 1):length(param_values), function(j) {
+          param2 <- names(param_values)[j]
+          lapply(param_values[[j]], function(value2) {
+            ccm[[buildHashValue(param1, value1, param2, value2)]] <<- def_val
+          })
         })
       })
     })
-  })
+  }
   ccm
 }
 
