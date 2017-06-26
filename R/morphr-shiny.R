@@ -60,14 +60,28 @@
 #' columns to \emph{specify} the field. This means that choosing a value in the
 #' specifying column sets the values of some or all other columns. It constrains
 #' the field. Specifying columns are marked with a darker grey than normal
-#' columns. The \code{specific_configurations} are expected to be a named list
-#' of named lists of named lists. The top-level hierarchy names represent the
-#' parameter names that are specifying. The next level names represent the
-#' parameter's values that are specifying. The deepest level names represent the
-#' parameter names that are specified and the values (list elements) are the
-#' parameter value(s) that are specified (i.e. considered possible) in this
-#' configuration. Defaults to NULL, i.e. no specification and the field is
-#' \emph{open}.
+#' columns. The \code{specific_configurations} can be defined in one of two
+#' formats:
+#'
+#' In the old compact format, \code{specific_configurations} are expected to be
+#' a named list of named lists of named lists. The top-level hierarchy names
+#' represent the parameter names that are specifying. The next level names
+#' represent the parameter's values that are specifying. The deepest level names
+#' represent the parameter names that are specified and the values (list elements)
+#' are the parameter value(s) that are specified (i.e. considered possible) in this
+#' configuration.
+#'
+#' In the new extended format, \code{specific_configurations} are expected to be
+#' a list of names lists. Each named list has the names \code{sources} and
+#' \code{targets}. Under sources, a list of sources, i.e. specifying parameters,
+#' is stored. All sources together act specifying, i.e. if all specifying
+#' sources are selected, then it constrains the field. Under targets, a list of
+#' targets, i.e. specified parameter values, is stored. Each source and target
+#' is a list with names \code{param} and \code{value}, identifying the parameter
+#' value.
+#'
+#' \code{specific_configurations} defaults to NULL, i.e. no specification and the
+#' field is \emph{open}.
 #'
 #' @param input The Shiny session's input object (the same as is passed into the
 #'   Shiny server function as an argument).
@@ -117,8 +131,8 @@ installMorphField <- function(input, output, id,
   # is used.
   output[[id]] <- renderMorphField({
     l <- returnMorphFieldUI(output, id, param_values, value_descriptions,
-                           specific_configurations, styleFunc,
-                           editable, edit_mode, edit_spec_mode)
+                            specific_configurations, styleFunc,
+                            editable, edit_mode, edit_spec_mode)
     field <- l$field
     field_df <- l$field_df
     proxy <<- reactivateMorphField(input, output, id,
@@ -156,6 +170,10 @@ returnMorphFieldUIWithoutToolbar <- function(output, id, param_values = NULL,
                                              specific_configurations = NULL,
                                              styleFunc = NULL, edit_mode = FALSE,
                                              edit_spec_mode = FALSE) {
+  if (!is.null(names(specific_configurations))) {
+    # old compact format; convert to new extended format
+    specific_configurations <- convertSpecConfToExtended(specific_configurations)
+  }
   l <- morphfield(param_values, value_descriptions, specific_configurations,
                   edit_mode, id, edit_spec_mode)
   field <- l$field
@@ -358,6 +376,10 @@ reactivateMorphField <- function(input, output, id, param_values,
                                  specific_configurations = function() {NULL},
                                  field_df = function() {NULL},
                                  styleFunc = NULL, editable = FALSE) {
+  if (!is.null(names(specific_configurations))) {
+    # old compact format; convert to new extended format
+    specific_configurations <- convertSpecConfToExtended(specific_configurations)
+  }
   proxy <- reactivateMorphFieldWithoutToolbar(
     input, id, param_values, ccm, specific_configurations, field_df, editable
   )

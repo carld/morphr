@@ -340,6 +340,37 @@ buildCCMFromSpecificConfigurations <- function(param_values,
 }
 
 
+#' Convert specific configurations to new extended format
+#'
+#' This function converts specific configurations (specifications) in the old
+#' compact format into the new extended format.
+#'
+#' @param specific_configurations The specific configurations in the old compact
+#'   format, see \code{\link{installMorphField}}.
+#' @return Specific configurations in the new extended format.
+#' @export
+convertSpecConfToExtended <- function(specific_configurations) {
+  sce <- list()
+  for (source_param in names(specific_configurations)) {
+    for (source_val in names(specific_configurations[[source_param]])) {
+      sce <- c(sce, list(
+        list(
+          sources = list(
+            list(param = source_param, value = source_val)
+          ),
+          targets = lapply(
+            names(specific_configurations[[source_param]][[source_val]]),
+            function(target_param) {
+              list(param = target_param,
+                   value = specific_configurations[[source_param]][[source_val]][[target_param]])
+            })
+        )
+      ))
+    }
+  }
+}
+
+
 #' Convert a long table format data.frame to a nested list
 #'
 #' Use this function if you have a data.frame in long table format (with

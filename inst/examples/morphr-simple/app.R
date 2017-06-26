@@ -30,7 +30,8 @@ server <- function(input, output, session) {
     "Parameter C" = c("C1", "C2")
   )
 
-  specific_configurations <- list(
+  # Old compact format (only one column can be specifying)
+  specific_configurations_old <- list(
     "Parameter A" = list(
       "A1" = list(
         "Parameter B" = c("B2", "B3"),
@@ -52,7 +53,9 @@ server <- function(input, output, session) {
   )
 
   # OR:
-  specific_configurations <- list(
+  # New extended format (arbitrary number of sources and targets, so arbitrary
+  # number of specifying columns, i.e. sources, possible)
+  specific_configurations_new <- list(
     list(
       sources = list(
         list(
@@ -81,11 +84,11 @@ server <- function(input, output, session) {
       targets = list(
         list(
           param = "Parameter B",
-          values = "B4"
+          value = "B4"
         ),
         list(
           param = "Parameter C",
-          values = "C2"
+          value = "C2"
         )
       )
     ),
@@ -99,11 +102,11 @@ server <- function(input, output, session) {
       targets = list(
         list(
           param = "Parameter B",
-          values = "B1"
+          value = "B1"
         ),
         list(
           param = "Parameter C",
-          values = "C1"
+          value = "C1"
         )
       )
     ),
@@ -117,11 +120,11 @@ server <- function(input, output, session) {
       targets = list(
         list(
           param = "Parameter B",
-          values = "B3"
+          value = "B3"
         ),
         list(
           param = "Parameter C",
-          values = "C2"
+          value = "C2"
         )
       )
     )
@@ -129,7 +132,7 @@ server <- function(input, output, session) {
 
   morphr::installMorphField(input, output, id = "morphfield",
                             param_values = param_values,
-                            specific_configurations = specific_configurations,
+                            specific_configurations = specific_configurations_old,
                             editable = TRUE)
 
 }
