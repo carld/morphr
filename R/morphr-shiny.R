@@ -170,10 +170,8 @@ returnMorphFieldUIWithoutToolbar <- function(output, id, param_values = NULL,
                                              specific_configurations = NULL,
                                              styleFunc = NULL, edit_mode = FALSE,
                                              edit_spec_mode = FALSE) {
-  if (!is.null(names(specific_configurations))) {
-    # old compact format; convert to new extended format
-    specific_configurations <- convertSpecConfToExtended(specific_configurations)
-  }
+  specific_configurations <- convertSpecConfToExtended(specific_configurations)
+  specific_configurations <- sortSpecifyingParams(specific_configurations)
   l <- morphfield(param_values, value_descriptions, specific_configurations,
                   edit_mode, id, edit_spec_mode)
   field <- l$field
@@ -376,17 +374,17 @@ reactivateMorphField <- function(input, output, id, param_values,
                                  specific_configurations = function() {NULL},
                                  field_df = function() {NULL},
                                  styleFunc = NULL, editable = FALSE) {
-  if (!is.null(names(specific_configurations))) {
-    # old compact format; convert to new extended format
-    specific_configurations <- convertSpecConfToExtended(specific_configurations)
+  specific_configurations2 <- function() {
+    sc <- convertSpecConfToExtended(specific_configurations())
+    sortSpecifyingParams(sc)
   }
   proxy <- reactivateMorphFieldWithoutToolbar(
-    input, id, param_values, ccm, specific_configurations, field_df, editable
+    input, id, param_values, ccm, specific_configurations2, field_df, editable
   )
 
   if (editable) {
     reactivateMorphFieldToolbar(input, output, id, param_values,
-                                value_descriptions, ccm, specific_configurations,
+                                value_descriptions, ccm, specific_configurations2,
                                 field_df, styleFunc)
   }
 
@@ -475,6 +473,8 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
       placeMorphFieldUIWithoutToolbar(output, id, param_values(), value_descriptions(),
                                        specific_configurations(), styleFunc,
                                        edit_mode = TRUE)
+      print("specific_configurations:")
+      print(specific_configurations())
       no_spec_col <- is.null(specific_configurations()) || length(specific_configurations()) == 0
       updateCheckboxInput(getDefaultReactiveDomain(), paste0(id, "_edit_mode"), value = TRUE)
       placeEditButtonRow(id, edit_mode = TRUE, edit_spec_mode_disabled = no_spec_col)
@@ -763,22 +763,41 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
   observeEvent(input[[paste0(id, "_save_spec_btn")]], {
     sel_cells <- input[[paste0(id, "_cells_selected")]]
     specific_configurations <- specific_configurations()
-    spec_param <- names(specific_configurations)
+    spec_params <- extractSpecifyingParams(specific_configurations)
     field_df <- getFieldDF(field_df, param_values)
-    spec_col <- which(names(field_df) == spec_param)
-    spec_row <- sel_cells[, 1][sel_cells[, 2] + 1 == spec_col]
-    spec_value <- field_df[spec_row, spec_col]
-    mask <- sel_cells[, 2] + 1 != spec_col
+    spec_cols <- which(names(field_df) == spec_params)
+    mask <- sapply(sel_cells[, 2] + 1, function(i) {i %in% spec_cols})
+    spec_rows <- sel_cells[, 1][mask]
+    # spec_value <- field_df[spec_rows[i], spec_cols[i]]
+    mask <- sapply(sel_cells[, 2] + 1, function(i) {!i %in% spec_cols})
     other_rows <- sel_cells[, 1][mask]
     other_cols <- sel_cells[, 2][mask] + 1
-    other_cols_unique <- unique(other_cols)
-    other_params_unique <- unique(names(field_df)[other_cols])
-    other_values <- lapply(other_cols_unique, function(col) {
-      rows <- other_rows[other_cols == col]
-      field_df[rows, col]
+    other_params <- names(field_df)[other_cols]
+    sources <- lapply(1:length(spec_cols), function(i) {
+      list(
+        param = spec_params[i],
+        value = field_df[spec_rows[i], spec_cols[i]]
+      )
     })
-    names(other_values) <- other_params_unique
-    specific_configurations[[spec_param]][[spec_value]] <- other_values
+    targets <- lapply(1:length(other_cols), function(i) {
+      list(
+        param = other_params[i],
+        value = field_df[other_rows[i], other_cols[i]]
+      )
+    })
+    this_source_index <- which(
+      sapply(1:length(specific_configurations), function(i) {
+        identical(specific_configurations[[i]]$sources, sources)
+      })
+    )
+    if (length(this_source_index) == 0) {
+      # source not present yet, insert at end
+      this_source_index <- length(specific_configurations) + 1
+    }
+    specific_configurations[[this_source_index]] <- list(
+      sources = sources,
+      targets = targets
+    )
     installModMorphField(input, output, id, param_values(), value_descriptions(),
                          ccm(), specific_configurations, styleFunc,
                          edit_spec_mode = input[[paste0(id, "_edit_spec_mode")]])
@@ -802,14 +821,15 @@ updateEditButtons <- function(input, id, sel_cells, field_df,
       if (nrow(sel_cells) == 0) {
         n_spec_col <- 0
       } else {
-        cols <- sel_cells[, 2]
-        # Calculate number of cell selections in specifying column: must be 1!
+        cols <- sel_cells[, 2] + 1
+        spec_params <- extractSpecifyingParams(specific_configurations)
+        # Calculate number of cell selections in specifying columns: must be > 0!
         n_spec_col <- sum(sapply(cols, function(col) {
-          column <- names(field_df)[col + 1]
-          names(specific_configurations) == column
+          column <- names(field_df)[col]
+          column %in% spec_params
         }))
       }
-      if (n_spec_col == 1) {
+      if (n_spec_col > 0) {
         shinyjs::enable(selector = paste0("#", id, "_save_spec_btn"))
       } else {
         shinyjs::disable(selector = paste0("#", id, "_save_spec_btn"))

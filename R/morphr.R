@@ -91,7 +91,7 @@ morphfield <- function(param_values = NULL, value_descriptions = NULL,
   if (!is.null(specific_configurations)) {
     # Style the parameters that define specific configurations differently:
     field <- field %>%
-      formatStyle(names(specific_configurations),
+      formatStyle(extractSpecifyingParams(specific_configurations),
                   color = "white", backgroundColor = "gray")
   }
 
@@ -350,24 +350,62 @@ buildCCMFromSpecificConfigurations <- function(param_values,
 #' @return Specific configurations in the new extended format.
 #' @export
 convertSpecConfToExtended <- function(specific_configurations) {
+  if (is.null(names(specific_configurations))) {
+    # Assume it's already in new format
+    return(specific_configurations)
+  }
+  # Old compact format; convert to new extended format
   sce <- list()
   for (source_param in names(specific_configurations)) {
-    for (source_val in names(specific_configurations[[source_param]])) {
+    if (length(specific_configurations[[source_param]]) == 0) {
       sce <- c(sce, list(
         list(
           sources = list(
-            list(param = source_param, value = source_val)
-          ),
-          targets = lapply(
-            names(specific_configurations[[source_param]][[source_val]]),
-            function(target_param) {
-              list(param = target_param,
-                   value = specific_configurations[[source_param]][[source_val]][[target_param]])
-            })
+            list(param = source_param, value = NULL)
+          )
         )
       ))
+    } else {
+      for (source_val in names(specific_configurations[[source_param]])) {
+        sce <- c(sce, list(
+          list(
+            sources = list(
+              list(param = source_param, value = source_val)
+            ),
+            targets = lapply(
+              names(specific_configurations[[source_param]][[source_val]]),
+              function(target_param) {
+                list(param = target_param,
+                     value = specific_configurations[[source_param]][[source_val]][[target_param]])
+              })
+          )
+        ))
+      }
     }
   }
+  return(sce)
+}
+
+
+extractSpecifyingParams <- function(specific_configurations) {
+  if (length(specific_configurations) == 0) return(NULL)
+  sort(unique(c(
+    sapply(specific_configurations, function(e) {
+      sapply(e$sources, function(ee) {ee$param})
+    })
+  )))
+}
+
+
+sortSpecifyingParams <- function(specific_configurations) {
+  sorted_params <- extractSpecifyingParams(specific_configurations)
+  lapply(specific_configurations, function(c) {
+    unsorted_params <- sapply(c$sources, function(s) {s$param})
+    sorted_indices <- unname(sapply(unsorted_params, function(p) {which(sorted_params == p)}))
+    # And sort the sources:
+    c$sources <- lapply(sorted_indices, function(i) {c$sources[[i]]})
+    c
+  })
 }
 
 

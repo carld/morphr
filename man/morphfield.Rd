@@ -100,13 +100,27 @@ With \emph{specific configurations}, one can define one or more parameter
 columns to \emph{specify} the field. This means that choosing a value in the
 specifying column sets the values of some or all other columns. It constrains
 the field. Specifying columns are marked with a darker grey than normal
-columns. The \code{specific_configurations} are expected to be a named list
-of named lists of named lists. The top-level hierarchy names represent the
-parameter names that are specifying. The next level names represent the
-parameter's values that are specifying. The deepest level names represent the
-parameter names that are specified and the values (list elements) are the
-parameter value(s) that are specified (i.e. considered possible) in this
-configuration. Defaults to NULL, i.e. no specification and the field is
-\emph{open}.
+columns. The \code{specific_configurations} can be defined in one of two
+formats:
+
+In the old compact format, \code{specific_configurations} are expected to be
+a named list of named lists of named lists. The top-level hierarchy names
+represent the parameter names that are specifying. The next level names
+represent the parameter's values that are specifying. The deepest level names
+represent the parameter names that are specified and the values (list elements)
+are the parameter value(s) that are specified (i.e. considered possible) in this
+configuration.
+
+In the new extended format, \code{specific_configurations} are expected to be
+a list of names lists. Each named list has the names \code{sources} and
+\code{targets}. Under sources, a list of sources, i.e. specifying parameters,
+is stored. All sources together act specifying, i.e. if all specifying
+sources are selected, then it constrains the field. Under targets, a list of
+targets, i.e. specified parameter values, is stored. Each source and target
+is a list with names \code{param} and \code{value}, identifying the parameter
+value.
+
+\code{specific_configurations} defaults to NULL, i.e. no specification and the
+field is \emph{open}.
 }
 

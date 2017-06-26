@@ -130,9 +130,159 @@ server <- function(input, output, session) {
     )
   )
 
+  specific_configurations_new2 <- list(
+    list(
+      sources = list(
+        list(
+          param = "Parameter A",
+          value = "A1"
+        ),
+        list(
+          param = "Parameter B",
+          value = "B1"
+        )
+      ),
+      targets = list(
+        list(
+          param = "Parameter C",
+          value = "C1"
+        )
+      )
+    ),
+    list(
+      sources = list(
+        list(
+          param = "Parameter A",
+          value = "A2"
+        ),
+        list(
+          param = "Parameter B",
+          value = "B4"
+        )
+      ),
+      targets = list(
+        list(
+          param = "Parameter C",
+          value = "C2"
+        )
+      )
+    ),
+    list(
+      sources = list(
+        list(
+          param = "Parameter A",
+          value = "A3"
+        ),
+        list(
+          param = "Parameter B",
+          value = "B1"
+        )
+      ),
+      targets = list(
+        list(
+          param = "Parameter C",
+          value = "C1"
+        )
+      )
+    ),
+    list(
+      sources = list(
+        list(
+          param = "Parameter A",
+          value = "A4"
+        ),
+        list(
+          param = "Parameter B",
+          value = "B3"
+        )
+      ),
+      targets = list(
+        list(
+          param = "Parameter C",
+          value = "C2"
+        )
+      )
+    )
+  )
+
+  specific_configurations_new3 <- list(
+    list(
+      sources = list(
+        list(
+          param = "Parameter B",
+          value = "B1"
+        ),
+        list(
+          param = "Parameter A",
+          value = "A1"
+        )
+      ),
+      targets = list(
+        list(
+          param = "Parameter C",
+          value = "C1"
+        )
+      )
+    ),
+    list(
+      sources = list(
+        list(
+          param = "Parameter A",
+          value = "A2"
+        ),
+        list(
+          param = "Parameter B",
+          value = "B4"
+        )
+      ),
+      targets = list(
+        list(
+          param = "Parameter C",
+          value = "C2"
+        )
+      )
+    ),
+    list(
+      sources = list(
+        list(
+          param = "Parameter B",
+          value = "B1"
+        ),
+        list(
+          param = "Parameter A",
+          value = "A3"
+        )
+      ),
+      targets = list(
+        list(
+          param = "Parameter C",
+          value = "C1"
+        )
+      )
+    ),
+    list(
+      sources = list(
+        list(
+          param = "Parameter B",
+          value = "B3"
+        ),
+        list(
+          param = "Parameter A",
+          value = "A4"
+        )
+      ),
+      targets = list(
+        list(
+          param = "Parameter C",
+          value = "C2"
+        )
+      )
+    )
+  )
+
   morphr::installMorphField(input, output, id = "morphfield",
                             param_values = param_values,
-                            specific_configurations = specific_configurations_old,
+                            specific_configurations = specific_configurations_new2,
                             editable = TRUE)
 
 }
