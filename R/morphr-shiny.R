@@ -79,6 +79,9 @@
 #' @param param_values A named list of vectors/lists. The names of the list are
 #'   the names of the parameters (columns) in the morphological field. The
 #'   vectors/lists contain the possible values that the parameter can have.
+#'   If \code{param_values} is NULL (default), then an empty field is created.
+#'   Use \code{editable = TRUE} in \code{\link{installMorphField}} to fill the
+#'   empty field in the browser.
 #' @param value_descriptions Optional. Each parameter value in param_values can
 #'   have an accompanying (long) description that will be shown as tooltip/popover.
 #'   The structure of \code{value_descriptions} is like that of \code{param_values},
@@ -103,21 +106,64 @@
 #'   \code{\link{dataTableProxy}()}.
 #' @export
 installMorphField <- function(input, output, id,
-                              param_values, value_descriptions = NULL,
+                              param_values = NULL, value_descriptions = NULL,
                               ccm = NULL, specific_configurations = NULL,
                               styleFunc = NULL, editable = FALSE,
                               edit_mode = FALSE, edit_spec_mode = FALSE) {
-  field_df <- placeMorphFieldUI(output, id, param_values, value_descriptions,
-                                specific_configurations, styleFunc,
-                                editable, edit_mode, edit_spec_mode)
-  proxy <- reactivateMorphField(input, output, id,
-                                param_values = function() {param_values},
-                                value_descriptions = function() {value_descriptions},
-                                ccm = function() {ccm},
-                                specific_configurations = function() {specific_configurations},
-                                field_df = function() {field_df},
-                                styleFunc = styleFunc, editable = editable)
+  proxy <- NULL
+  # Server code must be wrapped into any renderXXX() function in order
+  # to be executed not directly, but later when the UI is ready.
+  # Otherwise, you can get the error: 'ID not found in the DOM' when insertUI
+  # is used.
+  output[[id]] <- renderMorphField({
+    l <- returnMorphFieldUI(output, id, param_values, value_descriptions,
+                           specific_configurations, styleFunc,
+                           editable, edit_mode, edit_spec_mode)
+    field <- l$field
+    field_df <- l$field_df
+    proxy <<- reactivateMorphField(input, output, id,
+                                   param_values = function() {param_values},
+                                   value_descriptions = function() {value_descriptions},
+                                   ccm = function() {ccm},
+                                   specific_configurations = function() {specific_configurations},
+                                   field_df = function() {field_df},
+                                   styleFunc = styleFunc, editable = editable)
+    field
+  })
   return(proxy)
+}
+
+
+returnMorphFieldUI <- function(output, id, param_values = NULL,
+                               value_descriptions = NULL,
+                               specific_configurations = NULL,
+                               styleFunc = NULL, editable = FALSE,
+                               edit_mode = FALSE, edit_spec_mode = FALSE) {
+  l <- returnMorphFieldUIWithoutToolbar(
+    output, id, param_values, value_descriptions, specific_configurations,
+    styleFunc, edit_mode, edit_spec_mode
+  )
+  if (editable) {
+    placeMorphFieldUIToolbar(id, edit_mode)
+    no_spec_col <- is.null(specific_configurations) || length(specific_configurations) == 0
+    placeEditButtonRow(id, edit_mode, edit_spec_mode, edit_spec_mode_disabled = no_spec_col)
+  }
+  l
+}
+
+returnMorphFieldUIWithoutToolbar <- function(output, id, param_values = NULL,
+                                             value_descriptions = NULL,
+                                             specific_configurations = NULL,
+                                             styleFunc = NULL, edit_mode = FALSE,
+                                             edit_spec_mode = FALSE) {
+  l <- morphfield(param_values, value_descriptions, specific_configurations,
+                  edit_mode, id, edit_spec_mode)
+  field <- l$field
+  field_df <- l$field_df
+  if (!is.null(styleFunc)) {
+    field <- styleFunc(field)
+  }
+  list(field = field, field_df = field_df)
 }
 
 
@@ -132,39 +178,38 @@ installMorphField <- function(input, output, id,
 #'
 #' @inheritParams installMorphField
 #' @export
-placeMorphFieldUI <- function(output, id, param_values,
+placeMorphFieldUI <- function(output, id, param_values = NULL,
                               value_descriptions = NULL,
                               specific_configurations = NULL,
                               styleFunc = NULL, editable = FALSE,
                               edit_mode = FALSE, edit_spec_mode = FALSE) {
-  field_df <- placeMorphFieldUIWithoutToolbar(
-    output, id, param_values, value_descriptions, specific_configurations,
-    styleFunc, edit_mode, edit_spec_mode
-  )
-  if (editable) {
-    placeMorphFieldUIToolbar(id, edit_mode)
-    placeEditButtonRow(id, edit_mode, edit_spec_mode)
-  }
-  field_df
+  output[[id]] <- renderMorphField({
+    l <- returnMorphFieldUI(output, id, param_values,
+                            value_descriptions,
+                            specific_configurations,
+                            styleFunc, edit_mode, edit_spec_mode)
+    l$field
+  })
 }
 
-placeMorphFieldUIWithoutToolbar <- function(output, id, param_values,
+
+placeMorphFieldUIWithoutToolbar <- function(output, id, param_values = NULL,
                                             value_descriptions = NULL,
                                             specific_configurations = NULL,
                                             styleFunc = NULL, edit_mode = FALSE,
                                             edit_spec_mode = FALSE) {
-  l <- morphfield(param_values, value_descriptions, specific_configurations,
-                  edit_mode, id, edit_spec_mode)
-  field <- l$field
-  field_df <- l$field_df
-  if (!is.null(styleFunc)) {
-    field <- styleFunc(field)
-  }
-  output[[id]] <- renderMorphField(field)
-  field_df
+  output[[id]] <- renderMorphField({
+    l <- returnMorphFieldUIWithoutToolbar(output, id, param_values,
+                                          value_descriptions,
+                                          specific_configurations,
+                                          styleFunc, edit_mode, edit_spec_mode)
+    l$field
+  })
 }
 
-placeEditButtonRow <- function(id, edit_mode = FALSE, edit_spec_mode = FALSE) {
+
+placeEditButtonRow <- function(id, edit_mode = FALSE, edit_spec_mode = FALSE,
+                               edit_spec_mode_disabled = FALSE) {
   if (edit_mode) {
     insertUI(
       selector = paste0("#", id),
@@ -183,10 +228,15 @@ placeEditButtonRow <- function(id, edit_mode = FALSE, edit_spec_mode = FALSE) {
           actionButton(paste0(id, "_set_spec_col_btn"), "Set Specifying Column",
                        class = "pull-left"),
           {
+            v <- if (is.null(edit_spec_mode) || edit_spec_mode_disabled) {FALSE} else {edit_spec_mode}
             d <- checkboxInput(paste0(id, "_edit_spec_mode"), "Edit Specifications",
-                               value = edit_spec_mode)
+                               value = v)
             d$attribs$class <- paste(d$attribs$class, "pull-left")
             d$attribs$style <- "width: auto; margin-left: 10px; margin-right: 10px;"
+            if (edit_spec_mode_disabled) {
+              d$children[[1]]$children[[1]]$children[[1]]$attribs$class <- "disabled"
+              d$children[[1]]$children[[1]]$children[[1]]$attribs$disabled = ""
+            }
             d
           },
           actionButton(paste0(id, "_save_spec_btn"), "Save Specification",
@@ -350,8 +400,11 @@ reactivateMorphFieldWithoutToolbar <- function(input, id, param_values,
     sel_cells <- input[[paste0(id, "_cells_selected")]]
     field_df <- getFieldDF(field_df, param_values)
     if (editable) {
-      updateEditButtons(input, id, sel_cells, field_df, specific_configurations())
-      if (input[[paste0(id, "_edit_mode")]]) return() # do nothing else
+      em <- input[[paste0(id, "_edit_mode")]]
+      if (!is.null(em) && em) {
+        updateEditButtons(input, id, sel_cells, field_df, specific_configurations())
+        return() # do nothing else
+      }
     }
     if (isLastSelectedCellEmpty(sel_cells, field_df)) {
       sel_cells <- removeLastSelectedCell(sel_cells)
@@ -396,17 +449,17 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
                                         field_df = function() {NULL},
                                         styleFunc = NULL) {
   observeEvent(input[[paste0(id, "_edit_btn")]], {
-    prev_mode <- input[[paste0(id, "_edit_mode")]]
-    if (!prev_mode) { # toggle (edit_mode was previously off, turn it on)
+    if (!input[[paste0(id, "_edit_mode")]]) { # toggle (edit_mode was previously off, turn it on)
+      placeMorphFieldUIWithoutToolbar(output, id, param_values(), value_descriptions(),
+                                       specific_configurations(), styleFunc,
+                                       edit_mode = TRUE)
+      no_spec_col <- is.null(specific_configurations()) || length(specific_configurations()) == 0
       updateCheckboxInput(getDefaultReactiveDomain(), paste0(id, "_edit_mode"), value = TRUE)
-      placeMorphFieldUIWithoutToolbar(output, id, param_values(), value_descriptions(),
-                                      specific_configurations(), styleFunc,
-                                      edit_mode = TRUE)
-      placeEditButtonRow(id, edit_mode = TRUE)
+      placeEditButtonRow(id, edit_mode = TRUE, edit_spec_mode_disabled = no_spec_col)
     } else {
-      updateCheckboxInput(getDefaultReactiveDomain(), paste0(id, "_edit_mode"), value = FALSE)
       placeMorphFieldUIWithoutToolbar(output, id, param_values(), value_descriptions(),
-                                      specific_configurations(), styleFunc)
+                                       specific_configurations(), styleFunc)
+      updateCheckboxInput(getDefaultReactiveDomain(), paste0(id, "_edit_mode"), value = FALSE)
       placeEditButtonRow(id)
     }
   })
@@ -713,8 +766,9 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
 
 updateEditButtons <- function(input, id, sel_cells, field_df,
                               specific_configurations) {
-  if (input[[paste0(id, "_edit_mode")]]) {
-    if (!input[[paste0(id, "_edit_spec_mode")]]) {
+  if (req(input[[paste0(id, "_edit_mode")]])) {
+    esm <- input[[paste0(id, "_edit_spec_mode")]]
+    if (is.null(esm) || !esm) {
       if (nrow(sel_cells) == 1) {
         shinyjs::enable(selector = paste0("#", id, "_rem_item_btn"))
         shinyjs::enable(selector = paste0("#", id, "_mod_item_btn"))

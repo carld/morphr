@@ -4,9 +4,10 @@
 \alias{placeMorphFieldUI}
 \title{Place a morphological field widget into Shiny UI}
 \usage{
-placeMorphFieldUI(output, id, param_values, value_descriptions = NULL,
-  specific_configurations = NULL, styleFunc = NULL, editable = FALSE,
-  edit_mode = FALSE, edit_spec_mode = FALSE)
+placeMorphFieldUI(output, id, param_values = NULL,
+  value_descriptions = NULL, specific_configurations = NULL,
+  styleFunc = NULL, editable = FALSE, edit_mode = FALSE,
+  edit_spec_mode = FALSE)
 }
 \arguments{
 \item{output}{The Shiny session's output object (the same as is passed into
@@ -18,7 +19,10 @@ HTML document. This ID can be used with functions like
 
 \item{param_values}{A named list of vectors/lists. The names of the list are
 the names of the parameters (columns) in the morphological field. The
-vectors/lists contain the possible values that the parameter can have.}
+vectors/lists contain the possible values that the parameter can have.
+If \code{param_values} is NULL (default), then an empty field is created.
+Use \code{editable = TRUE} in \code{\link{installMorphField}} to fill the
+empty field in the browser.}
 
 \item{value_descriptions}{Optional. Each parameter value in param_values can
 have an accompanying (long) description that will be shown as tooltip/popover.

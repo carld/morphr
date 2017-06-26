@@ -44,7 +44,7 @@
 #' @return List with items \code{field} (a \code{\link{datatable}} object) and
 #'   \code{field_df} (the \code{data.frame} used to create the datatable object).
 #' @export
-morphfield <- function(param_values, value_descriptions = NULL,
+morphfield <- function(param_values = NULL, value_descriptions = NULL,
                        specific_configurations = NULL, edit_mode = FALSE,
                        id = NULL, set_spec_mode = FALSE) {
   field_df <- paramValuesToDataFrame(param_values, value_descriptions)
@@ -117,7 +117,7 @@ parseMorphFieldString <- function(string) {
 #' create a fixed dimension data.frame.
 #' @inheritParams installMorphField
 #' @export
-paramValuesToDataFrame <- function(param_values, value_descriptions = NULL) {
+paramValuesToDataFrame <- function(param_values = NULL, value_descriptions = NULL) {
   # Need to set seed manually to ensure random unique IDs of the tipify/popify elements
   # (Not understood why, but every morphfield was using the same ID sequence as the previous,
   # only omitting the first 8 IDs of the previous field.)
@@ -125,6 +125,7 @@ paramValuesToDataFrame <- function(param_values, value_descriptions = NULL) {
   set.seed(as.integer(as.numeric(substr(t, 7, nchar(t))) * 1e5))
 
   ret_val <- param_values
+  if (is.null(ret_val)) ret_val <- list(list())
   if (class(ret_val) == "list") {
     # Make sure that all list items have same length.
     # If not: fill with empty character strings
@@ -194,17 +195,14 @@ findConsistentCells <- function(param_values, ccm, selected_cells = NULL) {
   consistent_cells <- matrix(ncol = 2)[-1,] # empty two-column matrix
   lapply(seq_along(param_values), function(col) { # loop over all columns (index col)
     param1 <- names(param_values)[col]
-    # print(param1)
     if (!col %in% sel_cols) { # don't mark cells in columns with selections
       lapply(seq_along(param_values[[col]]), function(row) { # loop over all values in column (rows)
         value1 <- param_values[[col]][[row]]
-        # print(paste0("   ", value1))
         cell_consistent <- TRUE
         for (ocol in seq_along(param_values)[-col]) { # loop over all other columns (index ocol)
           # in each column (index ocol), at least one value (only within the selection
           # if there is a selection) must be consistent with value1
           param2 <- names(param_values)[ocol]
-          # print(paste0("      ", param2))
           if (ocol %in% sel_cols) {
             # check only with selected values
             check_values <- param_values[[ocol]][sel_rows[sel_cols == ocol]]
@@ -213,10 +211,8 @@ findConsistentCells <- function(param_values, ccm, selected_cells = NULL) {
           }
           consistent <- FALSE
           for (value2 in check_values) {
-            # print(paste0("         ", value2))
             if (ccm[[buildHashValue(param1, value1, param2, value2)]]) {
               consistent <- TRUE
-              # print(paste0("            CONSISTENT!"))
               break()
             }
           }
@@ -226,10 +222,7 @@ findConsistentCells <- function(param_values, ccm, selected_cells = NULL) {
           }
         }
         if (cell_consistent) {
-          # print(paste0("   => CELL CONSISTENT!"))
           consistent_cells <<- rbind(consistent_cells, c(row, col - 1))
-        } else {
-          # print(paste0("   => CELL NOT CONSISTENT!"))
         }
       })
     }
@@ -280,17 +273,19 @@ buildHashValue <- function(param1, value1, param2, value2) {
 #' @export
 initializeCCM <- function(param_values, def_val = TRUE) {
   ccm <- list()
-  lapply(1:(length(param_values) - 1), function(i) {
-    param1 <- names(param_values)[i]
-    lapply(param_values[[i]], function(value1) {
-      lapply((i + 1):length(param_values), function(j) {
-        param2 <- names(param_values)[j]
-        lapply(param_values[[j]], function(value2) {
-          ccm[[buildHashValue(param1, value1, param2, value2)]] <<- def_val
+  if (length(param_values) > 1) {
+    lapply(1:(length(param_values) - 1), function(i) {
+      param1 <- names(param_values)[i]
+      lapply(param_values[[i]], function(value1) {
+        lapply((i + 1):length(param_values), function(j) {
+          param2 <- names(param_values)[j]
+          lapply(param_values[[j]], function(value2) {
+            ccm[[buildHashValue(param1, value1, param2, value2)]] <<- def_val
+          })
         })
       })
     })
-  })
+  }
   ccm
 }
 
