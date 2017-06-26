@@ -443,27 +443,12 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
                                         styleFunc = NULL) {
   observeEvent(input[[paste0(id, "_edit_btn")]], {
     if (!input[[paste0(id, "_edit_mode")]]) { # toggle (edit_mode was previously off, turn it on)
-      # output[[id]] <- renderMorphField({
-      #   updateCheckboxInput(getDefaultReactiveDomain(), paste0(id, "_edit_mode"), value = TRUE)
-      #   l <- returnMorphFieldUIWithoutToolbar(output, id, param_values(), value_descriptions(),
-      #                                         specific_configurations(), styleFunc,
-      #                                         edit_mode = TRUE)
-      #   placeEditButtonRow(id, edit_mode = TRUE)
-      #   l$field
-      # })
       placeMorphFieldUIWithoutToolbar(output, id, param_values(), value_descriptions(),
                                        specific_configurations(), styleFunc,
                                        edit_mode = TRUE)
       updateCheckboxInput(getDefaultReactiveDomain(), paste0(id, "_edit_mode"), value = TRUE)
       placeEditButtonRow(id, edit_mode = TRUE)
     } else {
-      # output[[id]] <- renderMorphField({
-      #   updateCheckboxInput(getDefaultReactiveDomain(), paste0(id, "_edit_mode"), value = FALSE)
-      #   l <- returnMorphFieldUIWithoutToolbar(output, id, param_values(), value_descriptions(),
-      #                                         specific_configurations(), styleFunc)
-      #   placeEditButtonRow(id)
-      #   l$field
-      # })
       placeMorphFieldUIWithoutToolbar(output, id, param_values(), value_descriptions(),
                                        specific_configurations(), styleFunc)
       updateCheckboxInput(getDefaultReactiveDomain(), paste0(id, "_edit_mode"), value = FALSE)
@@ -737,15 +722,6 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
   })
 
   observeEvent(input[[paste0(id, "_edit_spec_mode")]], {
-    # output[[id]] <- renderMorphField({
-    #   l <- returnMorphFieldUIWithoutToolbar(
-    #     output, id, param_values(), value_descriptions(),
-    #     specific_configurations(), styleFunc,
-    #     edit_mode = TRUE, edit_spec_mode = input[[paste0(id, "_edit_spec_mode")]]
-    #   )
-    #   disableAllEditButtons(id)
-    #   l$field
-    # })
     placeMorphFieldUIWithoutToolbar(
       output, id, param_values(), value_descriptions(),
       specific_configurations(), styleFunc,
