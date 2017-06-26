@@ -195,17 +195,14 @@ findConsistentCells <- function(param_values, ccm, selected_cells = NULL) {
   consistent_cells <- matrix(ncol = 2)[-1,] # empty two-column matrix
   lapply(seq_along(param_values), function(col) { # loop over all columns (index col)
     param1 <- names(param_values)[col]
-    # print(param1)
     if (!col %in% sel_cols) { # don't mark cells in columns with selections
       lapply(seq_along(param_values[[col]]), function(row) { # loop over all values in column (rows)
         value1 <- param_values[[col]][[row]]
-        # print(paste0("   ", value1))
         cell_consistent <- TRUE
         for (ocol in seq_along(param_values)[-col]) { # loop over all other columns (index ocol)
           # in each column (index ocol), at least one value (only within the selection
           # if there is a selection) must be consistent with value1
           param2 <- names(param_values)[ocol]
-          # print(paste0("      ", param2))
           if (ocol %in% sel_cols) {
             # check only with selected values
             check_values <- param_values[[ocol]][sel_rows[sel_cols == ocol]]
@@ -214,10 +211,8 @@ findConsistentCells <- function(param_values, ccm, selected_cells = NULL) {
           }
           consistent <- FALSE
           for (value2 in check_values) {
-            # print(paste0("         ", value2))
             if (ccm[[buildHashValue(param1, value1, param2, value2)]]) {
               consistent <- TRUE
-              # print(paste0("            CONSISTENT!"))
               break()
             }
           }
@@ -227,10 +222,7 @@ findConsistentCells <- function(param_values, ccm, selected_cells = NULL) {
           }
         }
         if (cell_consistent) {
-          # print(paste0("   => CELL CONSISTENT!"))
           consistent_cells <<- rbind(consistent_cells, c(row, col - 1))
-        } else {
-          # print(paste0("   => CELL NOT CONSISTENT!"))
         }
       })
     }
