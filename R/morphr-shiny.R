@@ -145,7 +145,8 @@ returnMorphFieldUI <- function(output, id, param_values = NULL,
   )
   if (editable) {
     placeMorphFieldUIToolbar(id, edit_mode)
-    placeEditButtonRow(id, edit_mode, edit_spec_mode)
+    no_spec_col <- is.null(specific_configurations) || length(specific_configurations) == 0
+    placeEditButtonRow(id, edit_mode, edit_spec_mode, edit_spec_mode_disabled = no_spec_col)
   }
   l
 }
@@ -207,7 +208,8 @@ placeMorphFieldUIWithoutToolbar <- function(output, id, param_values = NULL,
 }
 
 
-placeEditButtonRow <- function(id, edit_mode = FALSE, edit_spec_mode = FALSE) {
+placeEditButtonRow <- function(id, edit_mode = FALSE, edit_spec_mode = FALSE,
+                               edit_spec_mode_disabled = FALSE) {
   if (edit_mode) {
     insertUI(
       selector = paste0("#", id),
@@ -226,10 +228,15 @@ placeEditButtonRow <- function(id, edit_mode = FALSE, edit_spec_mode = FALSE) {
           actionButton(paste0(id, "_set_spec_col_btn"), "Set Specifying Column",
                        class = "pull-left"),
           {
+            v <- if (is.null(edit_spec_mode) || edit_spec_mode_disabled) {FALSE} else {edit_spec_mode}
             d <- checkboxInput(paste0(id, "_edit_spec_mode"), "Edit Specifications",
-                               value = if (is.null(edit_spec_mode)) FALSE else edit_spec_mode)
+                               value = v)
             d$attribs$class <- paste(d$attribs$class, "pull-left")
             d$attribs$style <- "width: auto; margin-left: 10px; margin-right: 10px;"
+            if (edit_spec_mode_disabled) {
+              d$children[[1]]$children[[1]]$children[[1]]$attribs$class <- "disabled"
+              d$children[[1]]$children[[1]]$children[[1]]$attribs$disabled = ""
+            }
             d
           },
           actionButton(paste0(id, "_save_spec_btn"), "Save Specification",
@@ -446,8 +453,9 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
       placeMorphFieldUIWithoutToolbar(output, id, param_values(), value_descriptions(),
                                        specific_configurations(), styleFunc,
                                        edit_mode = TRUE)
+      no_spec_col <- is.null(specific_configurations()) || length(specific_configurations()) == 0
       updateCheckboxInput(getDefaultReactiveDomain(), paste0(id, "_edit_mode"), value = TRUE)
-      placeEditButtonRow(id, edit_mode = TRUE)
+      placeEditButtonRow(id, edit_mode = TRUE, edit_spec_mode_disabled = no_spec_col)
     } else {
       placeMorphFieldUIWithoutToolbar(output, id, param_values(), value_descriptions(),
                                        specific_configurations(), styleFunc)
