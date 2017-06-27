@@ -473,8 +473,6 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
       placeMorphFieldUIWithoutToolbar(output, id, param_values(), value_descriptions(),
                                        specific_configurations(), styleFunc,
                                        edit_mode = TRUE)
-      print("specific_configurations:")
-      print(specific_configurations())
       no_spec_col <- is.null(specific_configurations()) || length(specific_configurations()) == 0
       updateCheckboxInput(getDefaultReactiveDomain(), paste0(id, "_edit_mode"), value = TRUE)
       placeEditButtonRow(id, edit_mode = TRUE, edit_spec_mode_disabled = no_spec_col)

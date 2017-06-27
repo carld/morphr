@@ -319,10 +319,10 @@ buildCCMFromSpecificConfigurations <- function(param_values,
     # cross-correlate all with all higher
     lapply(1:(length(all) - 1), function(i) {
       lapply((i + 1):length(all), function(j) {
-        param1 <- all[i]$param
-        values1 <- all[i]$value
-        param2 <- all[j]$param
-        values2 <- all[j]$value
+        param1 <- all[[i]]$param
+        values1 <- all[[i]]$value
+        param2 <- all[[j]]$param
+        values2 <- all[[j]]$value
         lapply(values1, function(value1) {
           lapply(values2, function(value2) {
             ccm[[buildHashValue(param1, value1, param2, value2)]] <<- TRUE # cross-correlation between specifying and specified parameter
