@@ -312,28 +312,23 @@ buildCCMFromSpecificConfigurations <- function(param_values,
                                                specific_configurations) {
   ccm <- initializeCCM(param_values, def_val = FALSE) # first set all combinations to inconsistent
   # Then, set only valid combinations consistent:
-  lapply(names(specific_configurations), function(param1) {
-    lapply(names(specific_configurations[[param1]]), function(value1) {
-      configs <- specific_configurations[[param1]][[value1]]
-      # add relations from higher to lower hierarchy
-      lapply(names(configs), function(param2) {
-        lapply(configs[[param2]], function(value2) {
-          ccm[[buildHashValue(param1, value1, param2, value2)]] <<- TRUE # cross-correlation between specifying and specified parameter
-        })
-      })
-      if (length(configs) > 1) { # for more than one specified parameter: need to cross-correlate the specified parameters among themselves as well
-        lapply(1:(length(configs) - 1), function(i) {
-          param2 <- names(configs)[i]
-          lapply(configs[[param2]], function(value2) {
-            lapply((i + 1):length(configs), function(j) {
-              param3 <- names(configs)[j]
-              lapply(configs[[param3]], function(value3) {
-                ccm[[buildHashValue(param2, value2, param3, value3)]] <<- TRUE
-              })
-            })
+  lapply(specific_configurations, function(spec_conf) {
+    sources <- spec_conf$sources
+    targets <- spec_conf$targets
+    all <- c(sources, targets)
+    # cross-correlate all with all higher
+    lapply(1:(length(all) - 1), function(i) {
+      lapply((i + 1):length(all), function(j) {
+        param1 <- all[i]$param
+        values1 <- all[i]$value
+        param2 <- all[j]$param
+        values2 <- all[j]$value
+        lapply(values1, function(value1) {
+          lapply(values2, function(value2) {
+            ccm[[buildHashValue(param1, value1, param2, value2)]] <<- TRUE # cross-correlation between specifying and specified parameter
           })
         })
-      }
+      })
     })
   })
   ccm
