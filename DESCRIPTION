@@ -1,8 +1,8 @@
 Package: morphr
 Type: Package
 Title: A Tool for Morphological Analysis (MA) using the JavaScript library 'DataTables'
-Version: 0.0.1
-Date: 2017-02-15
+Version: 0.1.0
+Date: 2017-06-28
 Authors@R: c(
     person("Markus", "Voge", email = "markus.voge@ea-aw.de", role = c("aut", "cre")),
     person("Yihui", "Xie", email = "xie@yihui.name", role = c("ctb", "cph"), comment = "Author and maintainer of the R package DT that this package is built upon"),
