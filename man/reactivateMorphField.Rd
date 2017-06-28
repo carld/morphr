@@ -6,8 +6,9 @@
 \usage{
 reactivateMorphField(input, output, id, param_values,
   value_descriptions = function() {     NULL }, ccm = function() {     NULL
-  }, specific_configurations = function() {     NULL },
-  field_df = function() {     NULL }, styleFunc = NULL, editable = FALSE)
+  }, configurations = function() {     NULL }, spec_columns = function() {  
+    NULL }, field_df = function() {     NULL }, styleFunc = NULL,
+  editable = FALSE)
 }
 \arguments{
 \item{input}{The Shiny session's input object (the same as is passed into the
@@ -32,8 +33,15 @@ values must be names whose list elements are the description texts.}
 \item{ccm}{A function returning the \code{ccm}, see
 \code{\link{installMorphField}}.}
 
-\item{specific_configurations}{A function returning the
-\code{specific_configurations}, see \code{\link{installMorphField}}.}
+\item{configurations}{A function returning the
+\code{configurations}, see \code{\link{installMorphField}}.}
+
+\item{spec_columns}{Optional. A list of columns that shall be marked with dark
+gray color. These can be "specifying" columns, e.g. a summarizing column like
+for the selection of a scenario. These columns can then be seen as "input"
+columns: By clicking them, one gets a certain "output" response from
+the field, e.g. the parameter values that belong to a specific scenario.
+The \code{spec_columns} can also be any other "special" columns.}
 
 \item{field_df}{A function returning the \code{field_df}, as returned by
 \code{\link{paramValuesToDataFrame}}. Can be provided if it already exists
@@ -82,7 +90,7 @@ available while the updated field is installed with
 \code{\link{placeMorphFieldUI}}, one method to achieve this is to use
 \code{\link{reactive}} expressions for each of the data returning functions
 in the arguments \code{param_values}, \code{ccm},
-\code{specific_configurations}, and \code{field_df}. These reactive
+\code{configurations}, and \code{field_df}. These reactive
 expressions are then used both in the field update code with
 \code{\link{placeMorphFieldUI}} and given to \code{reactivateMorphField}.
 }

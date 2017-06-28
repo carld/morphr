@@ -16,7 +16,7 @@ empty field in the browser.}
 
 \item{ccm}{Optional. The cross-consistency matrix (CCM) for the morphological
 field can be given to constrain the possible configurations of the field.
-If provided, the \code{specific_configurations} are ignored. See details.}
+If provided, the \code{configurations} are ignored. See details.}
 
 \item{selected_cells}{A two-column matrix with the row and column indices of
 selected cells, starting at 1 for rows (0 is header) and at 0 for columns.

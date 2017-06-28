@@ -16,7 +16,7 @@ The converted data as nested list.
 Use this function if you have a data.frame in long table format (with
 redundant information in some columns) and need a nested list expected as
 input to \code{\link{installMorphField}}, e.g. arguments \code{param_values},
-\code{value_descriptions}, \code{specific_configurations}.
+\code{value_descriptions}, \code{configurations}.
 }
 \details{
 The redundant columns must be on the left, the non-redundant on the right

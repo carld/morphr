@@ -5,7 +5,7 @@
 \title{Create an HTML morphological field widget using the DataTables library}
 \usage{
 morphfield(param_values = NULL, value_descriptions = NULL,
-  specific_configurations = NULL, edit_mode = FALSE, id = NULL,
+  spec_columns = NULL, edit_mode = FALSE, id = NULL,
   set_spec_mode = FALSE)
 }
 \arguments{
@@ -22,10 +22,12 @@ The structure of \code{value_descriptions} is like that of \code{param_values},
 but instead of containing parameter values as list elements, the parameter
 values must be names whose list elements are the description texts.}
 
-\item{specific_configurations}{Optional. The specific configurations are a
-list of only the valid parameter configrations as alternative to the CCM.
-If the \code{ccm} is also given, \code{specific_configurations} are
-ignored. See details.}
+\item{spec_columns}{Optional. A list of columns that shall be marked with dark
+gray color. These can be "specifying" columns, e.g. a summarizing column like
+for the selection of a scenario. These columns can then be seen as "input"
+columns: By clicking them, one gets a certain "output" response from
+the field, e.g. the parameter values that belong to a specific scenario.
+The \code{spec_columns} can also be any other "special" columns.}
 
 \item{id}{The unique ID string that the morphological field will have in the
 HTML document. This ID can be used with functions like
@@ -62,65 +64,5 @@ has the same ID as the old one, then you should not use
 \code{installMorphField}. Instead, use \code{\link{placeMorphFieldUI}} every
 time you update the field, and run \code{\link{reactivateMorphField}} only
 once on the ID of the field.
-}
-
-\section{Cross-consistency matrix (CCM)}{
-
-
-The \emph{CCM} contains a logical for each pair-wise comparison of the
-parameter values of a morphological field, being TRUE if the combination of
-the two values is consistent or valid, otherwise FALSE. It is a symmetric
-matrix with empty diagonal. This means that the result of assessing the
-consistency of value1 in param1 (column1 of the morphological field) with
-value2 in param2 is the same as the consistency of value2 in param2 with
-value1 in param1 (hence the symmetry). Parameter values are not cross-checked
-with other values of the same parameter (hence the empty diagonal).
-
-The CCM is stored as a list whose names are hash strings of the two compared
-parameter/value pairs. Those hash strings can be created with the function
-\code{\link{buildHashValue}()}. One could also store the CCM as a simple
-matrix, but this has two drawbacks: (1) Even when a matrix is devlared to be
-symmetric with \code{\link{Matrix::forceSymmetric}()}, this does not appear
-to make the matrix \emph{stay} symmetric when it is modified, i.e. updating
-the upper/lower triangle does not change the lower/upper triangle
-accordingly. One must therefore decide for one half of the matrix and
-remember to operate only on that. (2) It is slightly less straight forward to
-look up the consistency for a given pair of values. One must first find the
-indices corresponding to them. (However, this would be more trivial when the
-matrix columns/rows are named.) I find it a bit easier to use
-\code{\link{buildHashValue}()} on the value pair and use the hash for the
-lookup in a named list, where one does not need to remember which value is
-column, which is row.
-}
-
-\section{Specific configurations}{
-
-
-With \emph{specific configurations}, one can define one or more parameter
-columns to \emph{specify} the field. This means that choosing a value in the
-specifying column sets the values of some or all other columns. It constrains
-the field. Specifying columns are marked with a darker grey than normal
-columns. The \code{specific_configurations} can be defined in one of two
-formats:
-
-In the old compact format, \code{specific_configurations} are expected to be
-a named list of named lists of named lists. The top-level hierarchy names
-represent the parameter names that are specifying. The next level names
-represent the parameter's values that are specifying. The deepest level names
-represent the parameter names that are specified and the values (list elements)
-are the parameter value(s) that are specified (i.e. considered possible) in this
-configuration.
-
-In the new extended format, \code{specific_configurations} are expected to be
-a list of names lists. Each named list has the names \code{sources} and
-\code{targets}. Under sources, a list of sources, i.e. specifying parameters,
-is stored. All sources together act specifying, i.e. if all specifying
-sources are selected, then it constrains the field. Under targets, a list of
-targets, i.e. specified parameter values, is stored. Each source and target
-is a list with names \code{param} and \code{value}, identifying the parameter
-value.
-
-\code{specific_configurations} defaults to NULL, i.e. no specification and the
-field is \emph{open}.
 }
 

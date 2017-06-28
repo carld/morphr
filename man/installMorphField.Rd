@@ -5,9 +5,9 @@
 \title{Install a morphological field widget in Shiny}
 \usage{
 installMorphField(input, output, id, param_values = NULL,
-  value_descriptions = NULL, ccm = NULL, specific_configurations = NULL,
-  styleFunc = NULL, editable = FALSE, edit_mode = FALSE,
-  edit_spec_mode = FALSE)
+  value_descriptions = NULL, ccm = NULL, configurations = NULL,
+  spec_columns = NULL, styleFunc = NULL, editable = FALSE,
+  edit_mode = FALSE, edit_spec_mode = FALSE)
 }
 \arguments{
 \item{input}{The Shiny session's input object (the same as is passed into the
@@ -35,12 +35,18 @@ values must be names whose list elements are the description texts.}
 
 \item{ccm}{Optional. The cross-consistency matrix (CCM) for the morphological
 field can be given to constrain the possible configurations of the field.
-If provided, the \code{specific_configurations} are ignored. See details.}
+If provided, the \code{configurations} are ignored. See details.}
 
-\item{specific_configurations}{Optional. The specific configurations are a
-list of only the valid parameter configrations as alternative to the CCM.
-If the \code{ccm} is also given, \code{specific_configurations} are
-ignored. See details.}
+\item{configurations}{Optional. The configurations are a list of the valid
+parameter configurations as alternative to the CCM. If the \code{ccm}
+is also given, \code{configurations} are ignored. See details.}
+
+\item{spec_columns}{Optional. A list of columns that shall be marked with dark
+gray color. These can be "specifying" columns, e.g. a summarizing column like
+for the selection of a scenario. These columns can then be seen as "input"
+columns: By clicking them, one gets a certain "output" response from
+the field, e.g. the parameter values that belong to a specific scenario.
+The \code{spec_columns} can also be any other "special" columns.}
 
 \item{styleFunc}{Optional function to style the field. It should accept the field
 returned by \code{\link{morphfield}()} (actually a datatable as returned by
@@ -113,19 +119,24 @@ matrix columns/rows are named.) I find it a bit easier to use
 \code{\link{buildHashValue}()} on the value pair and use the hash for the
 lookup in a named list, where one does not need to remember which value is
 column, which is row.
+
+Right now, it is not possible to view or edit the CCM, but it can be
+specified in code or, alternatively, be computed from configurations.
 }
 
-\section{Specific configurations}{
+\section{Configurations}{
 
 
-With \emph{specific configurations}, one can define one or more parameter
-columns to \emph{specify} the field. This means that choosing a value in the
-specifying column sets the values of some or all other columns. It constrains
-the field. Specifying columns are marked with a darker grey than normal
-columns. The \code{specific_configurations} can be defined in one of two
-formats:
+\emph{Configurations} are collections of parameter values that shall be
+consistent with each other. With configurations, one can define consistencies,
+from which the CCM is built. If configurations are specified, then all
+parameter values are inconsistent with all other parameter values to begin
+with. Then, the configurations are looped over and all combinations of all
+values with all other values within each configuration are set to be consistent.
 
-In the old compact format, \code{specific_configurations} are expected to be
+The \code{configurations} can be defined in one of two formats:
+
+In the old compact format, \code{configurations} are expected to be
 a named list of named lists of named lists. The top-level hierarchy names
 represent the parameter names that are specifying. The next level names
 represent the parameter's values that are specifying. The deepest level names
@@ -133,16 +144,16 @@ represent the parameter names that are specified and the values (list elements)
 are the parameter value(s) that are specified (i.e. considered possible) in this
 configuration.
 
-In the new extended format, \code{specific_configurations} are expected to be
-a list of names lists. Each named list has the names \code{sources} and
-\code{targets}. Under sources, a list of sources, i.e. specifying parameters,
-is stored. All sources together act specifying, i.e. if all specifying
-sources are selected, then it constrains the field. Under targets, a list of
-targets, i.e. specified parameter values, is stored. Each source and target
-is a list with names \code{param} and \code{value}, identifying the parameter
-value.
+In the new extended format, \code{configurations} are expected to be
+a list of configurations, where each configuration is a list of items, and
+each item is a list with names \code{param} and \code{value}, identifying the
+parameter value.
 
-\code{specific_configurations} defaults to NULL, i.e. no specification and the
-field is \emph{open}.
+\code{configurations} defaults to NULL: No constraints are applied and
+the field is \emph{open}, i.e. every value is consistent with all other
+values.
+
+If \code{edit_mode} is \code{TRUE}, the configurations can also be set
+interactively.
 }
 

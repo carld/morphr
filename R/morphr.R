@@ -38,15 +38,13 @@
 #' called internally by \code{\link{installMorphField}()}.
 #'
 #' @inheritSection installMorphField Details
-#' @inheritSection installMorphField Cross-consistency matrix (CCM)
-#' @inheritSection installMorphField Specific configurations
 #' @inheritParams installMorphField
 #' @return List with items \code{field} (a \code{\link{datatable}} object) and
 #'   \code{field_df} (the \code{data.frame} used to create the datatable object).
 #' @export
 morphfield <- function(param_values = NULL, value_descriptions = NULL,
-                       specific_configurations = NULL, edit_mode = FALSE,
-                       id = NULL, set_spec_mode = FALSE) {
+                       spec_columns = NULL, edit_mode = FALSE, id = NULL,
+                       set_spec_mode = FALSE) {
   field_df <- paramValuesToDataFrame(param_values, value_descriptions)
   if (edit_mode) {
     last_non_empty_index <- lapply(field_df, function(col) {
@@ -88,11 +86,10 @@ morphfield <- function(param_values = NULL, value_descriptions = NULL,
     escape = FALSE
   )
 
-  if (!is.null(specific_configurations)) {
-    # Style the parameters that define specific configurations differently:
+  if (!is.null(spec_columns)) {
+    # Style specifying or special columns differently:
     field <- field %>%
-      formatStyle(extractSpecifyingParams(specific_configurations),
-                  color = "white", backgroundColor = "gray")
+      formatStyle(spec_columns, color = "white", backgroundColor = "gray")
   }
 
   return(list(
@@ -300,29 +297,26 @@ buildUnconstrainedCCM <- function(param_values) {
 }
 
 
-#' Convert specific configurations to CCM
+#' Convert configurations to CCM
 #'
-#' If you specify your morphological field with \code{specific_configurations},
+#' If you specify your morphological field with \code{configurations},
 #' then they can be converted to a CCM (cross-consistency matrix) using this
 #' function.
 #'
 #' @inheritParams installMorphField
 #' @export
 buildCCMFromSpecificConfigurations <- function(param_values,
-                                               specific_configurations) {
+                                               configurations) {
   ccm <- initializeCCM(param_values, def_val = FALSE) # first set all combinations to inconsistent
   # Then, set only valid combinations consistent:
-  lapply(specific_configurations, function(spec_conf) {
-    sources <- spec_conf$sources
-    targets <- spec_conf$targets
-    all <- c(sources, targets)
-    # cross-correlate all with all higher
-    lapply(1:(length(all) - 1), function(i) {
-      lapply((i + 1):length(all), function(j) {
-        param1 <- all[[i]]$param
-        values1 <- all[[i]]$value
-        param2 <- all[[j]]$param
-        values2 <- all[[j]]$value
+  lapply(configurations, function(config) {
+    # cross-correlate all param-values with all other param-values to the right
+    lapply(1:(length(config) - 1), function(i) {
+      lapply((i + 1):length(config), function(j) {
+        param1 <- config[[i]]$param
+        values1 <- config[[i]]$value
+        param2 <- config[[j]]$param
+        values2 <- config[[j]]$value
         lapply(values1, function(value1) {
           lapply(values2, function(value2) {
             ccm[[buildHashValue(param1, value1, param2, value2)]] <<- TRUE # cross-correlation between specifying and specified parameter
@@ -335,44 +329,43 @@ buildCCMFromSpecificConfigurations <- function(param_values,
 }
 
 
-#' Convert specific configurations to new extended format
+#' Convert configurations to new extended format
 #'
-#' This function converts specific configurations (specifications) in the old
+#' This function converts configurations in the old
 #' compact format into the new extended format.
 #'
-#' @param specific_configurations The specific configurations in the old compact
+#' @param configurations The configurations in the old compact
 #'   format, see \code{\link{installMorphField}}.
-#' @return Specific configurations in the new extended format.
+#' @return Configurations in the new extended format.
 #' @export
-convertSpecConfToExtended <- function(specific_configurations) {
-  if (is.null(names(specific_configurations))) {
+convertConfigsToExtended <- function(configurations) {
+  if (is.null(names(configurations))) {
     # Assume it's already in new format
-    return(specific_configurations)
+    return(configurations)
   }
   # Old compact format; convert to new extended format
   sce <- list()
-  for (source_param in names(specific_configurations)) {
-    if (length(specific_configurations[[source_param]]) == 0) {
+  for (source_param in names(configurations)) {
+    if (length(configurations[[source_param]]) == 0) {
       sce <- c(sce, list(
         list(
-          sources = list(
-            list(param = source_param, value = NULL)
-          )
+          list(param = source_param, value = NULL)
         )
       ))
     } else {
-      for (source_val in names(specific_configurations[[source_param]])) {
+      for (source_val in names(configurations[[source_param]])) {
         sce <- c(sce, list(
-          list(
-            sources = list(
+          c(
+            list(
               list(param = source_param, value = source_val)
             ),
-            targets = lapply(
-              names(specific_configurations[[source_param]][[source_val]]),
+            lapply(
+              names(configurations[[source_param]][[source_val]]),
               function(target_param) {
                 list(param = target_param,
-                     value = specific_configurations[[source_param]][[source_val]][[target_param]])
-              })
+                     value = configurations[[source_param]][[source_val]][[target_param]])
+              }
+            )
           )
         ))
       }
@@ -382,24 +375,28 @@ convertSpecConfToExtended <- function(specific_configurations) {
 }
 
 
-extractSpecifyingParams <- function(specific_configurations) {
-  if (length(specific_configurations) == 0) return(NULL)
-  sort(unique(c(
-    sapply(specific_configurations, function(e) {
-      sapply(e$sources, function(ee) {ee$param})
-    })
-  )))
+sortedParams <- function(configurations) {
+  if (length(configurations) == 0) return(NULL)
+  sort(unique(
+    unlist(lapply(configurations, function(config) {
+      unlist(lapply(config, function(item) {item$param}))
+    }))
+  ))
 }
 
 
-sortSpecifyingParams <- function(specific_configurations) {
-  sorted_params <- extractSpecifyingParams(specific_configurations)
-  lapply(specific_configurations, function(c) {
-    unsorted_params <- sapply(c$sources, function(s) {s$param})
+sortConfigs <- function(configurations) {
+  sorted_params <- sortedParams(configurations)
+  lapply(configurations, function(config) {
+    unsorted_params <- sapply(config, function(item) {item$param})
     sorted_indices <- unname(sapply(unsorted_params, function(p) {which(sorted_params == p)}))
-    # And sort the sources:
-    c$sources <- lapply(sorted_indices, function(i) {c$sources[[i]]})
-    c
+    # Sort the items by the params...
+    config <- lapply(sorted_indices, function(i) {
+      # ...and the param values
+      config[[i]]$value <- sort(config[[i]]$value)
+      config[[i]]
+    })
+    config
   })
 }
 
@@ -409,7 +406,7 @@ sortSpecifyingParams <- function(specific_configurations) {
 #' Use this function if you have a data.frame in long table format (with
 #' redundant information in some columns) and need a nested list expected as
 #' input to \code{\link{installMorphField}}, e.g. arguments \code{param_values},
-#' \code{value_descriptions}, \code{specific_configurations}.
+#' \code{value_descriptions}, \code{configurations}.
 #'
 #' The redundant columns must be on the left, the non-redundant on the right
 #' side of the data.frame.

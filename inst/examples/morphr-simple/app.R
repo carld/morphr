@@ -31,7 +31,7 @@ server <- function(input, output, session) {
   )
 
   # Old compact format (only one column can be specifying)
-  specific_configurations_old <- list(
+  specific_configurations <- list(
     "Parameter A" = list(
       "A1" = list(
         "Parameter B" = c("B2", "B3"),
@@ -53,236 +53,256 @@ server <- function(input, output, session) {
   )
 
   # OR:
-  # New extended format (arbitrary number of sources and targets, so arbitrary
-  # number of specifying columns, i.e. sources, possible)
-  specific_configurations_new <- list(
+  # New extended format (arbitrary number of specifying columns, indeed no
+  # specifying columns at all, just (free) configurations)
+  configurations_new <- list(
+    # Configuration 1
     list(
-      sources = list(
-        list(
-          param = "Parameter A",
-          value = "A1"
-        )
+      list(
+        param = "Parameter A",
+        value = "A1"
       ),
-      targets = list(
-        list(
-          param = "Parameter B",
-          value = c("B2", "B3")
-        ),
-        list(
-          param = "Parameter C",
-          value = "C1"
-        )
+      list(
+        param = "Parameter B",
+        value = c("B2", "B3")
+      ),
+      list(
+        param = "Parameter C",
+        value = "C1"
       )
     ),
+    # Configuration 2
     list(
-      sources = list(
-        list(
-          param = "Parameter A",
-          value = "A2"
-        )
+      list(
+        param = "Parameter A",
+        value = "A2"
       ),
-      targets = list(
-        list(
-          param = "Parameter B",
-          value = "B4"
-        ),
-        list(
-          param = "Parameter C",
-          value = "C2"
-        )
+      list(
+        param = "Parameter B",
+        value = "B4"
+      ),
+      list(
+        param = "Parameter C",
+        value = "C2"
       )
     ),
+    # Configuration 3
     list(
-      sources = list(
-        list(
-          param = "Parameter A",
-          value = "A3"
-        )
+      list(
+        param = "Parameter A",
+        value = "A3"
       ),
-      targets = list(
-        list(
-          param = "Parameter B",
-          value = "B1"
-        ),
-        list(
-          param = "Parameter C",
-          value = "C1"
-        )
+      list(
+        param = "Parameter B",
+        value = "B1"
+      ),
+      list(
+        param = "Parameter C",
+        value = "C1"
       )
     ),
+    # Configuration 4
     list(
-      sources = list(
-        list(
-          param = "Parameter A",
-          value = "A4"
-        )
+      list(
+        param = "Parameter A",
+        value = "A4"
       ),
-      targets = list(
-        list(
-          param = "Parameter B",
-          value = "B3"
-        ),
-        list(
-          param = "Parameter C",
-          value = "C2"
-        )
+      list(
+        param = "Parameter B",
+        value = "B3"
+      ),
+      list(
+        param = "Parameter C",
+        value = "C2"
       )
     )
   )
 
-  specific_configurations_new2 <- list(
+  configurations_new2 <- list(
     list(
-      sources = list(
-        list(
-          param = "Parameter A",
-          value = "A1"
-        ),
-        list(
-          param = "Parameter B",
-          value = "B1"
-        )
+      list(
+        param = "Parameter A",
+        value = "A1"
       ),
-      targets = list(
-        list(
-          param = "Parameter C",
-          value = "C1"
-        )
+      list(
+        param = "Parameter B",
+        value = "B1"
+      ),
+      list(
+        param = "Parameter C",
+        value = "C1"
       )
     ),
     list(
-      sources = list(
-        list(
-          param = "Parameter A",
-          value = "A2"
-        ),
-        list(
-          param = "Parameter B",
-          value = "B4"
-        )
+      list(
+        param = "Parameter A",
+        value = "A2"
       ),
-      targets = list(
-        list(
-          param = "Parameter C",
-          value = "C2"
-        )
+      list(
+        param = "Parameter B",
+        value = "B4"
+      ),
+      list(
+        param = "Parameter C",
+        value = "C2"
       )
     ),
     list(
-      sources = list(
-        list(
-          param = "Parameter A",
-          value = "A3"
-        ),
-        list(
-          param = "Parameter B",
-          value = "B1"
-        )
+      list(
+        param = "Parameter A",
+        value = "A3"
       ),
-      targets = list(
-        list(
-          param = "Parameter C",
-          value = "C1"
-        )
+      list(
+        param = "Parameter B",
+        value = "B1"
+      ),
+      list(
+        param = "Parameter C",
+        value = "C1"
       )
     ),
     list(
-      sources = list(
-        list(
-          param = "Parameter A",
-          value = "A4"
-        ),
-        list(
-          param = "Parameter B",
-          value = "B3"
-        )
+      list(
+        param = "Parameter A",
+        value = "A4"
       ),
-      targets = list(
-        list(
-          param = "Parameter C",
-          value = "C2"
-        )
+      list(
+        param = "Parameter B",
+        value = "B3"
+      ),
+      list(
+        param = "Parameter C",
+        value = "C2"
       )
     )
   )
 
-  specific_configurations_new3 <- list(
+  configurations_new3 <- list(
     list(
-      sources = list(
-        list(
-          param = "Parameter B",
-          value = "B1"
-        ),
-        list(
-          param = "Parameter A",
-          value = "A1"
-        )
+      list(
+        param = "Parameter B",
+        value = "B1"
       ),
-      targets = list(
-        list(
-          param = "Parameter C",
-          value = "C1"
-        )
+      list(
+        param = "Parameter A",
+        value = "A1"
+      ),
+      list(
+        param = "Parameter C",
+        value = "C1"
       )
     ),
     list(
-      sources = list(
-        list(
-          param = "Parameter A",
-          value = "A2"
-        ),
-        list(
-          param = "Parameter B",
-          value = "B4"
-        )
+      list(
+        param = "Parameter A",
+        value = "A2"
       ),
-      targets = list(
-        list(
-          param = "Parameter C",
-          value = "C2"
-        )
+      list(
+        param = "Parameter B",
+        value = "B4"
+      ),
+      list(
+        param = "Parameter C",
+        value = "C2"
       )
     ),
     list(
-      sources = list(
-        list(
-          param = "Parameter B",
-          value = "B1"
-        ),
-        list(
-          param = "Parameter A",
-          value = "A3"
-        )
+      list(
+        param = "Parameter B",
+        value = "B1"
       ),
-      targets = list(
-        list(
-          param = "Parameter C",
-          value = "C1"
-        )
+      list(
+        param = "Parameter A",
+        value = "A3"
+      ),
+      list(
+        param = "Parameter C",
+        value = "C1"
       )
     ),
     list(
-      sources = list(
-        list(
-          param = "Parameter B",
-          value = "B3"
-        ),
-        list(
-          param = "Parameter A",
-          value = "A4"
-        )
+      list(
+        param = "Parameter B",
+        value = "B3"
       ),
-      targets = list(
-        list(
-          param = "Parameter C",
-          value = "C2"
-        )
+      list(
+        param = "Parameter A",
+        value = "A4"
+      ),
+      list(
+        param = "Parameter C",
+        value = "C2"
+      )
+    )
+  )
+
+  configurations_new4 <- list(
+    # Configuration 1
+    list(
+      list(
+        param = "Parameter A",
+        value = "A1"
+      ),
+      list(
+        param = "Parameter B",
+        value = c("B3", "B2")
+      ),
+      list(
+        param = "Parameter C",
+        value = "C1"
+      )
+    ),
+    # Configuration 2
+    list(
+      list(
+        param = "Parameter A",
+        value = "A2"
+      ),
+      list(
+        param = "Parameter B",
+        value = "B4"
+      ),
+      list(
+        param = "Parameter C",
+        value = "C2"
+      )
+    ),
+    # Configuration 3
+    list(
+      list(
+        param = "Parameter A",
+        value = "A3"
+      ),
+      list(
+        param = "Parameter B",
+        value = "B1"
+      ),
+      list(
+        param = "Parameter C",
+        value = "C1"
+      )
+    ),
+    # Configuration 4
+    list(
+      list(
+        param = "Parameter A",
+        value = "A4"
+      ),
+      list(
+        param = "Parameter B",
+        value = "B3"
+      ),
+      list(
+        param = "Parameter C",
+        value = "C2"
       )
     )
   )
 
   morphr::installMorphField(input, output, id = "morphfield",
                             param_values = param_values,
-                            specific_configurations = specific_configurations_new2,
+                            configurations = specific_configurations,
+                            spec_columns = c("Parameter A", "Parameter C"),
                             editable = TRUE)
 
 }
