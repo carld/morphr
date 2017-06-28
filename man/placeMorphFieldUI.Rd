@@ -7,7 +7,7 @@
 placeMorphFieldUI(output, id, param_values = NULL,
   value_descriptions = NULL, configurations = NULL, spec_columns = NULL,
   styleFunc = NULL, editable = FALSE, edit_mode = FALSE,
-  edit_spec_mode = FALSE)
+  edit_config_mode = FALSE)
 }
 \arguments{
 \item{output}{The Shiny session's output object (the same as is passed into
