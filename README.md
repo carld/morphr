@@ -124,22 +124,22 @@ server <- function(input, output) {
     "Parameter C" = c("C1", "C2")
   )
 
-  specific_configurations <- list(
-    "Parameter A" = list(
-      "A1" = list(
-        "Parameter B" = "B2",
-        "Parameter C" = "C1"
-      ),
-      "A2" = list(
-        "Parameter B" = "B1",
-        "Parameter C" = "C1"
-      )
+  configurations <- list(
+    list(
+      list(param = "Parameter A", value = "A1"),
+      list(param = "Parameter B", value = "B2"),
+      list(param = "Parameter C", value = "C1")
+    ),
+    list(
+      list(param = "Parameter A", value = "A2"),
+      list(param = "Parameter B", value = "B1"),
+      list(param = "Parameter C", value = "C1")
     )
   )
 
   morphr::installMorphField(input, output, id = "morphfield",
                             param_values = param_values,
-                            specific_configurations = specific_configurations)
+                            configurations = configurations)
 }
 
 shinyApp(ui = ui, server = server)
