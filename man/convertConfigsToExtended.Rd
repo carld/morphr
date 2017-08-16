@@ -2,9 +2,12 @@
 % Please edit documentation in R/morphr.R
 \name{convertConfigsToExtended}
 \alias{convertConfigsToExtended}
+\alias{convertConfigsToExtendedAndSort}
 \title{Convert configurations to new extended format}
 \usage{
 convertConfigsToExtended(configurations)
+
+convertConfigsToExtendedAndSort(configurations)
 }
 \arguments{
 \item{configurations}{The configurations in the old compact
@@ -16,4 +19,6 @@ Configurations in the new extended format.
 \description{
 This function converts configurations in the old
 compact format into the new extended format.
+
+Runs convertConfigsToExtended() and sortConfigs().
 }

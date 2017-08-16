@@ -337,6 +337,7 @@ buildCCMFromSpecificConfigurations <- function(param_values,
 #' @param configurations The configurations in the old compact
 #'   format, see \code{\link{installMorphField}}.
 #' @return Configurations in the new extended format.
+#' @rdname convertConfigsToExtended
 #' @export
 convertConfigsToExtended <- function(configurations) {
   if (is.null(names(configurations))) {
@@ -374,6 +375,16 @@ convertConfigsToExtended <- function(configurations) {
   return(sce)
 }
 
+#' Convert configurations to new extended format and sort them
+#'
+#' Runs convertConfigsToExtended() and sortConfigs().
+#'
+#' @rdname convertConfigsToExtended
+#' @export
+convertConfigsToExtendedAndSort <- function(configurations) {
+  sortConfigs(convertConfigsToExtended(configurations))
+}
+
 
 sortedParams <- function(configurations) {
   if (length(configurations) == 0) return(NULL)
@@ -385,6 +396,13 @@ sortedParams <- function(configurations) {
 }
 
 
+#' Sort configurations that are in the new format
+#'
+#' Sorts configuratios.
+#'
+#' @param The configurations in the new exptended format, see
+#'   \code{\link{installMorphField}}.
+#' @export
 sortConfigs <- function(configurations) {
   sorted_params <- sortedParams(configurations)
   lapply(configurations, function(config) {
@@ -429,4 +447,26 @@ buildNestedListFromDataFrame <- function(df) {
   }
   nested_list <- lapply(nested_list, buildNestedListFromDataFrame)
   return(nested_list)
+}
+
+
+dataFrameFromCCM <- function(param_values, ccm) {
+  as.data.frame(lapply(1:(length(param_values) - 1), function(i) {
+    param1 <- names(param_values)[i]
+    lapply(param_values[[param1]], function(value1) {
+      unlist(lapply(2:length(param_values), function(j) {
+        param2 <- names(param_values)[j]
+        lapply(param_values[[param2]], function(value2) {
+          if (j <= i) {
+            # This is diagonal or upper triangle, return NA
+            val <- NA
+          } else {
+            val <- ccm[[buildHashValue(param1, value1, param2, value2)]]
+            if (is.null(val)) val <- NA
+          }
+          val
+        })
+      }))
+    })
+  }))
 }

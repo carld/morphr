@@ -139,7 +139,7 @@ installMorphField <- function(input, output, id,
   # to be executed not directly, but later when the UI is ready.
   # Otherwise, you can get the error: 'ID not found in the DOM' when insertUI
   # is used.
-  output[[id]] <- renderMorphField({
+  f <- renderMorphField({
     l <- returnMorphFieldUI(output, id, param_values, value_descriptions,
                             configurations, spec_columns, styleFunc,
                             editable, edit_mode, edit_config_mode)
@@ -155,7 +155,9 @@ installMorphField <- function(input, output, id,
                                    styleFunc = styleFunc, editable = editable)
     field
   })
+  output[[id]] <- f
   return(proxy)
+  # return(f)
 }
 
 
@@ -165,7 +167,7 @@ returnMorphFieldUI <- function(output, id, param_values = NULL,
                                styleFunc = NULL, editable = FALSE,
                                edit_mode = FALSE, edit_config_mode = FALSE) {
   l <- returnMorphFieldUIWithoutToolbar(
-    output, id, param_values, value_descriptions, configurations, spec_columns,
+    output, id, param_values, value_descriptions, spec_columns,
     styleFunc, edit_mode, edit_config_mode
   )
   if (editable) {
@@ -177,12 +179,9 @@ returnMorphFieldUI <- function(output, id, param_values = NULL,
 
 returnMorphFieldUIWithoutToolbar <- function(output, id, param_values = NULL,
                                              value_descriptions = NULL,
-                                             configurations = NULL,
                                              spec_columns = NULL,
                                              styleFunc = NULL, edit_mode = FALSE,
                                              edit_config_mode = FALSE) {
-  configurations <- convertConfigsToExtended(configurations)
-  configurations <- sortConfigs(configurations)
   l <- morphfield(param_values, value_descriptions, spec_columns,
                   edit_mode, id, edit_config_mode)
   field <- l$field
@@ -229,7 +228,7 @@ placeMorphFieldUIWithoutToolbar <- function(output, id, param_values = NULL,
   output[[id]] <- renderMorphField({
     l <- returnMorphFieldUIWithoutToolbar(output, id, param_values,
                                           value_descriptions,
-                                          configurations, spec_columns,
+                                          spec_columns,
                                           styleFunc, edit_mode, edit_config_mode)
     l$field
   })
@@ -264,13 +263,16 @@ placeEditButtonRow <- function(id, edit_mode = FALSE, edit_config_mode = FALSE,
           actionButton(paste0(id, "_save_config_btn"), "Save Configuration",
                        class = "pull-left disabled", disabled = ""),
           {
-            d <- actionButton(paste0(id, "_rem_config_btn"), "Remove Configuration(s)")
+            d <- actionButton(paste0(id, "_rem_config_btn"), "Remove Configuration(s)",
+                              class = "pull-left")
             if (length(configurations) == 0) {
               d$attribs$class <- paste(d$attribs$class, "disabled")
               d$attribs$disabled = ""
             }
             d
-          }
+          },
+          actionButton(paste0(id, "_show_ccm_btn"), "Show CCM",
+                       class = "pull-left")
         ),
         column(
           4,
@@ -390,16 +392,13 @@ reactivateMorphField <- function(input, output, id, param_values,
                                  spec_columns = function() {NULL},
                                  field_df = function() {NULL},
                                  styleFunc = NULL, editable = FALSE) {
-  sc <- convertConfigsToExtended(configurations())
-  sc <- sortConfigs(sc)
-  configurations2 <- function() {sc}
   proxy <- reactivateMorphFieldWithoutToolbar(
-    input, id, param_values, ccm, configurations2, field_df, editable
+    input, id, param_values, ccm, configurations, field_df, editable
   )
 
   if (editable) {
     reactivateMorphFieldToolbar(input, output, id, param_values,
-                                value_descriptions, ccm, configurations2,
+                                value_descriptions, ccm, configurations,
                                 spec_columns, field_df, styleFunc)
   }
 
@@ -432,12 +431,13 @@ reactivateMorphFieldWithoutToolbar <- function(input, id, param_values,
 
   # Update the field with the new consistent cells after selection
   observeEvent(input[[paste0(id, "_cells_selected")]], {
+    configs <- convertConfigsToExtendedAndSort(configurations())
     sel_cells <- input[[paste0(id, "_cells_selected")]]
     field_df <- getFieldDF(field_df, param_values)
     if (editable) {
       em <- input[[paste0(id, "_edit_mode")]]
       if (!is.null(em) && em) {
-        updateEditButtons(input, id, sel_cells, field_df, configurations())
+        updateEditButtons(input, id, sel_cells, field_df, configs)
         return() # do nothing else
       }
     }
@@ -446,9 +446,9 @@ reactivateMorphFieldWithoutToolbar <- function(input, id, param_values,
     }
     ccm <- ccm()
     if (is.null(ccm)) {
-      if (!is.null(configurations())) {
+      if (!is.null(configs)) {
         ccm <- buildCCMFromSpecificConfigurations(param_values(),
-                                                  configurations())
+                                                  configs)
       } else {
         ccm <- buildUnconstrainedCCM(param_values())
       }
@@ -485,15 +485,16 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
                                         field_df = function() {NULL},
                                         styleFunc = NULL) {
   observeEvent(input[[paste0(id, "_edit_btn")]], {
+    configs <- convertConfigsToExtendedAndSort(configurations())
     if (!input[[paste0(id, "_edit_mode")]]) { # toggle (edit_mode was previously off, turn it on)
       placeMorphFieldUIWithoutToolbar(output, id, param_values(), value_descriptions(),
-                                       configurations(), spec_columns(), styleFunc,
-                                       edit_mode = TRUE)
+                                      configs, spec_columns(), styleFunc,
+                                      edit_mode = TRUE)
       updateCheckboxInput(getDefaultReactiveDomain(), paste0(id, "_edit_mode"), value = TRUE)
-      placeEditButtonRow(id, edit_mode = TRUE, configurations = configurations())
+      placeEditButtonRow(id, edit_mode = TRUE, configurations = configs)
     } else {
       placeMorphFieldUIWithoutToolbar(output, id, param_values(), value_descriptions(),
-                                      configurations(), spec_columns(), styleFunc)
+                                      configs, spec_columns(), styleFunc)
       updateCheckboxInput(getDefaultReactiveDomain(), paste0(id, "_edit_mode"), value = FALSE)
       placeEditButtonRow(id)
     }
@@ -526,6 +527,7 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
   })
 
   observeEvent(input[[paste0(id, "_add_item_ok")]], {
+    configs <- convertConfigsToExtendedAndSort(configurations())
     col <- as.integer(input[[paste0(id, "_new_item_col")]])
     new_item <- input[[paste0(id, "_new_item")]]
     if (!is.null(new_item) && nzchar(trimws(new_item))) {
@@ -533,7 +535,7 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
       param_values <- param_values()
       param_values[[col]] <- c(param_values[[col]], new_item)
       installModMorphField(input, output, id, param_values, value_descriptions(),
-                           ccm(), configurations(), spec_columns(), styleFunc)
+                           ccm(), configs, spec_columns(), styleFunc)
     } else {
       showModal(addItemModal(col, failed = TRUE))
     }
@@ -563,12 +565,13 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
 
   observeEvent(input[[paste0(id, "_rem_item_ok")]], {
     removeModal()
+    configs <- convertConfigsToExtendedAndSort(configurations())
     row <- as.integer(input[[paste0(id, "_rem_item_row")]])
     col <- as.integer(input[[paste0(id, "_rem_item_col")]])
     param_values <- param_values()
     param_values[[col]] <- param_values[[col]][-row]
     installModMorphField(input, output, id, param_values, value_descriptions(),
-                         ccm(), configurations(), spec_columns(), styleFunc)
+                         ccm(), configs, spec_columns(), styleFunc)
   })
 
   modItemModal <- function(row, col, failed = FALSE) {
@@ -597,6 +600,7 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
   })
 
   observeEvent(input[[paste0(id, "_mod_item_ok")]], {
+    configs <- convertConfigsToExtendedAndSort(configurations())
     row <- as.integer(input[[paste0(id, "_mod_item_row")]])
     col <- as.integer(input[[paste0(id, "_mod_item_col")]])
     mod_item <- input[[paste0(id, "_mod_item")]]
@@ -605,7 +609,7 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
       param_values <- param_values()
       param_values[[col]][row] <- mod_item
       installModMorphField(input, output, id, param_values, value_descriptions(),
-                           ccm(), configurations(), spec_columns(), styleFunc)
+                           ccm(), configs, spec_columns(), styleFunc)
     } else {
       showModal(modItemModal(row, col, failed = TRUE))
     }
@@ -636,8 +640,9 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
       names(new_pv) <- new_col
       param_values <- param_values()
       param_values <- c(param_values, new_pv)
+      configs <- convertConfigsToExtendedAndSort(configurations())
       installModMorphField(input, output, id, param_values, value_descriptions(),
-                           ccm(), configurations(), spec_columns(), styleFunc)
+                           ccm(), configs, spec_columns(), styleFunc)
     } else {
       showModal(addColModal(failed = TRUE))
     }
@@ -664,8 +669,9 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
     param_values <- param_values()
     col <- which(names(param_values) == rem_col)
     param_values <- param_values[-col]
+    configs <- convertConfigsToExtendedAndSort(configurations())
     installModMorphField(input, output, id, param_values, value_descriptions(),
-                         ccm(), configurations(), spec_columns(), styleFunc)
+                         ccm(), configs, spec_columns(), styleFunc)
   })
 
   modColModal <- function(failed = FALSE) {
@@ -695,8 +701,9 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
       param_values <- param_values()
       col <- which(names(param_values) == mod_col)
       names(param_values)[col] <- mod_col_title
+      configs <- convertConfigsToExtendedAndSort(configurations())
       installModMorphField(input, output, id, param_values, value_descriptions(),
-                           ccm(), configurations(), spec_columns(), styleFunc)
+                           ccm(), configs, spec_columns(), styleFunc)
     } else {
       showModal(modColModal(failed = TRUE))
     }
@@ -711,7 +718,7 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
         param_values = param_values(),
         value_descriptions = value_descriptions(),
         ccm = ccm(),
-        configurations = configurations()
+        configurations = convertConfigsToExtendedAndSort(configurations())
       )
       saveRDS(object, con)
     }
@@ -758,15 +765,17 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
   observeEvent(input[[paste0(id, "_set_spec_columns_ok")]], {
     removeModal()
     spec_columns <- input[[paste0(id, "_spec_columns")]]
+    configs <- convertConfigsToExtendedAndSort(configurations())
     installModMorphField(input, output, id, param_values(), value_descriptions(),
-                         ccm(), configurations(), spec_columns, styleFunc,
+                         ccm(), configs, spec_columns, styleFunc,
                          edit_config_mode = input[[paste0(id, "_edit_config_mode")]])
   })
 
   observeEvent(input[[paste0(id, "_edit_config_mode")]], {
+    configs <- convertConfigsToExtendedAndSort(configurations())
     placeMorphFieldUIWithoutToolbar(
       output, id, param_values(), value_descriptions(),
-      configurations(), spec_columns(), styleFunc,
+      configs, spec_columns(), styleFunc,
       edit_mode = TRUE, edit_config_mode = input[[paste0(id, "_edit_config_mode")]]
     )
     disableAllEditButtons(id)
@@ -774,7 +783,7 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
 
   observeEvent(input[[paste0(id, "_save_config_btn")]], {
     sel_cells <- input[[paste0(id, "_cells_selected")]]
-    configurations <- configurations()
+    configs <- convertConfigsToExtendedAndSort(configurations())
     field_df <- getFieldDF(field_df, param_values)
     rows <- sel_cells[, 1]
     cols <- sel_cells[, 2] + 1
@@ -786,34 +795,34 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
       )
     })
     index <- which(
-      sapply(1:length(configurations), function(i) {
-        identical(configurations[[i]], config)
+      sapply(1:length(configs), function(i) {
+        identical(configs[[i]], config)
       })
     )
     if (length(index) == 0) {
       # config not present yet, insert at end
-      index <- length(configurations) + 1
-      configurations[[index]] <- config
+      index <- length(configs) + 1
+      configs[[index]] <- config
     } else if (length(index) > 1) {
       # Delete duplicate configs
       for (i in 2:length(index)) {
-        configurations[[i]] <- NULL
+        configs[[i]] <- NULL
       }
     }
     installModMorphField(input, output, id, param_values(), value_descriptions(),
-                         ccm(), configurations, spec_columns(), styleFunc,
+                         ccm(), configs, spec_columns(), styleFunc,
                          edit_config_mode = input[[paste0(id, "_edit_config_mode")]])
   })
 
   remConfigModal <- function() {
-    configurations <- configurations()
-    config_strings <- sapply(configurations, function(config) {
+    configs <- convertConfigsToExtendedAndSort(configurations())
+    config_strings <- sapply(configs, function(config) {
       paste(sapply(config, function(item) {
         paste(item$param, paste0("(", paste(item$value, collapse = ", "), ")"),
               sep = ": ")
       }), collapse = " | ")
     })
-    choices <- 1:length(configurations)
+    choices <- 1:length(configs)
     names(choices) <- config_strings
     modalDialog(
       selectizeInput(paste0(id, "_configs"), HTML(paste(
@@ -833,11 +842,27 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
   observeEvent(input[[paste0(id, "_rem_config_ok")]], {
     removeModal()
     indices <- as.integer(input[[paste0(id, "_configs")]])
-    configurations <- configurations()
-    configurations[indices] <- NULL
+    configs <- convertConfigsToExtendedAndSort(configurations())
+    configs[indices] <- NULL
     installModMorphField(input, output, id, param_values(), value_descriptions(),
-                         ccm(), configurations, spec_columns(), styleFunc,
+                         ccm(), configs, spec_columns(), styleFunc,
                          edit_config_mode = input[[paste0(id, "_edit_config_mode")]])
+  })
+
+  ccmModal <- function() {
+    modalDialog(
+      dataTableOutput(paste0(id, "_ccm")),
+      footer = tagList(
+        # modalButton("Cancel"),
+        # actionButton(paste0(id, "_rem_config_ok"), "OK")
+        modalButton("Close")
+      )
+    )
+  }
+
+  observeEvent(input[[paste0(id, "_show_ccm_btn")]], {
+    showModal(ccmModal())
+    output[[paste0(id, "_ccm")]] <- renderDataTable(data.frame(a = c("b", "c")))
   })
 }
 
