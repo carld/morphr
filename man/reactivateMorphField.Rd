@@ -24,11 +24,8 @@ HTML document. This ID can be used with functions like
 \item{param_values}{A function returning the \code{param_values}, see
 \code{\link{installMorphField}}.}
 
-\item{value_descriptions}{Optional. Each parameter value in param_values can
-have an accompanying (long) description that will be shown as tooltip/popover.
-The structure of \code{value_descriptions} is like that of \code{param_values},
-but instead of containing parameter values as list elements, the parameter
-values must be names whose list elements are the description texts.}
+\item{value_descriptions}{A function returning the \code{value_descriptions}, see
+\code{\link{installMorphField}}.}
 
 \item{ccm}{A function returning the \code{ccm}, see
 \code{\link{installMorphField}}.}
@@ -57,9 +54,6 @@ or similar, and then return it.}
 
 \item{editable}{Logical, if TRUE, a button is shown to enter the field edit
 mode.}
-
-\item{param_values}{A function returning the \code{value_descriptions}, see
-\code{\link{installMorphField}}.}
 }
 \value{
 The proxy object to the morphological field as returned by

@@ -372,7 +372,7 @@ placeMorphFieldUIToolbar <- function(id, edit_mode) {
 #' @inheritParams installMorphField
 #' @param param_values A function returning the \code{param_values}, see
 #'   \code{\link{installMorphField}}.
-#' @param param_values A function returning the \code{value_descriptions}, see
+#' @param value_descriptions A function returning the \code{value_descriptions}, see
 #'   \code{\link{installMorphField}}.
 #' @param ccm A function returning the \code{ccm}, see
 #'   \code{\link{installMorphField}}.
@@ -862,7 +862,9 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
 
   observeEvent(input[[paste0(id, "_show_ccm_btn")]], {
     showModal(ccmModal())
-    output[[paste0(id, "_ccm")]] <- renderDataTable(data.frame(a = c("b", "c")))
+    output[[paste0(id, "_ccm")]] <- renderDataTable(
+      dataFrameFromCCM(param_values(), ccm())
+    )
   })
 }
 

@@ -450,8 +450,15 @@ buildNestedListFromDataFrame <- function(df) {
 }
 
 
+#' Convert CCM to data.frame
+#'
+#' Use this function to display the CCM in a tabular format, e.g. with \pkg{DT}.
+#'
+#' @inheritParams installMorphField
+#' @param ccm The CCM as returned by \code{\link{buildCCMFromSpecificConfigurations}}.
+#' @export
 dataFrameFromCCM <- function(param_values, ccm) {
-  as.data.frame(lapply(1:(length(param_values) - 1), function(i) {
+  df <- as.data.frame(lapply(1:(length(param_values) - 1), function(i) {
     param1 <- names(param_values)[i]
     lapply(param_values[[param1]], function(value1) {
       unlist(lapply(2:length(param_values), function(j) {
@@ -469,4 +476,7 @@ dataFrameFromCCM <- function(param_values, ccm) {
       }))
     })
   }))
+  colnames(df) <- do.call(c, param_values[-length(param_values)])
+  rownames(df) <- do.call(c, param_values[-1])
+  df
 }
