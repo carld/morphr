@@ -465,11 +465,12 @@ dataFrameFromCCM <- function(param_values, ccm) {
         param2 <- names(param_values)[j]
         lapply(param_values[[param2]], function(value2) {
           if (j <= i) {
-            # This is diagonal or upper triangle, return NA
-            val <- NA
+            # This is diagonal or upper triangle, return ""
+            val <- ""
           } else {
             val <- ccm[[buildHashValue(param1, value1, param2, value2)]]
-            if (is.null(val)) val <- NA
+            val <- ifelse(val, "TRUE", "FALSE")
+            if (is.null(val)) val <- ""
           }
           val
         })

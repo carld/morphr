@@ -413,6 +413,20 @@ getFieldDF <- function(field_df, param_values) {
   field_df
 }
 
+getCCM <- function(ccm, param_values, configurations) {
+  ccm <- ccm()
+  configs <- convertConfigsToExtendedAndSort(configurations())
+  if (is.null(ccm)) {
+    if (!is.null(configs)) {
+      ccm <- buildCCMFromSpecificConfigurations(param_values(),
+                                                configs)
+    } else {
+      ccm <- buildUnconstrainedCCM(param_values())
+    }
+  }
+  ccm
+}
+
 reactivateMorphFieldWithoutToolbar <- function(input, id, param_values,
                                                ccm = function() {NULL},
                                                configurations = function() {NULL},
@@ -444,15 +458,7 @@ reactivateMorphFieldWithoutToolbar <- function(input, id, param_values,
     if (isLastSelectedCellEmpty(sel_cells, field_df)) {
       sel_cells <- removeLastSelectedCell(sel_cells)
     }
-    ccm <- ccm()
-    if (is.null(ccm)) {
-      if (!is.null(configs)) {
-        ccm <- buildCCMFromSpecificConfigurations(param_values(),
-                                                  configs)
-      } else {
-        ccm <- buildUnconstrainedCCM(param_values())
-      }
-    }
+    ccm <- getCCM(ccm, param_values, configurations)
     consistent_cells <- findConsistentCells(param_values(), ccm, sel_cells)
     proxy %>% setCellsConsistent(consistent_cells)
   })
@@ -862,8 +868,9 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
 
   observeEvent(input[[paste0(id, "_show_ccm_btn")]], {
     showModal(ccmModal())
+    ccm <- getCCM(ccm, param_values, configurations)
     output[[paste0(id, "_ccm")]] <- renderDataTable(
-      dataFrameFromCCM(param_values(), ccm())
+      dataFrameFromCCM(param_values(), ccm)
     )
   })
 }
