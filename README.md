@@ -56,6 +56,14 @@ license.
 <a name="rit11"></a>[9]: Ritchey, T. (2011). [*Wicked Problems -- Social Messes, Decision Support Modelling with Morphological Analaysis*](https://link.springer.com/book/10.1007/978-3-642-19653-9), Volume 17 of the series Risk, Governane and Society, Springer-Verlag Berlin Heidelberg.
 
 
+## Talk
+
+I gave a talk about the `morphr` package at the useR!2017 conference in
+Brussels. The slides are [here](https://github.com/sgrubsmyon/morphr-talk-user2017) 
+and a video of the talk can be viewed
+[here](https://channel9.msdn.com/events/useR-international-R-User-conferences/useR-International-R-User-2017-Conference/Morphological-Analysis-with-R).
+
+
 ## Example
 
 See `morphr` in action in the following screenshot:
