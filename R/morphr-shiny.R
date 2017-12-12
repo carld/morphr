@@ -800,11 +800,12 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
         value = field_df[rows[i], cols[i]]
       )
     })
-    index <- which(
-      sapply(1:length(configs), function(i) {
-        identical(configs[[i]], config)
-      })
-    )
+    index <- list()
+    if (length(configs) > 0) {
+      index <- which(sapply(seq_along(configs), function(i) {
+          identical(configs[[i]], config)
+        }))
+    }
     if (length(index) == 0) {
       # config not present yet, insert at end
       index <- length(configs) + 1
