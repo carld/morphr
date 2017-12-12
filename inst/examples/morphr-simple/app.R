@@ -11,14 +11,11 @@ library(shiny)
 
 # Define UI
 ui <- fluidPage(
-
   # Application title
   titlePanel("My First Morphological Field"),
-
   fluidRow(
     morphr::morphFieldOutput("morphfield")
   )
-
 )
 
 # Define server logic
@@ -309,4 +306,3 @@ server <- function(input, output, session) {
 
 # Run the application
 shinyApp(ui = ui, server = server)
-
