@@ -925,6 +925,8 @@ disableAllEditButtons <- function(id) {
 }
 
 
+#' @rdname proxy
+#' @export
 getLastSelectedCell <- function(sel_cells) {
   matrix(sel_cells[nrow(sel_cells), ], ncol = 2)
 }
