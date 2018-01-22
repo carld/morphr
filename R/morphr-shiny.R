@@ -177,6 +177,7 @@ returnMorphFieldUI <- function(output, id, param_values = NULL,
   l
 }
 
+
 returnMorphFieldUIWithoutToolbar <- function(output, id, param_values = NULL,
                                              value_descriptions = NULL,
                                              spec_columns = NULL,
@@ -202,7 +203,11 @@ returnMorphFieldUIWithoutToolbar <- function(output, id, param_values = NULL,
 #' with \code{\link{reactivateMorphField}} to avoid multiple reactivation.
 #' See \code{\link{reactivateMorphField}} for details.
 #'
+#' If you want more control over the interactivity and implement anything in your
+#' own Shiyn app, you can use the proxy returned by this function.
+#'
 #' @inheritParams installMorphField
+#' @return A \code{\link{dataTableProxy}()} that can be used to modify the morphField.
 #' @export
 placeMorphFieldUI <- function(output, id, param_values = NULL,
                               value_descriptions = NULL,
@@ -216,6 +221,8 @@ placeMorphFieldUI <- function(output, id, param_values = NULL,
                             styleFunc, edit_mode, edit_config_mode)
     l$field
   })
+  proxy <- dataTableProxy(id)
+  return(proxy)
 }
 
 
@@ -290,6 +297,7 @@ placeEditButtonRow <- function(id, edit_mode = FALSE, edit_config_mode = FALSE,
     removeUI(selector = paste0("#", id, "_edit_btn_row"))
   }
 }
+
 
 placeMorphFieldUIToolbar <- function(id, edit_mode) {
   insertUI(
@@ -405,6 +413,7 @@ reactivateMorphField <- function(input, output, id, param_values,
   return(proxy)
 }
 
+
 getFieldDF <- function(field_df, param_values) {
   field_df <- field_df()
   if (is.null(field_df)) {
@@ -412,6 +421,7 @@ getFieldDF <- function(field_df, param_values) {
   }
   field_df
 }
+
 
 getCCM <- function(ccm, param_values, configurations) {
   ccm <- ccm()
@@ -426,6 +436,7 @@ getCCM <- function(ccm, param_values, configurations) {
   }
   ccm
 }
+
 
 reactivateMorphFieldWithoutToolbar <- function(input, id, param_values,
                                                ccm = function() {NULL},
@@ -466,6 +477,7 @@ reactivateMorphFieldWithoutToolbar <- function(input, id, param_values,
   return(proxy)
 }
 
+
 installModMorphField <- function(input, output, id, param_values, value_descriptions,
                                  ccm, configurations, spec_columns, styleFunc,
                                  edit_mode = TRUE, edit_config_mode = FALSE) {
@@ -482,6 +494,7 @@ installModMorphField <- function(input, output, id, param_values, value_descript
                     ccm, configurations, spec_columns, styleFunc,
                     editable = TRUE, edit_mode = edit_mode, edit_config_mode = edit_config_mode)
 }
+
 
 reactivateMorphFieldToolbar <- function(input, output, id, param_values,
                                         value_descriptions = function() {NULL},
@@ -904,17 +917,21 @@ updateEditButtons <- function(input, id, sel_cells, field_df,
   }
 }
 
+
 disableAllEditButtons <- function(id) {
   shinyjs::disable(selector = paste0("#", id, "_rem_item_btn"))
   shinyjs::disable(selector = paste0("#", id, "_mod_item_btn"))
   shinyjs::disable(selector = paste0("#", id, "_save_config_btn"))
 }
 
+
 getLastSelectedCell <- function(sel_cells) {
   matrix(sel_cells[nrow(sel_cells), ], ncol = 2)
 }
 
 
+#' @rdname proxy
+#' @export
 isLastSelectedCellEmpty <- function(sel_cells, field_df) {
   if (nrow(sel_cells) == 0) return(FALSE)
   last_selected_cell <- getLastSelectedCell(sel_cells)
@@ -927,9 +944,12 @@ isLastSelectedCellEmpty <- function(sel_cells, field_df) {
 }
 
 
+#' @rdname proxy
+#' @export
 removeLastSelectedCell <- function(sel_cells) {
   matrix(sel_cells[-nrow(sel_cells), ], ncol = 2)
 }
+
 
 #' Helper functions for using morphr in Shiny
 #'
@@ -944,7 +964,7 @@ removeLastSelectedCell <- function(sel_cells) {
 #'
 #' If you do not want or need the interactivity of the morphfield, you can use
 #' the function \code{\link{placeMorphFieldUI}()}.
-#' 
+#'
 #' @inheritParams shiny::textOutput
 #' @export
 morphFieldOutput <- function(outputId, width = '100%', height = 'auto') {
@@ -953,6 +973,7 @@ morphFieldOutput <- function(outputId, width = '100%', height = 'auto') {
     morphFieldOutputWithoutContainer(outputId, width = '100%', height = 'auto')
   )
 }
+
 
 morphFieldOutputWithoutContainer <- function(outputId, width = '100%', height = 'auto') {
   htmltools::attachDependencies(

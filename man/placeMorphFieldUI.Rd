@@ -51,6 +51,9 @@ or similar, and then return it.}
 \item{editable}{Logical, if TRUE, a button is shown to enter the field edit
 mode.}
 }
+\value{
+A \code{\link{dataTableProxy}()} that can be used to modify the morphField.
+}
 \description{
 This function only puts the widget into the Shiny UI, i.e. the \code{output}
 object, but does not reactivate it. \code{\link{reactivateMorphField}} can be
@@ -58,4 +61,8 @@ called afterwards for the reactivation. Alternatively, use
 \code{\link{installMorphfield}} to do both at the same time. Use this function
 with \code{\link{reactivateMorphField}} to avoid multiple reactivation.
 See \code{\link{reactivateMorphField}} for details.
+}
+\details{
+If you want more control over the interactivity and implement anything in your
+own Shiyn app, you can use the proxy returned by this function.
 }

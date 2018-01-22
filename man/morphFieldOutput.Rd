@@ -45,3 +45,7 @@ observe the input object. Besides that, there are the two usual functions
 package. The former is used to create a container for the morphological
 field, and the latter is used in the server logic to render the field.
 }
+\details{
+If you do not want or need the interactivity of the morphfield, you can use
+the function \code{\link{placeMorphFieldUI}()}.
+}
