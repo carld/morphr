@@ -942,6 +942,9 @@ removeLastSelectedCell <- function(sel_cells) {
 #' package. The former is used to create a container for the morphological
 #' field, and the latter is used in the server logic to render the field.
 #'
+#' If you do not want or need the interactivity of the morphfield, you can use
+#' the function \code{\link{placeMorphFieldUI}()}.
+#' 
 #' @inheritParams shiny::textOutput
 #' @export
 morphFieldOutput <- function(outputId, width = '100%', height = 'auto') {
