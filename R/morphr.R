@@ -83,7 +83,9 @@ morphfield <- function(param_values = NULL, value_descriptions = NULL,
       target = "cell"
     ),
     # Do not escape HTML
-    escape = FALSE
+    escape = FALSE,
+    # Make it responsive
+    extensions = c("Responsive")
   )
 
   if (!is.null(spec_columns)) {
