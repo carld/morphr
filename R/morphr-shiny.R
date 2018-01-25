@@ -126,6 +126,7 @@
 #'   or similar, and then return it.
 #' @param editable Logical, if TRUE, a button is shown to enter the field edit
 #'   mode.
+#' @param responsive Render morphfield responsively?
 #' @return The proxy object to the morphological field as returned by
 #'   \code{\link{dataTableProxy}()}.
 #' @export
@@ -133,7 +134,8 @@ installMorphField <- function(input, output, id,
                               param_values = NULL, value_descriptions = NULL,
                               ccm = NULL, configurations = NULL,
                               spec_columns = NULL, styleFunc = NULL,
-                              editable = FALSE, edit_mode = FALSE, edit_config_mode = FALSE) {
+                              editable = FALSE, edit_mode = FALSE,
+                              edit_config_mode = FALSE, responsive = FALSE) {
   proxy <- NULL
   # Server code must be wrapped into any renderXXX() function in order
   # to be executed not directly, but later when the UI is ready.
@@ -142,7 +144,7 @@ installMorphField <- function(input, output, id,
   f <- renderMorphField({
     l <- returnMorphFieldUI(output, id, param_values, value_descriptions,
                             configurations, spec_columns, styleFunc,
-                            editable, edit_mode, edit_config_mode)
+                            editable, edit_mode, edit_config_mode, responsive)
     field <- l$field
     field_df <- l$field_df
     proxy <<- reactivateMorphField(input, output, id,
@@ -165,10 +167,11 @@ returnMorphFieldUI <- function(output, id, param_values = NULL,
                                value_descriptions = NULL,
                                configurations = NULL, spec_columns = NULL,
                                styleFunc = NULL, editable = FALSE,
-                               edit_mode = FALSE, edit_config_mode = FALSE) {
+                               edit_mode = FALSE, edit_config_mode = FALSE,
+                               responsive = FALSE) {
   l <- returnMorphFieldUIWithoutToolbar(
     output, id, param_values, value_descriptions, spec_columns,
-    styleFunc, edit_mode, edit_config_mode
+    styleFunc, edit_mode, edit_config_mode, responsive
   )
   if (editable) {
     placeMorphFieldUIToolbar(id, edit_mode)
@@ -182,9 +185,10 @@ returnMorphFieldUIWithoutToolbar <- function(output, id, param_values = NULL,
                                              value_descriptions = NULL,
                                              spec_columns = NULL,
                                              styleFunc = NULL, edit_mode = FALSE,
-                                             edit_config_mode = FALSE) {
+                                             edit_config_mode = FALSE,
+                                             responsive = FALSE) {
   l <- morphfield(param_values, value_descriptions, spec_columns,
-                  edit_mode, id, edit_config_mode)
+                  edit_mode, id, edit_config_mode, responsive)
   field <- l$field
   field_df <- l$field_df
   if (!is.null(styleFunc)) {
@@ -213,12 +217,13 @@ placeMorphFieldUI <- function(output, id, param_values = NULL,
                               value_descriptions = NULL,
                               configurations = NULL, spec_columns = NULL,
                               styleFunc = NULL, editable = FALSE,
-                              edit_mode = FALSE, edit_config_mode = FALSE) {
+                              edit_mode = FALSE, edit_config_mode = FALSE,
+                              responsive = FALSE) {
   output[[id]] <- renderMorphField({
     l <- returnMorphFieldUI(output, id, param_values,
                             value_descriptions,
                             configurations, spec_columns,
-                            styleFunc, edit_mode, edit_config_mode)
+                            styleFunc, edit_mode, edit_config_mode, responsive)
     l$field
   })
   proxy <- dataTableProxy(id)
@@ -231,12 +236,14 @@ placeMorphFieldUIWithoutToolbar <- function(output, id, param_values = NULL,
                                             configurations = NULL,
                                             spec_columns = NULL,
                                             styleFunc = NULL, edit_mode = FALSE,
-                                            edit_config_mode = FALSE) {
+                                            edit_config_mode = FALSE,
+                                            responsive = FALSE) {
   output[[id]] <- renderMorphField({
     l <- returnMorphFieldUIWithoutToolbar(output, id, param_values,
                                           value_descriptions,
                                           spec_columns,
-                                          styleFunc, edit_mode, edit_config_mode)
+                                          styleFunc, edit_mode, edit_config_mode,
+                                          responsive)
     l$field
   })
 }

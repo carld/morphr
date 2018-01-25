@@ -44,7 +44,7 @@
 #' @export
 morphfield <- function(param_values = NULL, value_descriptions = NULL,
                        spec_columns = NULL, edit_mode = FALSE, id = NULL,
-                       set_spec_mode = FALSE) {
+                       set_spec_mode = FALSE, responsive = FALSE) {
   field_df <- paramValuesToDataFrame(param_values, value_descriptions)
   if (edit_mode) {
     last_non_empty_index <- lapply(field_df, function(col) {
@@ -85,7 +85,7 @@ morphfield <- function(param_values = NULL, value_descriptions = NULL,
     # Do not escape HTML
     escape = FALSE,
     # Make it responsive
-    extensions = c("Responsive")
+    if (responsive) extensions = c("Responsive")
   )
 
   if (!is.null(spec_columns)) {
