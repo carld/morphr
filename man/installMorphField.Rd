@@ -7,7 +7,7 @@
 installMorphField(input, output, id, param_values = NULL,
   value_descriptions = NULL, ccm = NULL, configurations = NULL,
   spec_columns = NULL, styleFunc = NULL, editable = FALSE,
-  edit_mode = FALSE, edit_config_mode = FALSE)
+  edit_mode = FALSE, edit_config_mode = FALSE, responsive = FALSE)
 }
 \arguments{
 \item{input}{The Shiny session's input object (the same as is passed into the
@@ -57,6 +57,8 @@ or similar, and then return it.}
 
 \item{editable}{Logical, if TRUE, a button is shown to enter the field edit
 mode.}
+
+\item{responsive}{Render morphfield responsively?}
 }
 \value{
 The proxy object to the morphological field as returned by

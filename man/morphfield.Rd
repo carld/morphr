@@ -6,7 +6,7 @@
 \usage{
 morphfield(param_values = NULL, value_descriptions = NULL,
   spec_columns = NULL, edit_mode = FALSE, id = NULL,
-  set_spec_mode = FALSE)
+  set_spec_mode = FALSE, responsive = FALSE)
 }
 \arguments{
 \item{param_values}{A named list of vectors/lists. The names of the list are
@@ -32,6 +32,8 @@ The \code{spec_columns} can also be any other "special" columns.}
 \item{id}{The unique ID string that the morphological field will have in the
 HTML document. This ID can be used with functions like
 \code{\link{dataTableProxy}}() to programmatically alter the field/table.}
+
+\item{responsive}{Render morphfield responsively?}
 }
 \value{
 List with items \code{field} (a \code{\link{datatable}} object) and

@@ -7,7 +7,7 @@
 placeMorphFieldUI(output, id, param_values = NULL,
   value_descriptions = NULL, configurations = NULL, spec_columns = NULL,
   styleFunc = NULL, editable = FALSE, edit_mode = FALSE,
-  edit_config_mode = FALSE)
+  edit_config_mode = FALSE, responsive = FALSE)
 }
 \arguments{
 \item{output}{The Shiny session's output object (the same as is passed into
@@ -50,6 +50,8 @@ or similar, and then return it.}
 
 \item{editable}{Logical, if TRUE, a button is shown to enter the field edit
 mode.}
+
+\item{responsive}{Render morphfield responsively?}
 }
 \value{
 A \code{\link{dataTableProxy}()} that can be used to modify the morphField.
