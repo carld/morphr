@@ -6,8 +6,9 @@
 \usage{
 installMorphField(input, output, id, param_values = NULL,
   value_descriptions = NULL, ccm = NULL, configurations = NULL,
-  spec_columns = NULL, styleFunc = NULL, editable = FALSE,
-  edit_mode = FALSE, edit_config_mode = FALSE, responsive = FALSE)
+  pre_selections = NULL, spec_columns = NULL, styleFunc = NULL,
+  editable = FALSE, edit_mode = FALSE, edit_config_mode = FALSE,
+  responsive = FALSE)
 }
 \arguments{
 \item{input}{The Shiny session's input object (the same as is passed into the
@@ -40,6 +41,10 @@ If provided, the \code{configurations} are ignored. See details.}
 \item{configurations}{Optional. The configurations are a list of the valid
 parameter configurations as alternative to the CCM. If the \code{ccm}
 is also given, \code{configurations} are ignored. See details.}
+
+\item{pre_selections}{Optional. Specify which cells shall be selected when the
+app starts. \code{pre_selections} is a list of named lists with names
+\code{param} and \code{value}.}
 
 \item{spec_columns}{Optional. A list of columns that shall be marked with dark
 gray color. These can be "specifying" columns, e.g. a summarizing column like

@@ -112,6 +112,9 @@
 #' @param configurations Optional. The configurations are a list of the valid
 #'   parameter configurations as alternative to the CCM. If the \code{ccm}
 #'   is also given, \code{configurations} are ignored. See details.
+#' @param pre_selections Optional. Specify which cells shall be selected when the
+#'   app starts. \code{pre_selections} is a list of named lists with names
+#'   \code{param} and \code{value}.
 #' @param spec_columns Optional. A list of columns that shall be marked with dark
 #'   gray color. These can be "specifying" columns, e.g. a summarizing column like
 #'   for the selection of a scenario. These columns can then be seen as "input"
@@ -132,7 +135,7 @@
 #' @export
 installMorphField <- function(input, output, id,
                               param_values = NULL, value_descriptions = NULL,
-                              ccm = NULL, configurations = NULL,
+                              ccm = NULL, configurations = NULL, pre_selections = NULL,
                               spec_columns = NULL, styleFunc = NULL,
                               editable = FALSE, edit_mode = FALSE,
                               edit_config_mode = FALSE, responsive = FALSE) {
@@ -152,6 +155,7 @@ installMorphField <- function(input, output, id,
                                    value_descriptions = function() {value_descriptions},
                                    ccm = function() {ccm},
                                    configurations = function() {configurations},
+                                   pre_selections = function() {pre_selections},
                                    spec_columns = function() {spec_columns},
                                    field_df = function() {field_df},
                                    styleFunc = styleFunc, editable = editable)
@@ -159,7 +163,6 @@ installMorphField <- function(input, output, id,
   })
   output[[id]] <- f
   return(proxy)
-  # return(f)
 }
 
 
@@ -215,7 +218,8 @@ returnMorphFieldUIWithoutToolbar <- function(output, id, param_values = NULL,
 #' @export
 placeMorphFieldUI <- function(output, id, param_values = NULL,
                               value_descriptions = NULL,
-                              configurations = NULL, spec_columns = NULL,
+                              configurations = NULL, pre_selections = NULL,
+                              spec_columns = NULL,
                               styleFunc = NULL, editable = FALSE,
                               edit_mode = FALSE, edit_config_mode = FALSE,
                               responsive = FALSE) {
@@ -227,13 +231,15 @@ placeMorphFieldUI <- function(output, id, param_values = NULL,
     l$field
   })
   proxy <- dataTableProxy(id)
+  if (!is.null(pre_selections)) {
+    preselectMorphField(proxy, param_values, pre_selections)
+  }
   return(proxy)
 }
 
 
 placeMorphFieldUIWithoutToolbar <- function(output, id, param_values = NULL,
                                             value_descriptions = NULL,
-                                            configurations = NULL,
                                             spec_columns = NULL,
                                             styleFunc = NULL, edit_mode = FALSE,
                                             edit_config_mode = FALSE,
@@ -393,6 +399,8 @@ placeMorphFieldUIToolbar <- function(id, edit_mode) {
 #'   \code{\link{installMorphField}}.
 #' @param configurations A function returning the
 #'   \code{configurations}, see \code{\link{installMorphField}}.
+#' @param pre_selections A function returning the
+#'   \code{pre_selections}, see \code{\link{installMorphField}}.
 #' @param field_df A function returning the \code{field_df}, as returned by
 #'   \code{\link{paramValuesToDataFrame}}. Can be provided if it already exists
 #'   anyway to save some time. If not provided, \code{field_df} is calculated
@@ -404,13 +412,16 @@ reactivateMorphField <- function(input, output, id, param_values,
                                  value_descriptions = function() {NULL},
                                  ccm = function() {NULL},
                                  configurations = function() {NULL},
+                                 pre_selections = function() {NULL},
                                  spec_columns = function() {NULL},
                                  field_df = function() {NULL},
                                  styleFunc = NULL, editable = FALSE) {
   proxy <- reactivateMorphFieldWithoutToolbar(
     input, id, param_values, ccm, configurations, field_df, editable
   )
-
+  if (!is.null(pre_selections)) {
+    preselectMorphField(proxy, param_values, pre_selections)
+  }
   if (editable) {
     reactivateMorphFieldToolbar(input, output, id, param_values,
                                 value_descriptions, ccm, configurations,
@@ -442,6 +453,21 @@ getCCM <- function(ccm, param_values, configurations) {
     }
   }
   ccm
+}
+
+#' Select cells in the morph field programmatically
+#'
+#' With this function, you can set certain cells as selected, e.g. when the app
+#' starts.
+#'
+#' @inheritParams installMorphField
+#' @param proxy The \code{dataTableProxy()}.
+#' @export
+preselectMorphField <- function(proxy, param_values, pre_selections) {
+  cols <- sapply(pre_selections, function(sel) which(sel$param == names(param_values)))
+  rows <- sapply(seq_along(cols), function(i) which(param_values[[cols[i]]] == pre_selections[[i]]$value))
+  cells <- matrix(c(rows, cols - 1), ncol = 2)
+  proxy %>% selectCells(cells)
 }
 
 
@@ -511,16 +537,16 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
                                         field_df = function() {NULL},
                                         styleFunc = NULL) {
   observeEvent(input[[paste0(id, "_edit_btn")]], {
-    configs <- convertConfigsToExtendedAndSort(configurations())
     if (!input[[paste0(id, "_edit_mode")]]) { # toggle (edit_mode was previously off, turn it on)
+      configs <- convertConfigsToExtendedAndSort(configurations())
       placeMorphFieldUIWithoutToolbar(output, id, param_values(), value_descriptions(),
-                                      configs, spec_columns(), styleFunc,
+                                      spec_columns(), styleFunc,
                                       edit_mode = TRUE)
       updateCheckboxInput(getDefaultReactiveDomain(), paste0(id, "_edit_mode"), value = TRUE)
       placeEditButtonRow(id, edit_mode = TRUE, configurations = configs)
     } else {
       placeMorphFieldUIWithoutToolbar(output, id, param_values(), value_descriptions(),
-                                      configs, spec_columns(), styleFunc)
+                                      spec_columns(), styleFunc)
       updateCheckboxInput(getDefaultReactiveDomain(), paste0(id, "_edit_mode"), value = FALSE)
       placeEditButtonRow(id)
     }
@@ -798,10 +824,9 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
   })
 
   observeEvent(input[[paste0(id, "_edit_config_mode")]], {
-    configs <- convertConfigsToExtendedAndSort(configurations())
     placeMorphFieldUIWithoutToolbar(
       output, id, param_values(), value_descriptions(),
-      configs, spec_columns(), styleFunc,
+      spec_columns(), styleFunc,
       edit_mode = TRUE, edit_config_mode = input[[paste0(id, "_edit_config_mode")]]
     )
     disableAllEditButtons(id)

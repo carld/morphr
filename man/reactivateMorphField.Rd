@@ -6,9 +6,9 @@
 \usage{
 reactivateMorphField(input, output, id, param_values,
   value_descriptions = function() {     NULL }, ccm = function() {     NULL
-  }, configurations = function() {     NULL }, spec_columns = function() {  
-    NULL }, field_df = function() {     NULL }, styleFunc = NULL,
-  editable = FALSE)
+  }, configurations = function() {     NULL }, pre_selections = function() {
+      NULL }, spec_columns = function() {     NULL }, field_df = function()
+  {     NULL }, styleFunc = NULL, editable = FALSE)
 }
 \arguments{
 \item{input}{The Shiny session's input object (the same as is passed into the
@@ -32,6 +32,9 @@ HTML document. This ID can be used with functions like
 
 \item{configurations}{A function returning the
 \code{configurations}, see \code{\link{installMorphField}}.}
+
+\item{pre_selections}{A function returning the
+\code{pre_selections}, see \code{\link{installMorphField}}.}
 
 \item{spec_columns}{Optional. A list of columns that shall be marked with dark
 gray color. These can be "specifying" columns, e.g. a summarizing column like
