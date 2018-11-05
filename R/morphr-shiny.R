@@ -419,8 +419,8 @@ reactivateMorphField <- function(input, output, id, param_values,
   proxy <- reactivateMorphFieldWithoutToolbar(
     input, id, param_values, ccm, configurations, field_df, editable
   )
-  if (!is.null(pre_selections)) {
-    preselectMorphField(proxy, param_values, pre_selections)
+  if (!is.null(pre_selections())) {
+    preselectMorphField(proxy, param_values(), pre_selections())
   }
   if (editable) {
     reactivateMorphFieldToolbar(input, output, id, param_values,
