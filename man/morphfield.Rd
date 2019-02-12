@@ -5,7 +5,7 @@
 \title{Create an HTML morphological field widget using the DataTables library}
 \usage{
 morphfield(param_values = NULL, value_descriptions = NULL,
-  spec_columns = NULL, edit_mode = FALSE, id = NULL,
+  placement = NULL, spec_columns = NULL, edit_mode = FALSE, id = NULL,
   set_spec_mode = FALSE, responsive = FALSE)
 }
 \arguments{
@@ -21,6 +21,9 @@ have an accompanying (long) description that will be shown as tooltip/popover.
 The structure of \code{value_descriptions} is like that of \code{param_values},
 but instead of containing parameter values as list elements, the parameter
 values must be names whose list elements are the description texts.}
+
+\item{placement}{Optional. Specify placement of value_description popovers.
+E.g. 'auto right' or 'auto left'.}
 
 \item{spec_columns}{Optional. A list of columns that shall be marked with dark
 gray color. These can be "specifying" columns, e.g. a summarizing column like

@@ -5,10 +5,10 @@
 \title{Install a morphological field widget in Shiny}
 \usage{
 installMorphField(input, output, id, param_values = NULL,
-  value_descriptions = NULL, ccm = NULL, configurations = NULL,
-  pre_selections = NULL, spec_columns = NULL, styleFunc = NULL,
-  editable = FALSE, edit_mode = FALSE, edit_config_mode = FALSE,
-  responsive = FALSE)
+  value_descriptions = NULL, placement = NULL, ccm = NULL,
+  configurations = NULL, pre_selections = NULL, spec_columns = NULL,
+  styleFunc = NULL, editable = FALSE, edit_mode = FALSE,
+  edit_config_mode = FALSE, responsive = FALSE)
 }
 \arguments{
 \item{input}{The Shiny session's input object (the same as is passed into the
@@ -33,6 +33,9 @@ have an accompanying (long) description that will be shown as tooltip/popover.
 The structure of \code{value_descriptions} is like that of \code{param_values},
 but instead of containing parameter values as list elements, the parameter
 values must be names whose list elements are the description texts.}
+
+\item{placement}{Optional. Specify placement of value_description popovers.
+E.g. 'auto right' or 'auto left'.}
 
 \item{ccm}{Optional. The cross-consistency matrix (CCM) for the morphological
 field can be given to constrain the possible configurations of the field.

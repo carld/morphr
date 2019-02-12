@@ -5,9 +5,10 @@
 \title{Place a morphological field widget into Shiny UI}
 \usage{
 placeMorphFieldUI(output, id, param_values = NULL,
-  value_descriptions = NULL, configurations = NULL, pre_selections = NULL,
-  spec_columns = NULL, styleFunc = NULL, editable = FALSE,
-  edit_mode = FALSE, edit_config_mode = FALSE, responsive = FALSE)
+  value_descriptions = NULL, placement = NULL, configurations = NULL,
+  pre_selections = NULL, spec_columns = NULL, styleFunc = NULL,
+  editable = FALSE, edit_mode = FALSE, edit_config_mode = FALSE,
+  responsive = FALSE)
 }
 \arguments{
 \item{output}{The Shiny session's output object (the same as is passed into
@@ -29,6 +30,9 @@ have an accompanying (long) description that will be shown as tooltip/popover.
 The structure of \code{value_descriptions} is like that of \code{param_values},
 but instead of containing parameter values as list elements, the parameter
 values must be names whose list elements are the description texts.}
+
+\item{placement}{Optional. Specify placement of value_description popovers.
+E.g. 'auto right' or 'auto left'.}
 
 \item{configurations}{Optional. The configurations are a list of the valid
 parameter configurations as alternative to the CCM. If the \code{ccm}

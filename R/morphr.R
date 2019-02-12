@@ -42,10 +42,10 @@
 #' @return List with items \code{field} (a \code{\link{datatable}} object) and
 #'   \code{field_df} (the \code{data.frame} used to create the datatable object).
 #' @export
-morphfield <- function(param_values = NULL, value_descriptions = NULL,
+morphfield <- function(param_values = NULL, value_descriptions = NULL, placement = NULL,
                        spec_columns = NULL, edit_mode = FALSE, id = NULL,
                        set_spec_mode = FALSE, responsive = FALSE) {
-  field_df <- paramValuesToDataFrame(param_values, value_descriptions)
+  field_df <- paramValuesToDataFrame(param_values, value_descriptions, placement)
   if (edit_mode) {
     last_non_empty_index <- lapply(field_df, function(col) {
       non_empty <- (1:length(col))[nchar(col) > 0]
@@ -116,7 +116,7 @@ parseMorphFieldString <- function(string) {
 #' create a fixed dimension data.frame.
 #' @inheritParams installMorphField
 #' @export
-paramValuesToDataFrame <- function(param_values = NULL, value_descriptions = NULL) {
+paramValuesToDataFrame <- function(param_values = NULL, value_descriptions = NULL, placement = NULL) {
   # Need to set seed manually to ensure random unique IDs of the tipify/popify elements
   # (Not understood why, but every morphfield was using the same ID sequence as the previous,
   # only omitting the first 8 IDs of the previous field.)
@@ -132,7 +132,8 @@ paramValuesToDataFrame <- function(param_values = NULL, value_descriptions = NUL
     cols <- length(ret_val)
     ret_val <- lapply(seq_along(ret_val), function(i) {
       param1 <- names(ret_val)[i]
-      placement <- if (i/cols <= 0.5) "right" else "left"
+      if (is.null(placement))
+        placement <- if (i/cols <= 0.5) "auto right" else "auto left"
       items <- sapply(ret_val[[i]], function(value1) {
         value1 <- parseMorphFieldString(value1)
         desc <- value_descriptions[[param1]][[value1]]
