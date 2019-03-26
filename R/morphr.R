@@ -461,7 +461,7 @@ buildNestedListFromDataFrame <- function(df) {
 #' @param ccm The CCM as returned by \code{\link{buildCCMFromSpecificConfigurations}}.
 #' @export
 dataFrameFromCCM <- function(param_values, ccm) {
-  df <- as.data.frame(lapply(1:(length(param_values) - 1), function(i) {
+  df <- as.data.frame(lapply(seq_len(max(0, length(param_values) - 1)), function(i) {
     param1 <- names(param_values)[i]
     lapply(param_values[[param1]], function(value1) {
       unlist(lapply(2:length(param_values), function(j) {
@@ -480,7 +480,9 @@ dataFrameFromCCM <- function(param_values, ccm) {
       }))
     })
   }))
-  colnames(df) <- do.call(c, param_values[-length(param_values)])
-  rownames(df) <- do.call(c, param_values[-1])
+  if (ncol(df) > 0 && nrow(df) > 0) {
+    colnames(df) <- do.call(c, param_values[-length(param_values)])
+    rownames(df) <- do.call(c, param_values[-1])
+  }
   df
 }
