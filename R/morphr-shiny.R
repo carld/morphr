@@ -736,13 +736,15 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
                          placement(), ccm(), configs, spec_columns(), styleFunc)
   })
 
-  modColModal <- function(failed = FALSE) {
+  modColModal <- function(no_col_selected = FALSE, title_empty = FALSE) {
     modalDialog(
       selectizeInput(paste0(id, "_mod_col"), "Select column to rename",
                      choices = names(param_values())),
       textInput(paste0(id, "_mod_col_title"), "Rename column to:",
                 placeholder = "Enter new column title here..."),
-      if (failed)
+      if (no_col_selected)
+        div(tags$b("No column selected.", style = "color: red;")),
+      if (title_empty)
         div(tags$b("Invalid column title.", style = "color: red;")),
       footer = tagList(
         modalButton("Cancel"),
@@ -758,7 +760,11 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
   observeEvent(input[[paste0(id, "_mod_col_ok")]], {
     mod_col <- input[[paste0(id, "_mod_col")]]
     mod_col_title <- input[[paste0(id, "_mod_col_title")]]
-    if (!is.null(mod_col_title) && nzchar(trimws(mod_col_title))) {
+    if (is.null(mod_col) || !nzchar(trimws(mod_col))) {
+      showModal(modColModal(no_col_selected = TRUE))
+    } else if (is.null(mod_col_title) || !nzchar(trimws(mod_col_title))) {
+      showModal(modColModal(title_empty = TRUE))
+    } else {
       removeModal()
       param_values <- param_values()
       col <- which(names(param_values) == mod_col)
@@ -766,8 +772,6 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
       configs <- convertConfigsToExtendedAndSort(configurations())
       installModMorphField(input, output, id, param_values, value_descriptions(),
                            placement(), ccm(), configs, spec_columns(), styleFunc)
-    } else {
-      showModal(modColModal(failed = TRUE))
     }
   })
 
