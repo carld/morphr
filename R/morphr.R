@@ -124,7 +124,7 @@ paramValuesToDataFrame <- function(param_values = NULL, value_descriptions = NUL
   set.seed(as.integer(as.numeric(substr(t, 7, nchar(t))) * 1e5))
 
   ret_val <- param_values
-  if (is.null(ret_val)) ret_val <- list(list())
+  if (is.null(ret_val)) ret_val <- data.frame()
   if (class(ret_val) == "list") {
     # Make sure that all list items have same length.
     # If not: fill with empty character strings
