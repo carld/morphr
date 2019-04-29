@@ -299,7 +299,7 @@ placeEditButtonRow <- function(id, edit_mode = FALSE, edit_config_mode = FALSE,
           },
           actionButton(paste0(id, "_show_ccm_btn"), "Show CCM",
                        class = "pull-left")
-        ),
+          ),
         column(
           4,
           div(
@@ -917,13 +917,30 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
   })
 
   ccmModal <- function() {
-    modalDialog(
-      dataTableOutput(paste0(id, "_ccm")),
-      footer = tagList(
-        # modalButton("Cancel"),
-        # actionButton(paste0(id, "_rem_config_ok"), "OK")
-        modalButton("Close")
-      )
+    tagList(
+      modalDialog(
+        dataTableOutput(paste0(id, "_ccm")),
+        # style = "max-height: 100%;", # what for? (see https://jsfiddle.net/iamakshay04/xmrxbL9f/)
+        title = "Cross-Consistency Matrix",
+        footer = tagList(
+          # modalButton("Cancel"),
+          # actionButton(paste0(id, "_rem_config_ok"), "OK")
+          modalButton("Close")
+        )
+      ),
+      tags$script(JS("
+$('.modal-content').resizable({
+    //alsoResize: '.modal-dialog',
+    minHeight: 300,
+    minWidth: 600
+});
+$('.modal-dialog').draggable();
+                     ")),
+      tags$style(HTML("
+.modal-header {
+  cursor: move;
+}
+      "))
     )
   }
 
@@ -1033,7 +1050,7 @@ morphFieldOutputWithoutContainer <- function(outputId, width = '100%', height = 
       crosstalk::crosstalkLibs(),
       list(
         htmltools::htmlDependency(
-          "morphr", "0.0.1",
+          "morphr", "0.1.0",
           c(file = system.file("htmlwidgets", package = "morphr")),
           stylesheet = "css/morphr.css", script = "morphr.js"
         ),
@@ -1041,6 +1058,12 @@ morphFieldOutputWithoutContainer <- function(outputId, width = '100%', height = 
           "shinyBS", packageVersion("shinyBS"),
           c(file = system.file("www", package = "shinyBS")),
           stylesheet = "shinyBS.css", script = "shinyBS.js"
+        ),
+        htmltools::htmlDependency(
+          "shiny-jqueryui", packageVersion("shiny"),
+          c(file = system.file("www", package = "shiny")),
+          stylesheet = "shared/jqueryui/jquery-ui.min.css",
+          script = "shared/jqueryui/jquery-ui.min.js"
         )
       )
     ),
