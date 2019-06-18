@@ -948,8 +948,42 @@ $('.modal-dialog').draggable();
     showModal(ccmModal())
     ccm <- getCCM(ccm, param_values, configurations)
     output[[paste0(id, "_ccm")]] <- renderDataTable(
-      dataFrameFromCCM(param_values(), ccm)
+      datatable(
+        dataFrameFromCCM(param_values(), ccm),
+        options = list(
+          # Disable search/filter box:
+          searching = FALSE,
+          # Show all rows on one page and no navigation:
+          paging = FALSE,
+          # Do not show info about data in footer:
+          info = FALSE,
+          # Disable sorting by columns for all columns:
+          ordering = FALSE
+          # enable addition of button(s) that are registered with shiny: see https://github.com/rstudio/DT/issues/178
+          # preDrawCallback = JS('function() { Shiny.unbindAll(this.api().table().node()); }'),
+          # drawCallback = JS('function() { Shiny.bindAll(this.api().table().node()); } ')
+        ),
+        # Disable display of rownames:
+        # rownames = FALSE,
+        # Enable cell selection:
+        selection = list(
+          mode = "single",
+          target = "cell"
+        )
+      )
     )
+  })
+
+  # Make CCM interactive:
+  ccm_proxy <- dataTableProxy(paste0(id, "_ccm"))
+
+  # Immediately deselect empty cells, they shall not be selectable
+  observeEvent(input[[paste0(id, "_ccm_cells_selected")]], {
+    sel_cells <- input[[paste0(id, "_ccm_cells_selected")]]
+    # field_df <- getFieldDF(field_df, param_values)
+    # if (isLastSelectedCellEmpty(sel_cells, field_df)) {
+      ccm_proxy %>% selectCells(removeLastSelectedCell(sel_cells))
+    # }
   })
 }
 
