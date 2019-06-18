@@ -636,10 +636,9 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
                          placement(), ccm(), configs, spec_columns(), styleFunc)
   })
 
-  modItemModal <- function(row, col, failed = FALSE) {
+  modItemModal <- function(row, col, old_item, failed = FALSE) {
     modalDialog(
-      textInput(paste0(id, "_mod_item"), "Rename item to:",
-                placeholder = "Enter new item text here..."),
+      textInput(paste0(id, "_mod_item"), "Rename item to:", value = old_item),
       div(
         textInput(paste0(id, "_mod_item_row"), "Column", value = row),
         textInput(paste0(id, "_mod_item_col"), "Column", value = col),
@@ -658,7 +657,9 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
     sel_cells <- input[[paste0(id, "_cells_selected")]]
     row <- sel_cells[1, 1]
     col <- sel_cells[1, 2] + 1
-    showModal(modItemModal(row, col))
+    param_values <- param_values()
+    old_item <- param_values[[col]][row]
+    showModal(modItemModal(row, col, old_item))
   })
 
   observeEvent(input[[paste0(id, "_mod_item_ok")]], {
@@ -673,7 +674,9 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
       installModMorphField(input, output, id, param_values, value_descriptions(),
                            placement(), ccm(), configs, spec_columns(), styleFunc)
     } else {
-      showModal(modItemModal(row, col, failed = TRUE))
+      param_values <- param_values()
+      old_item <- param_values[[col]][row]
+      showModal(modItemModal(row, col, old_item, failed = TRUE))
     }
   })
 
