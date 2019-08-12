@@ -961,10 +961,16 @@ $('.modal-dialog').draggable();
           # Do not show info about data in footer:
           info = FALSE,
           # Disable sorting by columns for all columns:
-          ordering = FALSE
+          ordering = FALSE,
           # enable addition of button(s) that are registered with shiny: see https://github.com/rstudio/DT/issues/178
           # preDrawCallback = JS('function() { Shiny.unbindAll(this.api().table().node()); }'),
           # drawCallback = JS('function() { Shiny.bindAll(this.api().table().node()); } ')
+          columnDefs = list(
+            list(
+              targets = 0,
+              className = "ccm-first-column"
+            )
+          )
         ),
         # Disable display of rownames:
         # rownames = FALSE,

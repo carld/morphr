@@ -9,7 +9,8 @@ table.dataTable td {
 }
 
 
-table.dataTable tr.selected td, table.dataTable td.selected {
+table.dataTable tr.selected td, table.dataTable td.selected,
+table.dataTable td.ccm-inconsistent {
   /*position: relative;*/
   background: #b0bed9;
   background: rgba(255, 0, 72, 0.4) !important; /* red */
@@ -34,6 +35,15 @@ table.dataTable tr.consistent td, table.dataTable td.consistent {
   /*position: relative;*/
   background: #b0bed9;
   background: rgba(0, 29, 255, 0.4) !important; /* blue */
+}
+
+table.dataTable td.ccm-consistent {
+  background: #b0bed9;
+  background: rgba(0, 190, 72, 0.4) !important; /* green */
+}
+
+table.dataTable td.ccm-first-column {
+  font-weight: bold;
 }
 
 /* Transparent overlay: (makes tooltip/popver unusable) (need "position: relative" above)
