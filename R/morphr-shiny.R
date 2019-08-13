@@ -929,7 +929,8 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
           # modalButton("Cancel"),
           # actionButton(paste0(id, "_rem_config_ok"), "OK")
           modalButton("Close")
-        )
+        ),
+        size = "l"
       ),
       tags$script(JS("
 $('.modal-content').resizable({
@@ -953,6 +954,7 @@ $('.modal-dialog').draggable();
     output[[paste0(id, "_ccm")]] <- renderDataTable(
       datatable(
         dataFrameFromCCM(param_values(), ccm),
+        extensions = 'FixedColumns',
         options = list(
           # Disable search/filter box:
           searching = FALSE,
@@ -965,12 +967,11 @@ $('.modal-dialog').draggable();
           # enable addition of button(s) that are registered with shiny: see https://github.com/rstudio/DT/issues/178
           # preDrawCallback = JS('function() { Shiny.unbindAll(this.api().table().node()); }'),
           # drawCallback = JS('function() { Shiny.bindAll(this.api().table().node()); } ')
-          columnDefs = list(
-            list(
-              targets = 0,
-              className = "ccm-first-column"
-            )
-          ),
+          columnDefs = list(list(targets = 0, className = "ccm-first-column")),
+          scrollX = TRUE,
+          scrollY = JS("1.6 * document.body.clientHeight"),
+          scrollCollapse = TRUE,
+          fixedColumns = TRUE,
           # See https://datatables.net/release-datatables/examples/advanced_init/row_callback.html
           # also possible: rowCallback = JS(", see https://datatables.net/reference/option/ for differences
           createdRow = JS("
@@ -985,8 +986,6 @@ $('.modal-dialog').draggable();
             }
           ")
         ),
-        # Disable display of rownames:
-        # rownames = FALSE,
         # Enable cell selection:
         selection = list(
           mode = "single",
