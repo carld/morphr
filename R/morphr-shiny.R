@@ -970,7 +970,20 @@ $('.modal-dialog').draggable();
               targets = 0,
               className = "ccm-first-column"
             )
-          )
+          ),
+          # See https://datatables.net/release-datatables/examples/advanced_init/row_callback.html
+          # also possible: rowCallback = JS(", see https://datatables.net/reference/option/ for differences
+          createdRow = JS("
+            function(row, data, index) {
+              for (var i = 1; i < data.length; i++) {
+                if (data[i] == 'FALSE') {
+                  $('td', row).eq(i).addClass('ccm-inconsistent');
+                } else if (data[i] == 'TRUE') {
+                  $('td', row).eq(i).addClass('ccm-consistent');
+                }
+              }
+            }
+          ")
         ),
         # Disable display of rownames:
         # rownames = FALSE,
