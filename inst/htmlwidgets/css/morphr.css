@@ -78,3 +78,8 @@ table.dataTable tr.consistent td:before, table.dataTable td.consistent:before {
   height: 500px;
 }
 */
+
+/* make modal width adjust to its content width: */
+.modal-content {
+  display: table;
+}
