@@ -4,7 +4,8 @@
 \alias{replaceData}
 \title{Replace data in an existing table}
 \usage{
-replaceData(proxy, data, ..., resetPaging = TRUE, clearSelection = "all")
+replaceData(proxy, data, ..., resetPaging = TRUE,
+  clearSelection = "all")
 }
 \arguments{
 \item{proxy}{a proxy object created by \code{dataTableProxy()}}

@@ -5,11 +5,12 @@
 \title{Make a morphological field reactive}
 \usage{
 reactivateMorphField(input, output, id, param_values,
-  value_descriptions = function() {     NULL }, placement = function() {    
-  NULL }, ccm = function() {     NULL }, configurations = function() {    
-  NULL }, pre_selections = function() {     NULL },
-  spec_columns = function() {     NULL }, field_df = function() {     NULL
-  }, styleFunc = NULL, editable = FALSE)
+  value_descriptions = function() {     NULL }, placement = function()
+  {     NULL }, ccm = function() {     NULL },
+  configurations = function() {     NULL }, pre_selections = function()
+  {     NULL }, spec_columns = function() {     NULL },
+  field_df = function() {     NULL }, styleFunc = NULL,
+  editable = FALSE)
 }
 \arguments{
 \item{input}{The Shiny session's input object (the same as is passed into the

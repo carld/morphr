@@ -7,8 +7,8 @@
 \usage{
 dataTableOutput(outputId, width = "100\%", height = "auto")
 
-renderDataTable(expr, server = TRUE, env = parent.frame(), quoted = FALSE,
-  ...)
+renderDataTable(expr, server = TRUE, env = parent.frame(),
+  quoted = FALSE, ...)
 }
 \arguments{
 \item{outputId}{output variable to read the table from}

@@ -10,13 +10,14 @@
 \alias{formatStyle}
 \title{Format table columns}
 \usage{
-formatCurrency(table, columns, currency = "$", interval = 3, mark = ",",
-  digits = 2, dec.mark = getOption("OutDec"), before = TRUE)
+formatCurrency(table, columns, currency = "$", interval = 3,
+  mark = ",", digits = 2, dec.mark = getOption("OutDec"),
+  before = TRUE)
 
 formatString(table, columns, prefix = "", suffix = "")
 
-formatPercentage(table, columns, digits = 0, interval = 3, mark = ",",
-  dec.mark = getOption("OutDec"))
+formatPercentage(table, columns, digits = 0, interval = 3,
+  mark = ",", dec.mark = getOption("OutDec"))
 
 formatRound(table, columns, digits = 2, interval = 3, mark = ",",
   dec.mark = getOption("OutDec"))
