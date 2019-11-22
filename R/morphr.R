@@ -389,14 +389,14 @@ convertConfigsToExtendedAndSort <- function(configurations) {
 }
 
 
-sortedParams <- function(configurations) {
-  if (length(configurations) == 0) return(NULL)
-  sort(unique(
-    unlist(lapply(configurations, function(config) {
-      unlist(lapply(config, function(item) {item$param}))
-    }))
-  ))
-}
+# sortedParams <- function(configurations) {
+#   if (length(configurations) == 0) return(NULL)
+#   sort(unique(
+#     unlist(lapply(configurations, function(config) {
+#       unlist(lapply(config, function(item) {item$param}))
+#     }))
+#   ))
+# }
 
 
 #' Sort configurations that are in the new format
@@ -407,10 +407,11 @@ sortedParams <- function(configurations) {
 #'   \code{\link{installMorphField}}.
 #' @export
 sortConfigs <- function(configurations) {
-  sorted_params <- sortedParams(configurations)
+  # sorted_params <- sortedParams(configurations)
   lapply(configurations, function(config) {
     unsorted_params <- sapply(config, function(item) {item$param})
-    sorted_indices <- unname(sapply(unsorted_params, function(p) {which(sorted_params == p)}))
+    # sorted_indices <- unname(sapply(unsorted_params, function(p) {which(sorted_params == p)}))
+    sorted_indices <- order(unsorted_params)
     # Sort the items by the params...
     config <- lapply(sorted_indices, function(i) {
       # ...and the param values
