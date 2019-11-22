@@ -733,6 +733,7 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
     param_values <- param_values()
     col <- which(names(param_values) == rem_col)
     param_values <- param_values[-col]
+    if (length(param_values) == 0) param_values <- NULL
     configs <- convertConfigsToExtendedAndSort(configurations())
     installModMorphField(input, output, id, param_values, value_descriptions(),
                          placement(), ccm(), configs, spec_columns(), styleFunc)
