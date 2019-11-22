@@ -449,19 +449,18 @@ getFieldDF <- function(field_df, param_values) {
   field_df
 }
 
-
 getCCM <- function(ccm, param_values, configurations) {
-  ccm <- ccm()
+  ccm_obj <- ccm()
   configs <- convertConfigsToExtendedAndSort(configurations())
-  if (is.null(ccm)) {
+  if (is.null(ccm_obj)) {
     if (!is.null(configs)) {
-      ccm <- buildCCMFromSpecificConfigurations(param_values(),
-                                                configs)
+      ccm_obj <- buildCCMFromSpecificConfigurations(param_values(),
+                                                    configs)
     } else {
-      ccm <- buildUnconstrainedCCM(param_values())
+      ccm_obj <- buildUnconstrainedCCM(param_values())
     }
   }
-  ccm
+  ccm_obj
 }
 
 #' Select cells in the morph field programmatically
@@ -511,8 +510,8 @@ reactivateMorphFieldWithoutToolbar <- function(input, id, param_values,
     if (isLastSelectedCellEmpty(sel_cells, field_df)) {
       sel_cells <- removeLastSelectedCell(sel_cells)
     }
-    ccm <- getCCM(ccm, param_values, configurations)
-    consistent_cells <- findConsistentCells(param_values(), ccm, sel_cells)
+    ccm_obj <- getCCM(ccm, param_values, configurations)
+    consistent_cells <- findConsistentCells(param_values(), ccm_obj, sel_cells)
     proxy %>% setCellsConsistent(consistent_cells)
   })
 
@@ -933,27 +932,30 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
         size = "l"
       ),
       tags$script(JS("
-$('.modal-content').resizable({
-    //alsoResize: '.modal-dialog',
-    minHeight: 300,
-    minWidth: 600
-});
-$('.modal-dialog').draggable();
+        $('.modal-content').resizable({
+            //alsoResize: '.modal-dialog',
+            minHeight: 300,
+            minWidth: 600
+        });
+        $('.modal-dialog').draggable();
                      ")),
       tags$style(HTML("
-.modal-header {
-  cursor: move;
-}
+        .modal-header {
+          cursor: move;
+        }
       "))
     )
   }
 
+  ccmReactive <- reactive({
+    getCCM(ccm, param_values, configurations)
+  })
+
   observeEvent(input[[paste0(id, "_show_ccm_btn")]], {
     showModal(ccmModal())
-    ccm <- getCCM(ccm, param_values, configurations)
     output[[paste0(id, "_ccm")]] <- renderDataTable(
       datatable(
-        dataFrameFromCCM(param_values(), ccm),
+        dataFrameFromCCM(param_values(), ccmReactive()),
         extensions = 'FixedColumns',
         options = list(
           # Disable search/filter box:
@@ -1001,6 +1003,8 @@ $('.modal-dialog').draggable();
   # Immediately deselect empty cells, they shall not be selectable
   observeEvent(input[[paste0(id, "_ccm_cells_selected")]], {
     sel_cells <- input[[paste0(id, "_ccm_cells_selected")]]
+    selection <- sel_cells[nrow(sel_cells), ]
+    # XXX TODO: Toggle CCM value of the selected cell
     # field_df <- getFieldDF(field_df, param_values)
     # if (isLastSelectedCellEmpty(sel_cells, field_df)) {
       ccm_proxy %>% selectCells(removeLastSelectedCell(sel_cells))
