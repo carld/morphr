@@ -306,7 +306,7 @@ placeEditButtonRow <- function(id, edit_mode = FALSE, edit_config_mode = FALSE,
             class = "pull-right",
             actionButton(paste0(id, "_add_col_btn"), "Add Column"),
             actionButton(paste0(id, "_rem_col_btn"), "Remove Column"),
-            actionButton(paste0(id, "_mod_col_btn"), "Modify Column"),
+            actionButton(paste0(id, "_ren_col_btn"), "Rename Column"),
             actionButton(paste0(id, "_set_spec_columns_btn"), "Mark Column(s)")
           )
         )
@@ -756,7 +756,7 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
     )
   }
 
-  observeEvent(input[[paste0(id, "_mod_col_btn")]], {
+  observeEvent(input[[paste0(id, "_ren_col_btn")]], {
     showModal(modColModal())
   })
 
@@ -926,9 +926,10 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
         # style = "max-height: 100%;", # what for? (see https://jsfiddle.net/iamakshay04/xmrxbL9f/)
         title = "Cross-Consistency Matrix",
         footer = tagList(
-          # modalButton("Cancel"),
-          # actionButton(paste0(id, "_rem_config_ok"), "OK")
-          modalButton("Close")
+          modalButton("Cancel"),
+          actionButton(paste0(id, "_invert_ccm_btn"), "Invert CCM"),
+          actionButton(paste0(id, "_save_ccm_btn"), "Save and Close")
+          # modalButton("Close")
         ),
         size = "l"
       ),
@@ -952,11 +953,16 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
     getCCM(ccm, param_values, configurations)
   })
 
+  ccmDataFrame <- reactiveVal(dataFrameFromCCM(param_values(), ccmReactive()))
+
   observeEvent(input[[paste0(id, "_show_ccm_btn")]], {
     showModal(ccmModal())
+
+    ccmDataFrame(dataFrameFromCCM(param_values(), ccmReactive()))
+
     output[[paste0(id, "_ccm")]] <- renderDataTable(
       datatable(
-        dataFrameFromCCM(param_values(), ccmReactive()),
+        ccmDataFrame(),
         extensions = 'FixedColumns',
         options = list(
           # Disable search/filter box:
@@ -1001,15 +1007,44 @@ reactivateMorphFieldToolbar <- function(input, output, id, param_values,
   # Make CCM interactive:
   ccm_proxy <- dataTableProxy(paste0(id, "_ccm"))
 
-  # Immediately deselect empty cells, they shall not be selectable
   observeEvent(input[[paste0(id, "_ccm_cells_selected")]], {
+    # Immediately deselect empty cells, they shall not be selectable
     sel_cells <- input[[paste0(id, "_ccm_cells_selected")]]
-    selection <- sel_cells[nrow(sel_cells), ]
-    # XXX TODO: Toggle CCM value of the selected cell
-    # field_df <- getFieldDF(field_df, param_values)
-    # if (isLastSelectedCellEmpty(sel_cells, field_df)) {
-      ccm_proxy %>% selectCells(removeLastSelectedCell(sel_cells))
-    # }
+    ccm_proxy %>% selectCells(removeLastSelectedCell(sel_cells))
+
+    # Toggle CCM value of the selected cell
+    if (nrow(sel_cells) > 0) {
+      row <- sel_cells[1, 1]
+      col <- sel_cells[1, 2]
+      ccm_copy <- ccmDataFrame()
+      if (ccm_copy[sel_cells] == "FALSE") {
+        ccm_copy[sel_cells] <- "TRUE"
+        ccmDataFrame(ccm_copy)
+      } else if (ccmDataFrame()[sel_cells] == "TRUE") {
+        ccm_copy[sel_cells] <- "FALSE"
+        ccmDataFrame(ccm_copy)
+      }
+    }
+  })
+
+  observeEvent(input[[paste0(id, "_invert_ccm_btn")]], {
+    ccm_copy <- ccmDataFrame()
+    for (i in seq_len(nrow(ccm_copy))) {
+      for (j in seq_along(ccm_copy)) {
+        if (ccm_copy[i, j] == "FALSE") ccm_copy[i, j] <- "TRUE"
+        else if (ccm_copy[i, j] == "TRUE") ccm_copy[i, j] <- "FALSE"
+      }
+    }
+    ccmDataFrame(ccm_copy)
+  })
+
+  observeEvent(input[[paste0(id, "_save_ccm_btn")]], {
+    removeModal()
+    configs <- convertConfigsToExtendedAndSort(configurations())
+    newCCM <- ccmFromDataFrame(ccmDataFrame(), param_values())
+    installModMorphField(input, output, id, param_values(), value_descriptions(),
+                         placement(), newCCM, configs, spec_columns(), styleFunc,
+                         edit_config_mode = input[[paste0(id, "_edit_config_mode")]])
   })
 }
 

@@ -480,10 +480,43 @@ dataFrameFromCCM <- function(param_values, ccm) {
         })
       }))
     })
-  }))
+  }), stringsAsFactors = FALSE)
   if (ncol(df) > 0 && nrow(df) > 0) {
     colnames(df) <- do.call(c, param_values[-length(param_values)])
     rownames(df) <- do.call(c, param_values[-1])
   }
   df
+}
+
+#' Convert data.frame to CCM
+#'
+#' Use this function to convert the CCM from a tabular format used with \pkg{DT}
+#' back to the original morphr format.
+#'
+#' @param df The CCM data.frame as returned by \code{\link{dataFrameFromCCM}}.
+#' @inheritParams installMorphField
+#' @export
+ccmFromDataFrame <- function(df, param_values) {
+  ccm <- list()
+  col_index <- 1
+  if (length(param_values) > 1) {
+    lapply(1:(length(param_values) - 1), function(i) {
+      param1 <- names(param_values)[i]
+      lapply(param_values[[i]], function(value1) {
+        # New df column
+        df_column <- na.omit(as.logical(df[, col_index]))
+        row_index <- 1
+        lapply((i + 1):length(param_values), function(j) {
+          param2 <- names(param_values)[j]
+          lapply(param_values[[j]], function(value2) {
+            logicalValue <- df_column[row_index]
+            ccm[[buildHashValue(param1, value1, param2, value2)]] <<- logicalValue
+            row_index <<- row_index + 1
+          })
+        })
+        col_index <<- col_index + 1
+      })
+    })
+  }
+  ccm
 }

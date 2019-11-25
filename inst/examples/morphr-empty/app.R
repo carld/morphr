@@ -7,7 +7,10 @@ ui <- fluidPage(
   # Application title
   titlePanel("My First Morphological Field"),
   fluidRow(
-    morphr::morphFieldOutput("morphfield")
+    column(
+      12,
+      morphr::morphFieldOutput("morphfield")
+    )
   )
 )
 
